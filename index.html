@@ -181,7 +181,7 @@ body { font-family: "Segoe UI", system-ui, sans-serif; background: var(--azul); 
     <div class="stat-lbl">Vales</div>
   </div>
   <div class="stat-card">
-    <div class="stat-val" id="stat-modulos">3</div>
+    <div class="stat-val" id="stat-modulos">4</div>
     <div class="stat-lbl">Módulos</div>
   </div>
 </div>
@@ -217,12 +217,12 @@ body { font-family: "Segoe UI", system-ui, sans-serif; background: var(--azul); 
     <div class="module-desc">Preventivo y correctivo</div>
   </a>
 
-  <div class="module-card proximamente" style="--color:#e67e22;" onclick="proximamente()">
-    <span class="module-badge badge-pronto">Pronto</span>
+  <a class="module-card activo" href="https://vgarcesb-cpu.github.io/scorpion-tail/bitacora.html" style="--color:#e67e22;">
+    <span class="module-badge badge-activo">Activo</span>
     <div class="module-icon">📓</div>
     <div class="module-name">Bitácora</div>
     <div class="module-desc">Registro de novedades</div>
-  </div>
+  </a>
 
   <div class="module-card proximamente" style="--color:#9b59b6;" onclick="proximamente()">
     <span class="module-badge badge-pronto">Pronto</span>
@@ -252,11 +252,18 @@ body { font-family: "Segoe UI", system-ui, sans-serif; background: var(--azul); 
     <div class="module-desc">Resumen ejecutivo</div>
   </div>
 
+  <div class="module-card proximamente" style="--color:#c0392b;" onclick="proximamente()">
+    <span class="module-badge badge-pronto">Pronto</span>
+    <div class="module-icon">📄</div>
+    <div class="module-name">Informe Técnico</div>
+    <div class="module-desc">Fallas y accidentes por escrito</div>
+  </div>
+
   <div class="module-card proximamente full" style="--color:#7f8c8d;" onclick="proximamente()">
     <div class="module-icon">➕</div>
     <div class="module-info">
       <div class="module-name">Más módulos en camino...</div>
-      <div class="module-desc">Bajas, mantención programada, formularios institucionales y más</div>
+      <div class="module-desc">Inventario, presupuesto, control personal, bajas y más</div>
     </div>
   </div>
 
