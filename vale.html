@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vale Entrega AGA">
+<meta name="theme-color" content="#0d1f3c">
+<link rel="manifest" id="vale-manifest">
+<link rel="apple-touch-icon" id="apple-icon-vale">
+<title>Vale de Entrega – AGA</title>
+<!--
+╔══════════════════════════════════════════════════════════════════╗
+║     VALE DE ENTREGA — Scorpion Tail · scorpion-tail             ║
+║     Migrado desde: VALE_ENTREGA (repo independiente)            ║
+║                                                                  ║
+║  MIG-001 │ Manifest inline (sin manifest.json externo)          ║
+║  MIG-002 │ SW inline (sin sw.js externo)                        ║
+║  MIG-003 │ Logo generado por canvas (sin base64 externo)        ║
+║  MIG-004 │ position:fixed + min-height:0 para S25               ║
+║  MIG-005 │ Fondo blanco en impresión PDF                        ║
+╚══════════════════════════════════════════════════════════════════╝
+-->
+<style>
+:root {
+  --azul: #0d1f3c;
+  --azul2: #1a3a6e;
+  --dorado: #c8a84b;
+  --dorado2: #a07830;
+  --blanco: #ffffff;
+  --gris: #f4f6f9;
+  --borde: #dde3ed;
+  --verde: #2ecc71;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+/* MIG-004 — position fixed para S25 */
+body { font-family: "Segoe UI", system-ui, sans-serif; font-size: 14px; background: var(--azul); color: #000; position: fixed; width: 100%; }
+
+.app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+
+/* HEADER */
+.app-header {
+  background: linear-gradient(90deg, #071429 0%, #0d2550 60%, #071429 100%);
+  border-bottom: 2px solid var(--dorado);
+  padding: calc(var(--safe-top) + 10px) 16px 10px;
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.app-header img { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--dorado); }
+.app-header .titulo { flex: 1; }
+.app-header .titulo .inst { font-size: 11px; font-weight: 700; color: var(--dorado); letter-spacing: 1px; text-transform: uppercase; }
+.app-header .titulo .sub { font-size: 9px; color: #a0b8d8; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 1px; }
+.app-header .folio-mini { text-align: right; }
+.app-header .folio-mini span { font-size: 9px; color: #a0b8d8; text-transform: uppercase; display: block; }
+.app-header .folio-mini .folio-val { font-family: "Courier New", monospace; font-size: 11px; font-weight: bold; color: var(--dorado); }
+
+/* STEPS BAR */
+.steps-bar { background: var(--azul2); padding: 10px 16px 0; flex-shrink: 0; }
+.steps-track { display: flex; align-items: flex-start; justify-content: space-between; position: relative; }
+.steps-track::before { content: ""; position: absolute; top: 14px; left: 14px; right: 14px; height: 2px; background: #3a5a8a; z-index: 0; }
+.step-item { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; position: relative; z-index: 1; }
+.step-circle { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; background: #3a5a8a; color: #7a9cc8; border: 2px solid #3a5a8a; transition: all 0.3s; }
+.step-item.activo .step-circle { background: var(--dorado); color: #fff; border-color: var(--dorado); box-shadow: 0 0 10px rgba(200,168,75,0.5); }
+.step-item.completo .step-circle { background: var(--verde); color: #fff; border-color: var(--verde); }
+.step-label { font-size: 8px; color: #7a9cc8; text-transform: uppercase; letter-spacing: 0.3px; text-align: center; line-height: 1.2; padding-bottom: 6px; }
+.step-item.activo .step-label { color: var(--dorado); }
+.step-item.completo .step-label { color: var(--verde); }
+
+/* CONTENT — MIG-004 min-height:0 */
+.steps-content { flex: 1; min-height: 0; overflow: hidden; position: relative; }
+.step-panel { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; opacity: 0; pointer-events: none; }
+.step-panel.activo { opacity: 1; pointer-events: all; }
+
+/* CARDS */
+.card { background: var(--blanco); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+.card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--azul2); border-bottom: 2px solid var(--dorado); padding-bottom: 8px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+
+/* CAMPOS */
+.campo-group { margin-bottom: 12px; }
+.campo-label { font-size: 11px; font-weight: 600; color: #555; margin-bottom: 5px; display: block; }
+.campo-input { width: 100%; padding: 11px 13px; border: 1.5px solid var(--borde); border-radius: 8px; font-size: 15px; font-family: inherit; color: #000; background: var(--gris); transition: all 0.2s; outline: none; -webkit-appearance: none; }
+.campo-input:focus { border-color: var(--azul2); background: #fff; box-shadow: 0 0 0 3px rgba(26,58,110,0.1); }
+textarea.campo-input { min-height: 70px; resize: vertical; }
+.campo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* MATERIALES */
+.material-item { background: var(--gris); border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1.5px solid var(--borde); position: relative; }
+.material-item .item-num { font-size: 10px; font-weight: 700; color: var(--azul2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.btn-eliminar-item { position: absolute; top: 10px; right: 10px; background: #fee; border: 1px solid #fcc; color: #c0392b; border-radius: 50%; width: 26px; height: 26px; font-size: 16px; cursor: pointer; line-height: 1; padding: 0; }
+.item-fila { display: grid; grid-template-columns: 1fr 80px; gap: 8px; }
+.btn-agregar { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--azul2), var(--azul)); color: #fff; border: 2px dashed rgba(200,168,75,0.4); border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+/* FIRMAS */
+.firma-block { margin-bottom: 20px; }
+.firma-titulo { font-size: 13px; font-weight: bold; color: var(--azul2); margin-bottom: 4px; text-align: center; }
+.firma-nombre { font-size: 12px; color: #666; text-align: center; margin-bottom: 8px; font-style: italic; }
+.sig-canvas { border: 2px solid var(--azul2); border-radius: 10px; display: block; background: #fff; touch-action: none; width: 100%; height: 130px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.btn-borrar-firma { width: 100%; padding: 8px; margin-top: 6px; background: #eee; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; color: #555; }
+
+/* RESUMEN */
+.resumen-card { background: var(--blanco); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.15); margin-bottom: 16px; }
+.resumen-header { background: linear-gradient(90deg, var(--azul), var(--azul2)); padding: 14px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--dorado); }
+.resumen-header img { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--dorado); }
+.resumen-header .r-inst { font-size: 10px; color: var(--dorado); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.resumen-header .r-sub { font-size: 9px; color: #a0b8d8; }
+.resumen-body { padding: 14px 16px; }
+.resumen-fila { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--gris); font-size: 12px; }
+.resumen-fila .r-key { color: #777; }
+.resumen-fila .r-val { font-weight: 600; color: #000; text-align: right; max-width: 60%; }
+
+/* CONFIRMADO */
+.confirm-box { text-align: center; padding: 20px; }
+.confirm-icon { font-size: 56px; margin-bottom: 10px; }
+.confirm-txt { font-size: 16px; font-weight: 700; color: var(--azul2); margin-bottom: 6px; }
+.confirm-sub { font-size: 12px; color: #777; margin-bottom: 20px; }
+
+/* BOTONES */
+.btn-pdf { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--dorado), var(--dorado2)); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 20px rgba(200,168,75,0.4); display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+.btn-nuevo { width: 100%; padding: 12px; background: rgba(255,255,255,0.08); color: #a0b8d8; border: 1.5px solid rgba(255,255,255,0.15); border-radius: 10px; font-size: 14px; cursor: pointer; font-family: inherit; }
+
+/* NAV BAR */
+.nav-bar { background: linear-gradient(90deg, #071429, #0d2550); border-top: 1px solid rgba(200,168,75,0.3); padding: 10px 16px; padding-bottom: calc(10px + var(--safe-bottom)); display: flex; gap: 10px; flex-shrink: 0; }
+.btn-nav { flex: 1; padding: 13px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-atras { background: rgba(255,255,255,0.08); color: #a0b8d8; border: 1.5px solid rgba(255,255,255,0.12); }
+.btn-siguiente { background: linear-gradient(135deg, var(--azul2), #0d2550); color: #fff; border: 1.5px solid rgba(200,168,75,0.4); }
+.btn-siguiente.dorado { background: linear-gradient(135deg, var(--dorado), var(--dorado2)); border-color: var(--dorado); }
+.btn-nav:disabled { opacity: 0.3; pointer-events: none; }
+.nav-bar.oculta { display: none; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--azul2); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; border: 1px solid var(--dorado); white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* MIG-005 — PRINT fondo blanco */
+#print-area { display: none; }
+@media print {
+  body {
+    background: #ffffff !important;
+    position: static !important;
+    width: auto !important;
+    overflow: visible !important;
+  }
+  body > * { display: none !important; }
+  #print-area {
+    display: block !important;
+    background: #ffffff !important;
+  }
+  body { background: #fff !important; }
+  #print-area, #print-area * { color: #000 !important; background: transparent !important; }
+  #print-area table th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  @page { size: letter portrait; margin: 15mm 15mm 15mm 30mm; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="app-header">
+    <img id="logo-header" src="" alt="AGA">
+    <div class="titulo">
+      <div class="inst">Fuerza Aérea de Chile</div>
+      <div class="sub">División de Educación · Academia de Guerra Aérea</div>
+    </div>
+    <div class="folio-mini">
+      <span>N° Folio</span>
+      <div class="folio-val" id="folio-show">—</div>
+    </div>
+  </div>
+
+  <!-- STEPS BAR -->
+  <div class="steps-bar">
+    <div class="steps-track">
+      <div class="step-item activo" id="si-1"><div class="step-circle">1</div><div class="step-label">Datos</div></div>
+      <div class="step-item" id="si-2"><div class="step-circle">2</div><div class="step-label">Materiales</div></div>
+      <div class="step-item" id="si-3"><div class="step-circle">3</div><div class="step-label">Firmas</div></div>
+      <div class="step-item" id="si-4"><div class="step-circle">4</div><div class="step-label">PDF</div></div>
+    </div>
+  </div>
+
+  <!-- CONTENIDO -->
+  <div class="steps-content">
+
+    <!-- PASO 1: DATOS -->
+    <div class="step-panel activo" id="panel-1">
+      <div class="card">
+        <div class="card-title">📋 Datos del Vale</div>
+        <div class="campo-group">
+          <label class="campo-label">Quien entrega *</label>
+          <input type="text" class="campo-input" id="entrega" placeholder="Nombre / Grado">
+        </div>
+        <div class="campo-group">
+          <label class="campo-label">Unidad de origen (entrega)</label>
+          <input type="text" class="campo-input" id="unidad-entrega" placeholder="Ej: Escuadrilla de Material">
+        </div>
+        <div class="campo-group">
+          <label class="campo-label">Quien recibe *</label>
+          <input type="text" class="campo-input" id="recibe" placeholder="Nombre / Grado">
+        </div>
+        <div class="campo-group">
+          <label class="campo-label">Unidad de origen (recibe)</label>
+          <input type="text" class="campo-input" id="unidad-recibe" placeholder="Ej: Dirección de Educación">
+        </div>
+        <div class="campo-group">
+          <label class="campo-label">Lugar de entrega</label>
+          <input type="text" class="campo-input" id="lugar" placeholder="Ej: Bodega central, terreno...">
+        </div>
+        <div class="campo-group">
+          <label class="campo-label">Observaciones</label>
+          <textarea class="campo-input" id="obs" placeholder="Opcional..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 2: MATERIALES -->
+    <div class="step-panel" id="panel-2">
+      <div class="card">
+        <div class="card-title">📦 Materiales a Entregar</div>
+        <div id="lista-items"></div>
+        <button class="btn-agregar" id="btn-agregar-item">＋ Agregar material</button>
+      </div>
+    </div>
+
+    <!-- PASO 3: FIRMAS -->
+    <div class="step-panel" id="panel-3">
+      <div class="card">
+        <div class="card-title">✍️ Firmas Digitales</div>
+        <div class="firma-block">
+          <div class="firma-titulo">Firma — Quien entrega</div>
+          <div class="firma-nombre" id="nombre-entrega-firma"></div>
+          <canvas class="sig-canvas" id="sig-entrega"></canvas>
+          <button class="btn-borrar-firma" id="btn-clear-entrega">🗑 Borrar firma</button>
+        </div>
+        <div class="firma-block">
+          <div class="firma-titulo">Firma — Quien recibe</div>
+          <div class="firma-nombre" id="nombre-recibe-firma"></div>
+          <canvas class="sig-canvas" id="sig-recibe"></canvas>
+          <button class="btn-borrar-firma" id="btn-clear-recibe">🗑 Borrar firma</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 4: PDF -->
+    <div class="step-panel" id="panel-4">
+      <div class="resumen-card">
+        <div class="resumen-header">
+          <img id="logo-resumen" src="" alt="AGA">
+          <div>
+            <div class="r-inst">Vale de Entrega</div>
+            <div class="r-sub">Academia de Guerra Aérea — FACH</div>
+          </div>
+        </div>
+        <div class="resumen-body">
+          <div class="resumen-fila"><span class="r-key">Folio</span><span class="r-val" id="r-folio">—</span></div>
+          <div class="resumen-fila"><span class="r-key">Entrega</span><span class="r-val" id="r-entrega">—</span></div>
+          <div class="resumen-fila"><span class="r-key">Recibe</span><span class="r-val" id="r-recibe">—</span></div>
+          <div class="resumen-fila"><span class="r-key">Lugar</span><span class="r-val" id="r-lugar">—</span></div>
+          <div class="resumen-fila"><span class="r-key">N° ítems</span><span class="r-val" id="r-items">—</span></div>
+        </div>
+      </div>
+      <div class="card confirm-box">
+        <div class="confirm-icon">✅</div>
+        <div class="confirm-txt">Listo para imprimir</div>
+        <div class="confirm-sub">Revisa los datos y genera el PDF</div>
+        <button class="btn-pdf" id="btn-pdf">🖨️ Imprimir / Guardar PDF</button>
+        <button class="btn-nuevo" id="btn-nuevo">+ Nuevo vale</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NAV BAR -->
+  <div class="nav-bar" id="nav-bar">
+    <button class="btn-nav btn-atras" id="btn-atras" disabled>← Atrás</button>
+    <button class="btn-nav btn-siguiente" id="btn-siguiente">Siguiente →</button>
+  </div>
+
+</div>
+
+<!-- ÁREA DE IMPRESIÓN -->
+<div id="print-area">
+  <div style="font-family:Arial,sans-serif;font-size:11px;color:#000;">
+    <div style="display:flex;align-items:flex-start;border-bottom:1px solid #000;padding-bottom:8px;margin-bottom:12px;">
+      <div style="text-align:center;font-size:8px;font-weight:bold;text-transform:uppercase;line-height:1.4;width:fit-content;">
+        FUERZA AÉREA DE CHILE<br>DIVISIÓN DE EDUCACIÓN<br>
+        <span style="text-decoration:underline;">ACADEMIA DE GUERRA AÉREA</span>
+      </div>
+      <div style="flex:1;text-align:center;padding:0 10px;">
+        <div style="font-size:12px;font-weight:bold;text-transform:uppercase;text-decoration:underline;">COMPROBANTE DE ENTREGA</div>
+        <div style="font-size:10px;font-family:monospace;color:#444;margin-top:3px;" id="p-folio"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-bottom:10px;" id="p-info"></div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+      <thead><tr>
+        <th style="border:1px solid #000;padding:4px;background:#f0f0f0;text-align:center;font-size:10px;width:10%">Cant.</th>
+        <th style="border:1px solid #000;padding:4px;background:#f0f0f0;font-size:10px;width:65%">Descripción</th>
+        <th style="border:1px solid #000;padding:4px;background:#f0f0f0;text-align:center;font-size:10px;width:25%">Unidad</th>
+      </tr></thead>
+      <tbody id="p-items"></tbody>
+    </table>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:24px;">
+      <div style="text-align:center;font-size:10px;">
+        <img id="p-sig-entrega" src="" style="height:45px;display:block;margin:0 auto 4px;max-width:160px;">
+        <div style="border-top:1px solid #000;padding-top:3px;margin-bottom:2px;"></div>
+        <div id="p-entrega" style="font-weight:bold;"></div>
+        <div style="color:#666;">Quien entrega</div>
+      </div>
+      <div style="text-align:center;font-size:10px;">
+        <img id="p-sig-recibe" src="" style="height:45px;display:block;margin:0 auto 4px;max-width:160px;">
+        <div style="border-top:1px solid #000;padding-top:3px;margin-bottom:2px;"></div>
+        <div id="p-recibe" style="font-weight:bold;"></div>
+        <div style="color:#666;">Quien recibe</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// MIG-003 — Icono generado por canvas (sin base64 externo)
+// ═══════════════════════════════════════════════════════
+var LOGO = (function() {
+  var c = document.createElement('canvas');
+  c.width = c.height = 128;
+  var ctx = c.getContext('2d');
+  ctx.fillStyle = '#0d1f3c';
+  ctx.fillRect(0, 0, 128, 128);
+  ctx.strokeStyle = '#c8a84b';
+  ctx.lineWidth = 5;
+  ctx.strokeRect(5, 5, 118, 118);
+  ctx.font = '60px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🧾', 64, 56);
+  ctx.fillStyle = '#c8a84b';
+  ctx.font = 'bold 14px sans-serif';
+  ctx.fillText('AGA', 64, 108);
+  return c.toDataURL('image/png');
+})();
+
+var folio = "VE-" + new Date().getFullYear() + "-" + (Math.floor(Math.random()*9000)+1000);
+var pasoActual = 1;
+var items = [];
+var sigEntregaURL = "";
+var sigRecibeURL = "";
+
+window.addEventListener("load", function() {
+  document.getElementById("logo-header").src  = LOGO;
+  document.getElementById("logo-resumen").src = LOGO;
+  document.getElementById("folio-show").textContent = folio;
+
+  agregarItem();
+
+  document.getElementById("btn-atras").addEventListener("click", function() { irPaso(-1); });
+  document.getElementById("btn-siguiente").addEventListener("click", function() { irPaso(1); });
+  document.getElementById("btn-agregar-item").addEventListener("click", agregarItem);
+  document.getElementById("btn-clear-entrega").addEventListener("click", function() { limpiarFirma("sig-entrega"); });
+  document.getElementById("btn-clear-recibe").addEventListener("click", function() { limpiarFirma("sig-recibe"); });
+  document.getElementById("btn-pdf").addEventListener("click", imprimirPDF);
+  document.getElementById("btn-nuevo").addEventListener("click", nuevoVale);
+});
+
+// ═══════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ═══════════════════════════════════════════════════════
+function irPaso(dir) {
+  if (dir === 1 && !validarPaso()) return;
+  var sig = pasoActual + dir;
+  if (sig < 1 || sig > 4) return;
+
+  document.querySelectorAll(".step-panel").forEach(function(p) { p.classList.remove("activo"); });
+  document.querySelectorAll(".step-item").forEach(function(s) { s.classList.remove("activo"); });
+
+  for (var i = 1; i < sig; i++) {
+    document.getElementById("si-" + i).classList.add("completo");
+  }
+  if (dir === -1) document.getElementById("si-" + sig).classList.remove("completo");
+
+  pasoActual = sig;
+  document.getElementById("panel-" + pasoActual).classList.add("activo");
+  document.getElementById("si-" + pasoActual).classList.add("activo");
+  document.getElementById("btn-atras").disabled = (pasoActual === 1);
+
+  var btnSig = document.getElementById("btn-siguiente");
+  var navBar = document.getElementById("nav-bar");
+
+  if (pasoActual === 3) {
+    setTimeout(function() {
+      initCanvas("sig-entrega");
+      initCanvas("sig-recibe");
+    }, 150);
+    document.getElementById("nombre-entrega-firma").textContent = document.getElementById("entrega").value || "";
+    document.getElementById("nombre-recibe-firma").textContent  = document.getElementById("recibe").value  || "";
+  }
+
+  if (pasoActual === 4) {
+    navBar.classList.add("oculta");
+    actualizarResumen();
+  } else {
+    navBar.classList.remove("oculta");
+    btnSig.textContent = pasoActual === 3 ? "Ver Resumen →" : "Siguiente →";
+    btnSig.className = "btn-nav btn-siguiente" + (pasoActual === 3 ? " dorado" : "");
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// VALIDACIÓN
+// ═══════════════════════════════════════════════════════
+function validarPaso() {
+  if (pasoActual === 1) {
+    if (!document.getElementById("entrega").value.trim()) { mostrarToast("⚠️ Ingresa quien entrega"); return false; }
+    if (!document.getElementById("recibe").value.trim())  { mostrarToast("⚠️ Ingresa quien recibe");  return false; }
+  }
+  if (pasoActual === 2) {
+    var tieneItems = items.some(function(it) { return it.desc; });
+    if (!tieneItems) { mostrarToast("⚠️ Agrega al menos un material"); return false; }
+  }
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════
+// ÍTEMS
+// ═══════════════════════════════════════════════════════
+function agregarItem() {
+  items.push({ id: Date.now(), cant: 1, desc: "", un: "UN" });
+  renderItems();
+}
+
+function eliminarItem(id) {
+  if (items.length <= 1) { mostrarToast("⚠️ Debe haber al menos un ítem"); return; }
+  items = items.filter(function(it) { return it.id !== id; });
+  renderItems();
+}
+
+function renderItems() {
+  var lista = document.getElementById("lista-items");
+  lista.innerHTML = "";
+  items.forEach(function(it, idx) {
+    var wrap = document.createElement("div");
+    wrap.className = "material-item";
+
+    var num = document.createElement("div");
+    num.className = "item-num";
+    num.textContent = "Ítem " + (idx + 1);
+    wrap.appendChild(num);
+
+    var btnEl = document.createElement("button");
+    btnEl.className = "btn-eliminar-item";
+    btnEl.type = "button";
+    btnEl.textContent = "×";
+    (function(mid) { btnEl.addEventListener("click", function() { eliminarItem(mid); }); })(it.id);
+    wrap.appendChild(btnEl);
+
+    var gDesc = crearCampo("Descripción", "text", it.desc, "Ej: Silla oficina");
+    (function(mid) { gDesc.querySelector("input").addEventListener("input", function() { getItem(mid).desc = this.value; }); })(it.id);
+    wrap.appendChild(gDesc);
+
+    var fila = document.createElement("div");
+    fila.className = "item-fila";
+
+    var gCant = crearCampo("Cantidad", "number", it.cant, "1");
+    gCant.querySelector("input").min = "1";
+    (function(mid) { gCant.querySelector("input").addEventListener("change", function() { getItem(mid).cant = parseInt(this.value) || 1; }); })(it.id);
+
+    var gUn = crearCampo("Unidad", "text", it.un, "UN");
+    (function(mid) { gUn.querySelector("input").addEventListener("change", function() { getItem(mid).un = this.value || "UN"; }); })(it.id);
+
+    fila.appendChild(gCant);
+    fila.appendChild(gUn);
+    wrap.appendChild(fila);
+    lista.appendChild(wrap);
+  });
+}
+
+function crearCampo(label, type, value, placeholder) {
+  var wrap = document.createElement("div");
+  wrap.className = "campo-group";
+  var lbl = document.createElement("label");
+  lbl.className = "campo-label";
+  lbl.textContent = label;
+  var inp = document.createElement("input");
+  inp.type = type;
+  inp.className = "campo-input";
+  inp.value = value;
+  inp.placeholder = placeholder;
+  wrap.appendChild(lbl);
+  wrap.appendChild(inp);
+  return wrap;
+}
+
+function getItem(id) { return items.find(function(it) { return it.id === id; }); }
+
+// ═══════════════════════════════════════════════════════
+// CANVAS FIRMAS
+// ═══════════════════════════════════════════════════════
+function initCanvas(canvasId) {
+  var sc = document.getElementById(canvasId);
+  if (!sc) return;
+  sc.width  = sc.offsetWidth || 300;
+  sc.height = 130;
+  var ctx = sc.getContext("2d");
+  ctx.strokeStyle = "#1a3a6e";
+  ctx.lineWidth   = 2.5;
+  ctx.lineCap     = "round";
+  ctx.lineJoin    = "round";
+  if (sc._siginit) return;
+  sc._siginit = true;
+  var drawing = false;
+  function getPos(e) {
+    var r = sc.getBoundingClientRect();
+    var t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - r.left, y: t.clientY - r.top };
+  }
+  sc.addEventListener("mousedown",  function(e) { drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); });
+  sc.addEventListener("mousemove",  function(e) { if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+  sc.addEventListener("mouseup",    function() { drawing = false; });
+  sc.addEventListener("mouseleave", function() { drawing = false; });
+  sc.addEventListener("touchstart", function(e) { e.preventDefault(); drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); }, { passive: false });
+  sc.addEventListener("touchmove",  function(e) { e.preventDefault(); if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: false });
+  sc.addEventListener("touchend",   function() { drawing = false; });
+}
+
+window.addEventListener("resize",  function() { setTimeout(function() { if (pasoActual === 3) { initCanvas("sig-entrega"); initCanvas("sig-recibe"); } }, 200); });
+screen.orientation && screen.orientation.addEventListener("change", function() { setTimeout(function() { if (pasoActual === 3) { initCanvas("sig-entrega"); initCanvas("sig-recibe"); } }, 350); });
+
+function limpiarFirma(canvasId) {
+  var sc = document.getElementById(canvasId);
+  if (sc) sc.getContext("2d").clearRect(0, 0, sc.width, sc.height);
+}
+
+function capturarFirma(canvasId) {
+  var sc = document.getElementById(canvasId);
+  if (!sc) return "";
+  var temp = document.createElement("canvas");
+  temp.width = sc.width; temp.height = sc.height;
+  var ctx = temp.getContext("2d");
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, temp.width, temp.height);
+  ctx.drawImage(sc, 0, 0);
+  return temp.toDataURL("image/jpeg", 0.6);
+}
+
+// ═══════════════════════════════════════════════════════
+// RESUMEN
+// ═══════════════════════════════════════════════════════
+function actualizarResumen() {
+  var itemsConDesc = items.filter(function(it) { return it.desc; });
+  document.getElementById("r-folio").textContent   = folio;
+  document.getElementById("r-entrega").textContent = document.getElementById("entrega").value || "—";
+  document.getElementById("r-recibe").textContent  = document.getElementById("recibe").value  || "—";
+  document.getElementById("r-lugar").textContent   = document.getElementById("lugar").value   || "—";
+  document.getElementById("r-items").textContent   = itemsConDesc.length + " ítem(s)";
+}
+
+// ═══════════════════════════════════════════════════════
+// IMPRIMIR — FIX-005: 800ms para S25
+// ═══════════════════════════════════════════════════════
+function imprimirPDF() {
+  sigEntregaURL = capturarFirma("sig-entrega");
+  sigRecibeURL  = capturarFirma("sig-recibe");
+
+  var entrega      = document.getElementById("entrega").value.trim();
+  var recibe       = document.getElementById("recibe").value.trim();
+  var lugar        = document.getElementById("lugar").value.trim();
+  var obs          = document.getElementById("obs").value.trim();
+  var unidadEntrega = document.getElementById("unidad-entrega").value.trim();
+  var unidadRecibe  = document.getElementById("unidad-recibe").value.trim();
+  var fecha = new Date().toLocaleDateString("es-CL");
+
+  document.getElementById("p-folio").textContent = folio + " — " + fecha;
+
+  var pInfo = document.getElementById("p-info");
+  pInfo.innerHTML = "";
+  function addInfo(label, value, fullWidth) {
+    if (!value) return;
+    var div = document.createElement("div");
+    div.style.fontSize = "10px";
+    if (fullWidth) div.style.gridColumn = "1/-1";
+    var lbl = document.createElement("div");
+    lbl.style.color = "#666"; lbl.style.fontSize = "9px"; lbl.textContent = label;
+    var val = document.createElement("div");
+    val.textContent = value;
+    div.appendChild(lbl); div.appendChild(val);
+    pInfo.appendChild(div);
+  }
+  addInfo("Quien entrega", entrega, false);
+  addInfo("Unidad origen (entrega)", unidadEntrega, false);
+  addInfo("Quien recibe", recibe, false);
+  addInfo("Unidad origen (recibe)", unidadRecibe, false);
+  addInfo("Lugar", lugar, true);
+  addInfo("Observaciones", obs, true);
+
+  var tbody = document.getElementById("p-items");
+  tbody.innerHTML = "";
+  items.filter(function(it) { return it.desc; }).forEach(function(it) {
+    var tr = document.createElement("tr");
+    [it.cant, it.desc, it.un].forEach(function(txt, ci) {
+      var td = document.createElement("td");
+      td.style.cssText = "border:1px solid #000;padding:4px;font-size:10px" + (ci !== 1 ? ";text-align:center" : "");
+      td.textContent = txt;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("p-entrega").textContent = entrega;
+  document.getElementById("p-recibe").textContent  = recibe;
+  if (sigEntregaURL) document.getElementById("p-sig-entrega").src = sigEntregaURL;
+  if (sigRecibeURL)  document.getElementById("p-sig-recibe").src  = sigRecibeURL;
+
+  setTimeout(function() { window.print(); }, 800);
+}
+
+// ═══════════════════════════════════════════════════════
+// NUEVO VALE
+// ═══════════════════════════════════════════════════════
+function nuevoVale() {
+  ["entrega","recibe","lugar","obs","unidad-entrega","unidad-recibe"].forEach(function(id) {
+    document.getElementById(id).value = "";
+  });
+  items = [];
+  agregarItem();
+  sigEntregaURL = "";
+  sigRecibeURL  = "";
+  folio = "VE-" + new Date().getFullYear() + "-" + (Math.floor(Math.random()*9000)+1000);
+  document.getElementById("folio-show").textContent = folio;
+  document.querySelectorAll(".step-panel").forEach(function(p) { p.classList.remove("activo"); });
+  document.querySelectorAll(".step-item").forEach(function(s) { s.classList.remove("activo","completo"); });
+  pasoActual = 1;
+  document.getElementById("panel-1").classList.add("activo");
+  document.getElementById("si-1").classList.add("activo");
+  document.getElementById("btn-atras").disabled = true;
+  document.getElementById("btn-siguiente").textContent = "Siguiente →";
+  document.getElementById("btn-siguiente").className = "btn-nav btn-siguiente";
+  document.getElementById("nav-bar").classList.remove("oculta");
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function mostrarToast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(function() { t.classList.remove("show"); }, 2500);
+}
+
+// ═══════════════════════════════════════════════════════
+// MIG-001 — MANIFEST INLINE
+// ═══════════════════════════════════════════════════════
+(function() {
+  var m = {
+    name: 'Vale de Entrega — AGA',
+    short_name: 'Vale AGA',
+    description: 'Vale de entrega de materiales — Academia de Guerra Aérea FACH',
+    start_url: '/scorpion-tail/vale.html',
+    display: 'standalone',
+    background_color: '#0d1f3c',
+    theme_color: '#0d1f3c',
+    orientation: 'portrait-primary',
+    icons: [{ src: LOGO, sizes: '128x128', type: 'image/png' }]
+  };
+  var b = new Blob([JSON.stringify(m)], { type: 'application/json' });
+  document.getElementById('vale-manifest').href = URL.createObjectURL(b);
+  document.getElementById('apple-icon-vale').href = LOGO;
+})();
+
+// ═══════════════════════════════════════════════════════
+// MIG-002 — SERVICE WORKER INLINE
+// ═══════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  var swCode = [
+    "const CACHE='aga-vale-v1';",
+    "self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add('.')).then(()=>self.skipWaiting()));});",
+    "self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});",
+    "self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{var rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));return res;}).catch(()=>caches.match(e.request))));});"
+  ].join('\n');
+  var swBlob = new Blob([swCode], { type: 'application/javascript' });
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob), { scope: './' })
+    .catch(function(e) { console.warn('[SW Vale]', e); });
+}
+</script>
+</body>
+</html>
