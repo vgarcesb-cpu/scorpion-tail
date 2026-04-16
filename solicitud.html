@@ -9,28 +9,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Solicitud AGA">
-<!--
-╔══════════════════════════════════════════════════════════════════╗
-║     SOLICITUD ADQUISICIÓN — Scorpion Tail · scorpion-tail       ║
-║     Migrado desde: Solicitud-Supervisor (repo independiente)     ║
-║                                                                  ║
-║  FIX-001 │ 🔴 localStorage → IndexedDB con guards completos     ║
-║  FIX-002 │ 🔴 Guard !db en todas las operaciones IDB            ║
-║  FIX-003 │ 🔴 onerror en apertura IDB y en transacciones        ║
-║  FIX-004 │ 🔴 null-check en todos los onsuccess de IDB          ║
-║  FIX-005 │ 🔴 window.print() 800ms para S25                     ║
-║  FIX-006 │ 🟠 Canvas: ajustarCanvas() antes de drawImage        ║
-║  FIX-007 │ 🟠 orientationchange listener para S25               ║
-║  FIX-008 │ 🟠 Firma persistida en historial (firmaImg en IDB)   ║
-║  FIX-009 │ 🟠 Validación obligatoria por paso antes de avanzar  ║
-║  FIX-010 │ 🟡 Service Worker inline (sin sw.js externo)         ║
-║  FIX-011 │ 🟡 Manifest inline (sin manifest.json externo)       ║
-║  FIX-012 │ 🟡 viewport-fit:cover para notch S25                 ║
-║  FIX-013 │ 🟡 Folio visible inmediato desde IDB al cargar       ║
-║                                                                  ║
-║  IDB: AGA_DB_SOLICITUDES (mismo store — datos continuos)        ║
-╚══════════════════════════════════════════════════════════════════╝
--->
 <style>
 :root {
   --azul:   #0d1f3c;
@@ -46,11 +24,8 @@
   --safe-bottom: env(safe-area-inset-bottom, 20px);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; height: 100dvh; overflow: hidden; }
-
-.app { display: flex; flex-direction: column; height: 100dvh; padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); }
-
-/* HEADER */
+body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; height: 100dvh; overflow: hidden; position: fixed; width: 100%; }
+.app { display: flex; flex-direction: column; height: 100dvh; padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); position: relative; }
 .app-header { background: linear-gradient(135deg, #071429 0%, #0d2550 100%); padding: 10px 16px 8px; border-bottom: 1px solid rgba(200,168,75,0.3); flex-shrink: 0; }
 .header-top { display: flex; align-items: center; justify-content: space-between; }
 .header-logo { display: flex; flex-direction: column; }
@@ -58,8 +33,6 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
 .header-logo .titulo { font-size: 13px; font-weight: 700; color: var(--dorado); text-transform: uppercase; letter-spacing: 0.5px; }
 .header-folio { font-size: 10px; color: rgba(255,255,255,0.5); text-align: right; }
 .folio-badge { font-size: 13px; font-weight: 700; color: var(--dorado); display: block; }
-
-/* STEPS BAR */
 .steps-bar { display: flex; align-items: center; padding: 8px 16px; background: #071429; border-bottom: 1px solid rgba(200,168,75,0.2); flex-shrink: 0; gap: 0; }
 .step-item { display: flex; align-items: center; flex: 1; }
 .step-circle { width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(200,168,75,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); flex-shrink: 0; transition: all 0.2s; }
@@ -69,57 +42,37 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
 .step-item.activo .step-label { color: var(--dorado); }
 .step-item.completo .step-circle { border-color: var(--verde); color: var(--verde); background: rgba(46,204,113,0.1); }
 .step-item.completo .step-label { color: var(--verde); }
-
-/* CONTENT */
-.steps-content { flex: 1; overflow: hidden; position: relative; background: var(--gris); }
+.steps-content { flex: 1; min-height: 0; overflow: hidden; position: relative; background: var(--gris); }
 .step-panel { position: absolute; inset: 0; overflow-y: auto; padding: 12px; display: none; -webkit-overflow-scrolling: touch; }
 .step-panel.activo { display: block; }
-
-/* CARDS */
 .card { background: var(--blanco); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--borde); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 .card-title { font-size: 11px; font-weight: 700; color: var(--azul2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--borde); display: flex; align-items: center; gap: 6px; }
-
-/* CAMPOS */
 .campo-label { display: block; font-size: 10px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
 .campo-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--borde); border-radius: 8px; font-size: 13px; font-family: inherit; background: var(--gris); color: var(--azul); transition: border-color 0.15s; -webkit-appearance: none; }
 .campo-input:focus { outline: none; border-color: var(--azul2); background: #fff; }
 .campo-group { margin-bottom: 10px; }
 .campo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-
-/* ITEMS */
 .item-card { background: var(--gris); border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1.5px solid var(--borde); position: relative; }
 .item-num { font-size: 10px; font-weight: 700; color: var(--azul2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
 .btn-eliminar-item { position: absolute; top: 10px; right: 10px; background: #fee; border: 1px solid #fcc; color: var(--rojo); border-radius: 50%; width: 26px; height: 26px; font-size: 16px; cursor: pointer; line-height: 1; padding: 0; font-family: inherit; }
 .item-fila3 { display: grid; grid-template-columns: 70px 80px 1fr; gap: 8px; margin-bottom: 8px; }
 .item-precio { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .subtotal-item { background: var(--azul2); color: var(--dorado); border-radius: 6px; padding: 8px 12px; font-size: 13px; font-weight: 700; text-align: right; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-
-/* TOTALES */
 .totales-box { background: linear-gradient(135deg, var(--azul) 0%, var(--azul2) 100%); border-radius: 10px; padding: 12px 14px; margin-top: 6px; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 .tot-row { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.8); padding: 3px 0; }
 .tot-row.total { color: var(--dorado); font-weight: 700; font-size: 14px; border-top: 1px solid rgba(200,168,75,0.3); margin-top: 4px; padding-top: 6px; }
-
-/* BTN AGREGAR */
 .btn-agregar { width: 100%; padding: 10px; border: 2px dashed var(--borde); background: transparent; border-radius: 8px; color: var(--azul2); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
-
-/* RESUMEN */
 .resumen-fila { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--borde); font-size: 12px; }
 .r-key { color: #888; font-weight: 600; }
 .r-val { color: var(--azul); font-weight: 500; text-align: right; max-width: 60%; }
 .resumen-item-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 11px; color: #555; border-bottom: 1px dashed var(--borde); }
-
-/* FIRMA */
 #sig-canvas { border: 2px solid var(--azul2); border-radius: 10px; display: block; background: #fff; touch-action: none; width: 100%; height: 160px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-
-/* HISTORIAL */
 .hist-item-app { background: var(--blanco); border: 1px solid var(--borde); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: box-shadow 0.15s; }
 .hist-item-app:active { box-shadow: 0 0 0 2px var(--dorado); }
 .hist-folio { font-size: 13px; font-weight: 700; color: var(--azul2); }
 .hist-det { font-size: 11px; color: #888; margin-top: 3px; }
 .hist-obs { font-size: 11px; color: #aaa; margin-top: 2px; font-style: italic; }
 .btn-eliminar-hist { margin-top: 8px; padding: 5px 12px; background: #fee; border: 1px solid #fcc; color: var(--rojo); border-radius: 6px; font-size: 11px; cursor: pointer; font-family: inherit; }
-
-/* NAV BAR */
 .nav-bar { display: flex; gap: 8px; padding: 10px 16px; background: linear-gradient(90deg,#071429,#0d2550); border-top: 1px solid rgba(200,168,75,0.3); flex-shrink: 0; }
 .nav-bar.oculta { display: none; }
 .btn-nav { flex: 1; padding: 11px 8px; border-radius: 10px; border: 1px solid rgba(200,168,75,0.25); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
@@ -127,36 +80,36 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
 .btn-siguiente { background: var(--azul2); border-color: var(--azul2); color: #fff; }
 .btn-siguiente.dorado { background: linear-gradient(135deg,var(--dorado),var(--dorado2)); border-color: var(--dorado); color: #fff; }
 .btn-nav:active { transform: scale(0.97); }
-
-/* PDF BUTTONS */
-.btn-pdf { display: block; width: 100%; padding: 13px; background: var(--azul); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 8px; -webkit-print-color-adjust: exact !important; }
+.btn-pdf { display: block; width: 100%; padding: 13px; background: var(--azul); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 8px; }
 .btn-nuevo { display: block; width: 100%; padding: 13px; background: linear-gradient(135deg,var(--dorado),var(--dorado2)); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 8px; }
-
-/* TOAST */
 .toast { position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: #333; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* PRINT */
+/* FIX-014 — fondo blanco en impresión, anula position:fixed */
 #print-area { display: none; }
 @media print {
+  body {
+    background: #ffffff !important;
+    position: static !important;
+    width: auto !important;
+    overflow: visible !important;
+  }
   body > .app, .toast { display: none !important; }
   #print-area {
     display: block !important;
     padding: 0;
     font-family: Arial, sans-serif;
     color: #000;
+    background: #ffffff !important;
   }
   @page { size: letter portrait; margin: 15mm 20mm; }
   table { border-collapse: collapse !important; }
   th, td { border: 1px solid #ccc !important; }
-  .print-header-bg { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
 </style>
 </head>
 <body>
-
 <div class="app">
-  <!-- HEADER -->
   <div class="app-header">
     <div class="header-top">
       <div class="header-logo">
@@ -169,66 +122,31 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
       </div>
     </div>
   </div>
-
-  <!-- STEPS BAR -->
   <div class="steps-bar">
-    <div class="step-item activo" id="si-1">
-      <div class="step-circle">1</div>
-      <span class="step-label">Datos</span>
-    </div>
+    <div class="step-item activo" id="si-1"><div class="step-circle">1</div><span class="step-label">Datos</span></div>
     <div class="step-line"></div>
-    <div class="step-item" id="si-2">
-      <div class="step-circle">2</div>
-      <span class="step-label">Materiales</span>
-    </div>
+    <div class="step-item" id="si-2"><div class="step-circle">2</div><span class="step-label">Materiales</span></div>
     <div class="step-line"></div>
-    <div class="step-item" id="si-3">
-      <div class="step-circle">3</div>
-      <span class="step-label">Firma</span>
-    </div>
+    <div class="step-item" id="si-3"><div class="step-circle">3</div><span class="step-label">Firma</span></div>
   </div>
-
-  <!-- CONTENT -->
   <div class="steps-content">
-
-    <!-- PASO 1 — DATOS GENERALES -->
     <div class="step-panel activo" id="panel-1">
       <div class="card">
         <div class="card-title">📋 Datos Generales</div>
         <div class="campo-row">
-          <div class="campo-group">
-            <label class="campo-label">Año</label>
-            <input class="campo-input" type="text" id="folio-anio" maxlength="4" inputmode="numeric" placeholder="2026">
-          </div>
-          <div class="campo-group">
-            <label class="campo-label">N° Folio</label>
-            <input class="campo-input" type="text" id="folio-num" readonly>
-          </div>
+          <div class="campo-group"><label class="campo-label">Año</label><input class="campo-input" type="text" id="folio-anio" maxlength="4" inputmode="numeric" placeholder="2026"></div>
+          <div class="campo-group"><label class="campo-label">N° Folio</label><input class="campo-input" type="text" id="folio-num" readonly></div>
         </div>
-        <div class="campo-group">
-          <label class="campo-label">Fecha</label>
-          <input class="campo-input" type="date" id="fecha">
-        </div>
-        <div class="campo-group">
-          <label class="campo-label">Escuadrilla Base Aérea</label>
+        <div class="campo-group"><label class="campo-label">Fecha</label><input class="campo-input" type="date" id="fecha"></div>
+        <div class="campo-group"><label class="campo-label">Escuadrilla Base Aérea</label>
           <select class="campo-input" id="escuadrilla">
-            <option>Bandada Instalaciones</option>
-            <option>Bandada Alimentación</option>
-            <option>Bandada Transporte</option>
+            <option>Bandada Instalaciones</option><option>Bandada Alimentación</option><option>Bandada Transporte</option>
           </select>
         </div>
-        <div class="campo-group">
-          <label class="campo-label">Cdte. Escuadrilla Base Aérea</label>
-          <input class="campo-input" type="text" id="cdte" placeholder="Grado y Nombre">
-        </div>
-        <div class="campo-group">
-          <label class="campo-label">Observaciones</label>
-          <textarea class="campo-input" id="observaciones" rows="2" placeholder="Notas adicionales..." style="resize:none"></textarea>
-        </div>
+        <div class="campo-group"><label class="campo-label">Cdte. Escuadrilla Base Aérea</label><input class="campo-input" type="text" id="cdte" placeholder="Grado y Nombre"></div>
+        <div class="campo-group"><label class="campo-label">Observaciones</label><textarea class="campo-input" id="observaciones" rows="2" placeholder="Notas adicionales..." style="resize:none"></textarea></div>
       </div>
     </div>
-
-    <!-- PASO 2 — MATERIALES -->
     <div class="step-panel" id="panel-2">
       <div class="card">
         <div class="card-title">📦 Ítems de Solicitud</div>
@@ -244,8 +162,6 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
         </div>
       </div>
     </div>
-
-    <!-- PASO 3 — RESUMEN Y FIRMA -->
     <div class="step-panel" id="panel-3">
       <div class="card">
         <div class="card-title">📄 Resumen</div>
@@ -259,43 +175,27 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
       </div>
       <div class="card">
         <div class="card-title">✍️ Firma Digital</div>
-        <div class="campo-group">
-          <label class="campo-label">Nombre completo</label>
-          <input class="campo-input" type="text" id="firma-nombre" placeholder="NOMBRE EN MAYÚSCULAS" style="text-transform:uppercase">
-        </div>
+        <div class="campo-group"><label class="campo-label">Nombre completo</label><input class="campo-input" type="text" id="firma-nombre" placeholder="NOMBRE EN MAYÚSCULAS" style="text-transform:uppercase"></div>
         <div class="campo-row">
-          <div class="campo-group">
-            <label class="campo-label">Grado</label>
-            <input class="campo-input" type="text" id="firma-grado" placeholder="Tte. Cnel.">
-          </div>
-          <div class="campo-group">
-            <label class="campo-label">Cargo</label>
-            <input class="campo-input" type="text" id="firma-cargo" placeholder="Cdte. Escuadrilla">
-          </div>
+          <div class="campo-group"><label class="campo-label">Grado</label><input class="campo-input" type="text" id="firma-grado" placeholder="Tte. Cnel."></div>
+          <div class="campo-group"><label class="campo-label">Cargo</label><input class="campo-input" type="text" id="firma-cargo" placeholder="Cdte. Escuadrilla"></div>
         </div>
         <div style="margin-top:8px">
           <div style="font-size:11px;font-weight:600;color:#555;margin-bottom:6px;text-align:center">Firma a mano</div>
-          <div id="sig-wrap" style="width:100%">
-            <canvas id="sig-canvas"></canvas>
-          </div>
+          <div id="sig-wrap" style="width:100%"><canvas id="sig-canvas"></canvas></div>
           <button onclick="limpiarFirma()" style="width:100%;padding:8px;margin-top:6px;background:#eee;border:1px solid #ddd;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;color:#555">Borrar firma</button>
         </div>
       </div>
       <button class="btn-pdf" onclick="imprimirPDF()">🖨️ Guardar / Imprimir PDF</button>
       <button class="btn-nuevo" onclick="guardarHistorial()">💾 Guardar en historial</button>
     </div>
-
-    <!-- HISTORIAL -->
     <div class="step-panel" id="panel-hist">
       <div class="card">
         <div class="card-title">📁 Historial de Solicitudes</div>
         <div id="hist-lista"></div>
       </div>
     </div>
-
   </div>
-
-  <!-- NAV BAR -->
   <div class="nav-bar" id="nav-bar">
     <button class="btn-nav btn-atras" id="btn-atras" onclick="irPaso(pasoActual-1)" disabled>← Atrás</button>
     <button class="btn-nav btn-atras" onclick="verHistorial()" style="flex:0.6;font-size:12px">📁 Historial</button>
@@ -303,11 +203,7 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
     <button class="btn-nav btn-siguiente" id="btn-siguiente" onclick="irPaso(pasoActual+1)">Siguiente →</button>
   </div>
 </div>
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
-
-<!-- PRINT AREA -->
 <div id="print-area">
   <div style="text-align:center;margin-bottom:16px">
     <div style="font-size:12px;font-weight:400;line-height:1.4">FUERZA AÉREA DE CHILE</div>
@@ -324,15 +220,13 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
     <div><div style="color:#666;font-size:10px">Cdte. Escuadrilla Base Aérea</div><div id="p-cdte" style="font-weight:600"></div></div>
   </div>
   <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px">
-    <thead>
-      <tr>
-        <th style="border:1px solid #ccc;padding:5px 8px;text-align:left;font-weight:600;background:#f0f0f0">Cant.</th>
-        <th style="border:1px solid #ccc;padding:5px 8px;text-align:left;font-weight:600;background:#f0f0f0">Unidad</th>
-        <th style="border:1px solid #ccc;padding:5px 8px;text-align:left;font-weight:600;background:#f0f0f0">Descripción Material / Servicio</th>
-        <th style="border:1px solid #ccc;padding:5px 8px;text-align:right;font-weight:600;background:#f0f0f0">P. Unitario</th>
-        <th style="border:1px solid #ccc;padding:5px 8px;text-align:right;font-weight:600;background:#f0f0f0">Subtotal</th>
-      </tr>
-    </thead>
+    <thead><tr>
+      <th style="border:1px solid #ccc;padding:5px 8px;text-align:left;font-weight:600;background:#f0f0f0">Cant.</th>
+      <th style="border:1px solid #ccc;padding:5px 8px;text-align:left;font-weight:600;background:#f0f0f0">Unidad</th>
+      <th style="border:1px solid #ccc;padding:5px 8px;text-align:left;font-weight:600;background:#f0f0f0">Descripción Material / Servicio</th>
+      <th style="border:1px solid #ccc;padding:5px 8px;text-align:right;font-weight:600;background:#f0f0f0">P. Unitario</th>
+      <th style="border:1px solid #ccc;padding:5px 8px;text-align:right;font-weight:600;background:#f0f0f0">Subtotal</th>
+    </tr></thead>
     <tbody id="p-items"></tbody>
   </table>
   <div style="text-align:right;font-size:12px;margin-bottom:10px">
@@ -351,605 +245,88 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
     </div>
   </div>
 </div>
-
 <script>
-// ═══════════════════════════════════════════════════════
-// ESTADO GLOBAL
-// ═══════════════════════════════════════════════════════
-var db;
-var pasoActual = 1;
-var items = [];
-var editIndex = null;
-var solicitudes = [];
-var sigDataURL = '';
-
-// ═══════════════════════════════════════════════════════
-// FIX-001 — IndexedDB
-// MISMO nombre de BD → los datos del repo anterior se conservan
-// ═══════════════════════════════════════════════════════
-var IDB_NAME    = 'AGA_DB_SOLICITUDES';
-var IDB_VERSION = 1;
-var STORE_SOL   = 'solicitudes';
-var STORE_CFG   = 'config';
-
-var idbReq = indexedDB.open(IDB_NAME, IDB_VERSION);
-
-// FIX-003 — onerror global IDB
-idbReq.onerror = function() {
-  alert('Error al abrir la base de datos. Verifica permisos o almacenamiento disponible.');
-};
-
-idbReq.onupgradeneeded = function(e) {
-  var d = e.target.result;
-  if (!d.objectStoreNames.contains(STORE_SOL))
-    d.createObjectStore(STORE_SOL, { keyPath: 'id' });
-  if (!d.objectStoreNames.contains(STORE_CFG))
-    d.createObjectStore(STORE_CFG, { keyPath: 'key' });
-};
-
-idbReq.onsuccess = function(e) {
-  db = e.target.result;
-  cargarTodasSolicitudes(function() {
-    init();
-  });
-};
-
-function cargarTodasSolicitudes(cb) {
-  if (!db) { cb(); return; }
-  var tx = db.transaction(STORE_SOL, 'readonly');
-  tx.onerror = function(e) { alert('Error IDB: ' + e.target.error); };
-  tx.objectStore(STORE_SOL).getAll().onsuccess = function(e) {
-    solicitudes = e.target.result || [];
-    solicitudes.sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
-    cb();
-  };
-}
-
-// ── Folio counter ──
-function getFolio(cb) {
-  if (!db) { cb(0); return; }
-  var tx = db.transaction(STORE_CFG, 'readonly');
-  tx.onerror = function() { cb(0); };
-  tx.objectStore(STORE_CFG).get('folio').onsuccess = function(e) {
-    var r = e.target.result;
-    cb(r ? (parseInt(r.value) || 0) : 0);
-  };
-}
-
-function setFolio(n, cb) {
-  if (!db) { if (cb) cb(); return; }
-  var tx = db.transaction(STORE_CFG, 'readwrite');
-  tx.onerror = function(e) { alert('Error IDB config: ' + e.target.error); };
-  tx.objectStore(STORE_CFG).put({ key: 'folio', value: String(n) });
-  tx.oncomplete = function() { if (cb) cb(); };
-}
-
-function saveIDB(cb) {
-  if (!db) return alert('Base de datos no lista.');
-  var tx = db.transaction(STORE_SOL, 'readwrite');
-  tx.onerror = function(e) { alert('Error al guardar: ' + e.target.error); };
-  var store = tx.objectStore(STORE_SOL);
-  solicitudes.forEach(function(s) { store.put(s); });
-  tx.oncomplete = function() { if (cb) cb(); };
-}
-
-// ═══════════════════════════════════════════════════════
-// UTILIDADES
-// ═══════════════════════════════════════════════════════
-function escHTML(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function folioStr(n) { return String(n).padStart(4, '0'); }
-function fmtN(n) { return n > 0 ? Math.round(n).toLocaleString('es-CL') : '—'; }
-function fmtFecha(f) {
-  if (!f) return '';
-  var p = f.split('-');
-  return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : f;
-}
-
-// ═══════════════════════════════════════════════════════
-// FIX-013 — Actualizar folio-show en header
-// ═══════════════════════════════════════════════════════
-function actualizarFolioHeader() {
-  var anio = document.getElementById('folio-anio').value || new Date().getFullYear();
-  var num  = document.getElementById('folio-num').value  || '????';
-  document.getElementById('folio-show').textContent = 'ADQ-' + anio + '-' + num;
-}
-
-// ═══════════════════════════════════════════════════════
-// INICIO
-// ═══════════════════════════════════════════════════════
-function init() {
-  getFolio(function(actual) {
-    var siguiente = actual + 1;
-    var anio = new Date().getFullYear();
-    document.getElementById('folio-num').value  = folioStr(siguiente);
-    document.getElementById('folio-anio').value = anio;
-    document.getElementById('fecha').value      = new Date().toISOString().slice(0, 10);
-    actualizarFolioHeader();
-    agregarItem();
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-// RESET CONTADOR
-// ═══════════════════════════════════════════════════════
-function resetContador() {
-  if (!confirm('¿Resetear el contador de folios a 0001?')) return;
-  setFolio(0, function() {
-    document.getElementById('folio-num').value = '0001';
-    actualizarFolioHeader();
-    mostrarToast('✓ Contador reseteado a 0001');
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-// ITEMS
-// ═══════════════════════════════════════════════════════
-function agregarItem() {
-  items.push({ cant: 1, unidad: 'UN', descripcion: '', pUnitario: 0 });
-  renderItems();
-}
-
-function eliminarItem(i) {
-  if (items.length > 1) { items.splice(i, 1); renderItems(); }
-}
-
-function updItem(i, k, v) {
-  if (k === 'pUnitario') {
-    items[i][k] = parseFloat(String(v).replace(/\./g, '').replace(',', '.')) || 0;
-  } else if (k === 'cant') {
-    items[i][k] = parseFloat(v) || 0;
-  } else {
-    items[i][k] = v;
-  }
-  renderItems();
-}
-
-function calcSub(it) { return (parseFloat(it.cant) || 0) * (parseFloat(it.pUnitario) || 0); }
-
-function calcTotals() {
-  var sub = items.reduce(function(a, it) { return a + calcSub(it); }, 0);
-  return { sub: sub, iva: sub * 0.19, total: sub * 1.19 };
-}
-
-function renderItems() {
-  var t = calcTotals();
-  var cont = document.getElementById('items-container');
-  cont.innerHTML = items.map(function(it, i) {
-    var sub = calcSub(it);
-    return '<div class="item-card">' +
-      '<div class="item-num">Ítem ' + (i + 1) + '</div>' +
-      (items.length > 1 ? '<button class="btn-eliminar-item" onclick="eliminarItem(' + i + ')">×</button>' : '') +
-      '<div class="item-fila3">' +
-        '<div><label class="campo-label" style="font-size:10px">Cant.</label>' +
-        '<input class="campo-input" style="padding:8px" type="number" min="1" value="' + it.cant + '" onchange="updItem(' + i + ',\'cant\',this.value)"></div>' +
-        '<div><label class="campo-label" style="font-size:10px">Unidad</label>' +
-        '<select class="campo-input" style="padding:8px" onchange="updItem(' + i + ',\'unidad\',this.value)">' +
-        ['UN','KG','MT','LT','CJ','PAQ','GL'].map(function(u) { return '<option' + (it.unidad === u ? ' selected' : '') + '>' + u + '</option>'; }).join('') +
-        '</select></div>' +
-        '<div><label class="campo-label" style="font-size:10px">Descripción</label>' +
-        '<input class="campo-input" style="padding:8px" type="text" placeholder="Descripción" value="' + escHTML(it.descripcion) + '" onchange="updItem(' + i + ',\'descripcion\',this.value)"></div>' +
-      '</div>' +
-      '<div class="item-precio">' +
-        '<div><label class="campo-label" style="font-size:10px">P. Unitario</label>' +
-        '<div style="display:flex;align-items:center;gap:4px"><span style="font-weight:700;color:var(--azul2)">$</span>' +
-        '<input class="campo-input" style="padding:8px" type="text" inputmode="numeric" value="' + (it.pUnitario > 0 ? Math.round(it.pUnitario).toLocaleString('es-CL') : '') + '" placeholder="0" onchange="updItem(' + i + ',\'pUnitario\',this.value)"></div></div>' +
-        '<div><label class="campo-label" style="font-size:10px">Subtotal</label>' +
-        '<div class="subtotal-item">$ ' + (sub > 0 ? Math.round(sub).toLocaleString('es-CL') : '—') + '</div></div>' +
-      '</div>' +
-    '</div>';
+var db, pasoActual=1, items=[], editIndex=null, solicitudes=[], sigDataURL='';
+var IDB_NAME='AGA_DB_SOLICITUDES', IDB_VERSION=1, STORE_SOL='solicitudes', STORE_CFG='config';
+var idbReq=indexedDB.open(IDB_NAME,IDB_VERSION);
+idbReq.onerror=function(){alert('Error al abrir la base de datos.');};
+idbReq.onupgradeneeded=function(e){var d=e.target.result;if(!d.objectStoreNames.contains(STORE_SOL))d.createObjectStore(STORE_SOL,{keyPath:'id'});if(!d.objectStoreNames.contains(STORE_CFG))d.createObjectStore(STORE_CFG,{keyPath:'key'});};
+idbReq.onsuccess=function(e){db=e.target.result;cargarTodasSolicitudes(function(){init();});};
+function cargarTodasSolicitudes(cb){if(!db){cb();return;}var tx=db.transaction(STORE_SOL,'readonly');tx.onerror=function(e){alert('Error IDB: '+e.target.error);};tx.objectStore(STORE_SOL).getAll().onsuccess=function(e){solicitudes=e.target.result||[];solicitudes.sort(function(a,b){return(b.ts||0)-(a.ts||0);});cb();};}
+function getFolio(cb){if(!db){cb(0);return;}var tx=db.transaction(STORE_CFG,'readonly');tx.onerror=function(){cb(0);};tx.objectStore(STORE_CFG).get('folio').onsuccess=function(e){var r=e.target.result;cb(r?(parseInt(r.value)||0):0);};}
+function setFolio(n,cb){if(!db){if(cb)cb();return;}var tx=db.transaction(STORE_CFG,'readwrite');tx.onerror=function(e){alert('Error IDB config: '+e.target.error);};tx.objectStore(STORE_CFG).put({key:'folio',value:String(n)});tx.oncomplete=function(){if(cb)cb();};}
+function escHTML(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function folioStr(n){return String(n).padStart(4,'0');}
+function fmtN(n){return n>0?Math.round(n).toLocaleString('es-CL'):'—';}
+function fmtFecha(f){if(!f)return '';var p=f.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:f;}
+function actualizarFolioHeader(){var anio=document.getElementById('folio-anio').value||new Date().getFullYear();var num=document.getElementById('folio-num').value||'????';document.getElementById('folio-show').textContent='ADQ-'+anio+'-'+num;}
+function init(){getFolio(function(actual){document.getElementById('folio-num').value=folioStr(actual+1);document.getElementById('folio-anio').value=new Date().getFullYear();document.getElementById('fecha').value=new Date().toISOString().slice(0,10);actualizarFolioHeader();agregarItem();});}
+function resetContador(){if(!confirm('¿Resetear el contador de folios a 0001?'))return;setFolio(0,function(){document.getElementById('folio-num').value='0001';actualizarFolioHeader();mostrarToast('✓ Contador reseteado a 0001');});}
+function agregarItem(){items.push({cant:1,unidad:'UN',descripcion:'',pUnitario:0});renderItems();}
+function eliminarItem(i){if(items.length>1){items.splice(i,1);renderItems();}}
+function updItem(i,k,v){if(k==='pUnitario'){items[i][k]=parseFloat(String(v).replace(/\./g,'').replace(',','.'))||0;}else if(k==='cant'){items[i][k]=parseFloat(v)||0;}else{items[i][k]=v;}renderItems();}
+function calcSub(it){return(parseFloat(it.cant)||0)*(parseFloat(it.pUnitario)||0);}
+function calcTotals(){var sub=items.reduce(function(a,it){return a+calcSub(it);},0);return{sub:sub,iva:sub*0.19,total:sub*1.19};}
+function renderItems(){
+  var t=calcTotals();
+  document.getElementById('items-container').innerHTML=items.map(function(it,i){
+    var sub=calcSub(it);
+    return '<div class="item-card"><div class="item-num">Ítem '+(i+1)+'</div>'+(items.length>1?'<button class="btn-eliminar-item" onclick="eliminarItem('+i+')">×</button>':'')+
+    '<div class="item-fila3"><div><label class="campo-label" style="font-size:10px">Cant.</label><input class="campo-input" style="padding:8px" type="number" min="1" value="'+it.cant+'" onchange="updItem('+i+',\'cant\',this.value)"></div>'+
+    '<div><label class="campo-label" style="font-size:10px">Unidad</label><select class="campo-input" style="padding:8px" onchange="updItem('+i+',\'unidad\',this.value)">'+['UN','KG','MT','LT','CJ','PAQ','GL'].map(function(u){return'<option'+(it.unidad===u?' selected':'')+'>'+u+'</option>';}).join('')+'</select></div>'+
+    '<div><label class="campo-label" style="font-size:10px">Descripción</label><input class="campo-input" style="padding:8px" type="text" placeholder="Descripción" value="'+escHTML(it.descripcion)+'" onchange="updItem('+i+',\'descripcion\',this.value)"></div></div>'+
+    '<div class="item-precio"><div><label class="campo-label" style="font-size:10px">P. Unitario</label><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:700;color:var(--azul2)">$</span><input class="campo-input" style="padding:8px" type="text" inputmode="numeric" value="'+(it.pUnitario>0?Math.round(it.pUnitario).toLocaleString('es-CL'):'')+'" placeholder="0" onchange="updItem('+i+',\'pUnitario\',this.value)"></div></div>'+
+    '<div><label class="campo-label" style="font-size:10px">Subtotal</label><div class="subtotal-item">$ '+(sub>0?Math.round(sub).toLocaleString('es-CL'):'—')+'</div></div></div></div>';
   }).join('');
-  document.getElementById('tot-sub').textContent   = fmtN(t.sub);
-  document.getElementById('tot-iva').textContent   = fmtN(t.iva);
-  document.getElementById('tot-total').textContent = fmtN(t.total);
+  document.getElementById('tot-sub').textContent=fmtN(t.sub);
+  document.getElementById('tot-iva').textContent=fmtN(t.iva);
+  document.getElementById('tot-total').textContent=fmtN(t.total);
 }
-
-// ═══════════════════════════════════════════════════════
-// PASOS
-// ═══════════════════════════════════════════════════════
-function validarPaso(n) {
-  if (n === 1) {
-    var anio = document.getElementById('folio-anio').value.trim();
-    var fecha = document.getElementById('fecha').value.trim();
-    var cdte  = document.getElementById('cdte').value.trim();
-    if (!anio || anio.length !== 4) { mostrarToast('⚠️ Ingresa el año (4 dígitos)'); return false; }
-    if (!fecha) { mostrarToast('⚠️ Selecciona una fecha'); return false; }
-    if (!cdte)  { mostrarToast('⚠️ Ingresa el Cdte. Escuadrilla'); return false; }
-  }
-  if (n === 2) {
-    var tieneDesc = items.some(function(it) { return it.descripcion.trim() !== ''; });
-    if (!tieneDesc) { mostrarToast('⚠️ Agrega al menos un ítem con descripción'); return false; }
-  }
+function validarPaso(n){
+  if(n===1){var anio=document.getElementById('folio-anio').value.trim();var fecha=document.getElementById('fecha').value.trim();var cdte=document.getElementById('cdte').value.trim();if(!anio||anio.length!==4){mostrarToast('⚠️ Ingresa el año (4 dígitos)');return false;}if(!fecha){mostrarToast('⚠️ Selecciona una fecha');return false;}if(!cdte){mostrarToast('⚠️ Ingresa el Cdte. Escuadrilla');return false;}}
+  if(n===2){var tieneDesc=items.some(function(it){return it.descripcion.trim()!=='';});if(!tieneDesc){mostrarToast('⚠️ Agrega al menos un ítem con descripción');return false;}}
   return true;
 }
-
-function irPaso(n) {
-  if (n < 1 || n > 3) return;
-  if (n > pasoActual && !validarPaso(pasoActual)) return;
-  if (n === 3) {
-    actualizarResumen();
-    setTimeout(function() {
-      initCanvas();
-      if (sigDataURL) restaurarFirma();
-    }, 150);
-  }
-  if (pasoActual === 3 && n !== 3) { sigDataURL = capturarFirma(); }
-  document.querySelectorAll('.step-panel').forEach(function(p) { p.classList.remove('activo'); });
-  ['si-1','si-2','si-3'].forEach(function(id, idx) {
-    var el = document.getElementById(id);
-    el.classList.remove('activo','completo');
-    if (idx + 1 < n) el.classList.add('completo');
-    if (idx + 1 === n) el.classList.add('activo');
-  });
-  document.getElementById('panel-' + n).classList.add('activo');
-  pasoActual = n;
-  document.getElementById('btn-atras').disabled = (n === 1);
-  var btnSig = document.getElementById('btn-siguiente');
-  if (n === 3) {
-    btnSig.textContent = '+ Nuevo';
-    btnSig.className = 'btn-nav btn-siguiente dorado';
-    btnSig.onclick = function() { nuevoFormulario(); };
-  } else {
-    btnSig.textContent = 'Siguiente →';
-    btnSig.className = 'btn-nav btn-siguiente';
-    btnSig.onclick = function() { irPaso(pasoActual + 1); };
-  }
-  // FIX-013 — actualizar folio en header en cada cambio de paso
+function irPaso(n){
+  if(n<1||n>3)return;
+  if(n>pasoActual&&!validarPaso(pasoActual))return;
+  if(n===3){actualizarResumen();setTimeout(function(){initCanvas();if(sigDataURL)restaurarFirma();},150);}
+  if(pasoActual===3&&n!==3){sigDataURL=capturarFirma();}
+  document.querySelectorAll('.step-panel').forEach(function(p){p.classList.remove('activo');});
+  ['si-1','si-2','si-3'].forEach(function(id,idx){var el=document.getElementById(id);el.classList.remove('activo','completo');if(idx+1<n)el.classList.add('completo');if(idx+1===n)el.classList.add('activo');});
+  document.getElementById('panel-'+n).classList.add('activo');
+  pasoActual=n;
+  document.getElementById('btn-atras').disabled=(n===1);
+  var btnSig=document.getElementById('btn-siguiente');
+  if(n===3){btnSig.textContent='+ Nuevo';btnSig.className='btn-nav btn-siguiente dorado';btnSig.onclick=function(){nuevoFormulario();};}
+  else{btnSig.textContent='Siguiente →';btnSig.className='btn-nav btn-siguiente';btnSig.onclick=function(){irPaso(pasoActual+1);};}
   actualizarFolioHeader();
 }
-
-// ═══════════════════════════════════════════════════════
-// CANVAS FIRMA
-// ═══════════════════════════════════════════════════════
-function ajustarCanvas() {
-  var sc = document.getElementById('sig-canvas');
-  if (!sc) return;
-  var wrap = document.getElementById('sig-wrap');
-  var w = wrap.getBoundingClientRect().width;
-  if (w === 0) return;
-  sc.width  = w;
-  sc.height = 160;
-  var ctx = sc.getContext('2d');
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth = 2;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-}
-
-function initCanvas() {
-  var sc = document.getElementById('sig-canvas');
-  if (!sc) return;
-  ajustarCanvas();
-  if (sc._siginit) return;
-  sc._siginit = true;
-  var ctx = sc.getContext('2d');
-  var drawing = false;
-  function getPos(e) {
-    var r = sc.getBoundingClientRect();
-    var t = e.touches ? e.touches[0] : e;
-    return {
-      x: (t.clientX - r.left) * (sc.width / r.width),
-      y: (t.clientY - r.top)  * (sc.height / r.height)
-    };
-  }
-  sc.addEventListener('mousedown',  function(e) { drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); });
-  sc.addEventListener('mousemove',  function(e) { if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
-  sc.addEventListener('mouseup',    function() { drawing = false; });
-  sc.addEventListener('mouseleave', function() { drawing = false; });
-  sc.addEventListener('touchstart', function(e) { e.preventDefault(); drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); }, { passive: false });
-  sc.addEventListener('touchmove',  function(e) { e.preventDefault(); if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: false });
-  sc.addEventListener('touchend',   function() { drawing = false; });
-}
-
-window.addEventListener('resize', function() { setTimeout(ajustarCanvas, 200); });
-screen.orientation && screen.orientation.addEventListener('change', function() { setTimeout(ajustarCanvas, 350); });
-
-function restaurarFirma() {
-  var sc = document.getElementById('sig-canvas');
-  if (!sc || !sigDataURL) return;
-  ajustarCanvas();
-  var img = new Image();
-  img.onload = function() { sc.getContext('2d').drawImage(img, 0, 0, sc.width, sc.height); };
-  img.src = sigDataURL;
-}
-
-function limpiarFirma() {
-  var sc = document.getElementById('sig-canvas');
-  if (sc) sc.getContext('2d').clearRect(0, 0, sc.width, sc.height);
-  sigDataURL = '';
-}
-
-function capturarFirma() {
-  var sc = document.getElementById('sig-canvas');
-  if (!sc) return '';
-  var tmp = document.createElement('canvas');
-  tmp.width = sc.width; tmp.height = sc.height;
-  var ctx = tmp.getContext('2d');
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, tmp.width, tmp.height);
-  ctx.drawImage(sc, 0, 0);
-  return tmp.toDataURL('image/jpeg', 0.7);
-}
-
-// ═══════════════════════════════════════════════════════
-// RESUMEN
-// ═══════════════════════════════════════════════════════
-function actualizarResumen() {
-  var t     = calcTotals();
-  var anio  = document.getElementById('folio-anio').value;
-  var num   = document.getElementById('folio-num').value;
-  var fecha = document.getElementById('fecha').value;
-  var esc   = document.getElementById('escuadrilla').value;
-  var cdte  = document.getElementById('cdte').value;
-  var obs   = document.getElementById('observaciones').value;
-
-  document.getElementById('resumen-datos').innerHTML = [
-    ['Folio',        'ADQ-' + anio + '-' + num],
-    ['Fecha',        fmtFecha(fecha)],
-    ['Escuadrilla',  esc],
-    ['Cdte.',        cdte || '—'],
-    ['Observaciones',obs || '—']
-  ].map(function(r) {
-    return '<div class="resumen-fila"><span class="r-key">' + r[0] + '</span><span class="r-val">' + r[1] + '</span></div>';
-  }).join('');
-
-  document.getElementById('resumen-items').innerHTML =
-    '<div style="font-size:11px;font-weight:700;color:var(--azul2);margin:8px 0 4px">Ítems</div>' +
-    items.filter(function(it) { return it.descripcion; }).map(function(it, i) {
-      return '<div class="resumen-item-row"><span>' + (i+1) + '. ' + it.cant + ' ' + it.unidad + ' — ' + it.descripcion + '</span><span>$' + Math.round(calcSub(it)).toLocaleString('es-CL') + '</span></div>';
-    }).join('');
-
-  document.getElementById('r-sub').textContent   = fmtN(t.sub);
-  document.getElementById('r-iva').textContent   = fmtN(t.iva);
-  document.getElementById('r-total').textContent = fmtN(t.total);
-}
-
-// ═══════════════════════════════════════════════════════
-// HISTORIAL
-// ═══════════════════════════════════════════════════════
-function renderHistorial() {
-  var lista = document.getElementById('hist-lista');
-  if (solicitudes.length === 0) {
-    lista.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px;font-size:13px">No hay solicitudes guardadas aún.</div>';
-    return;
-  }
-  lista.innerHTML = solicitudes.map(function(h) {
-    return '<div class="hist-item-app" onclick="cargarHistorial(\'' + h.id + '\')">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center">' +
-        '<span class="hist-folio">' + h.id + '</span>' +
-        '<span style="color:#888;font-size:11px">' + fmtFecha(h.fecha) + '</span>' +
-      '</div>' +
-      '<div class="hist-det">' + h.escuadrilla + ' · ' + h.items.length + ' ítem(s) · Total: $' + Math.round(h.total).toLocaleString('es-CL') + '</div>' +
-      (h.observaciones ? '<div class="hist-obs">' + h.observaciones + '</div>' : '') +
-      '<button class="btn-eliminar-hist" onclick="event.stopPropagation();eliminarHistorial(\'' + h.id + '\')">Eliminar</button>' +
-    '</div>';
-  }).join('');
-}
-
-function guardarHistorial() {
-  if (!db) return alert('Base de datos no lista. Intenta de nuevo en un momento.');
-  var t     = calcTotals();
-  var anio  = document.getElementById('folio-anio').value  || new Date().getFullYear().toString();
-  var num   = document.getElementById('folio-num').value   || '0001';
-  var fecha = document.getElementById('fecha').value       || new Date().toISOString().slice(0,10);
-  var esc   = document.getElementById('escuadrilla').value || '';
-  var cdte  = document.getElementById('cdte').value        || '';
-  var obs   = document.getElementById('observaciones').value || '';
-  var fn    = document.getElementById('firma-nombre').value || '';
-  var fg    = document.getElementById('firma-grado').value  || '';
-  var fc    = document.getElementById('firma-cargo').value  || '';
-  var sigSnap = capturarFirma();
-  var itsSnap = items.map(function(it) { return Object.assign({}, it); });
-  var folioId = 'ADQ-' + anio + '-' + num;
-
-  var rec = {
-    id: folioId, folioAnio: anio, folioNum: num, fecha: fecha,
-    escuadrilla: esc, cdte: cdte, observaciones: obs,
-    firmaNombre: fn, firmaGrado: fg, firmaCargo: fc,
-    firmaImg: sigSnap,
-    items: itsSnap, total: t.total,
-    ts: Date.now()
-  };
-
-  var tx = db.transaction(STORE_SOL, 'readwrite');
-  tx.onerror = function(e) { alert('Error al guardar en base de datos: ' + e.target.error); };
-  tx.objectStore(STORE_SOL).put(rec);
-  tx.oncomplete = function() {
-    var idx = solicitudes.findIndex(function(s) { return s.id === folioId; });
-    if (idx >= 0) { solicitudes[idx] = rec; } else { solicitudes.unshift(rec); }
-    editIndex = null;
-    mostrarToast('✓ Guardado: ' + folioId);
-    setTimeout(function() {
-      sigDataURL = '';
-      var usado = parseInt(num) || 1;
-      setFolio(usado, function() {
-        getFolio(function(actual) {
-          var siguiente = folioStr(actual + 1);
-          document.getElementById('folio-num').value     = siguiente;
-          document.getElementById('folio-anio').value    = new Date().getFullYear();
-          document.getElementById('fecha').value         = new Date().toISOString().slice(0, 10);
-          document.getElementById('escuadrilla').value   = 'Bandada Instalaciones';
-          document.getElementById('cdte').value          = '';
-          document.getElementById('observaciones').value = '';
-          document.getElementById('firma-nombre').value  = '';
-          document.getElementById('firma-grado').value   = '';
-          document.getElementById('firma-cargo').value   = '';
-          items = [];
-          agregarItem();
-          actualizarFolioHeader();
-          irPaso(1);
-        });
-      });
-    }, 1000);
-  };
-}
-
-function cargarHistorial(id) {
-  var h = solicitudes.find(function(s) { return s.id === id; });
-  if (!h) return alert('Registro no encontrado.');
-  editIndex = id;
-  document.getElementById('folio-anio').value    = h.folioAnio;
-  document.getElementById('folio-num').value     = h.folioNum;
-  document.getElementById('fecha').value         = h.fecha;
-  document.getElementById('escuadrilla').value   = h.escuadrilla;
-  document.getElementById('cdte').value          = h.cdte || '';
-  document.getElementById('observaciones').value = h.observaciones || '';
-  document.getElementById('firma-nombre').value  = h.firmaNombre || '';
-  document.getElementById('firma-grado').value   = h.firmaGrado || '';
-  document.getElementById('firma-cargo').value   = h.firmaCargo || '';
-  sigDataURL = h.firmaImg || '';
-  items = h.items.map(function(it) { return Object.assign({}, it); });
-  renderItems();
-  volverDeHistorial();
-  actualizarFolioHeader();
-  irPaso(1);
-  mostrarToast('Solicitud ' + h.id + ' cargada');
-}
-
-function eliminarHistorial(id) {
-  if (!db) return alert('Base de datos no lista.');
-  if (!confirm('¿Eliminar la solicitud ' + id + '?')) return;
-  var tx = db.transaction(STORE_SOL, 'readwrite');
-  tx.onerror = function(e) { alert('Error al eliminar: ' + e.target.error); };
-  tx.objectStore(STORE_SOL).delete(id);
-  tx.oncomplete = function() {
-    solicitudes = solicitudes.filter(function(s) { return s.id !== id; });
-    renderHistorial();
-    mostrarToast('✓ Solicitud eliminada');
-  };
-}
-
-function verHistorial() {
-  document.querySelectorAll('.step-panel').forEach(function(p) { p.classList.remove('activo'); });
-  document.getElementById('panel-hist').classList.add('activo');
-  renderHistorial();
-  document.getElementById('nav-bar').classList.add('oculta');
-  var b = document.getElementById('btn-volver-hist');
-  if (!b) {
-    var nb = document.createElement('div');
-    nb.style.cssText = 'padding:10px 16px;background:linear-gradient(90deg,#071429,#0d2550);border-top:1px solid rgba(200,168,75,0.3)';
-    nb.innerHTML = '<button id="btn-volver-hist" class="btn-nav btn-atras" style="width:100%" onclick="volverDeHistorial()">← Volver al formulario</button>';
-    document.querySelector('.app').appendChild(nb);
-  }
-}
-
-function volverDeHistorial() {
-  var extra = document.getElementById('btn-volver-hist');
-  if (extra && extra.parentNode) extra.parentNode.remove();
-  document.getElementById('nav-bar').classList.remove('oculta');
-  irPaso(pasoActual);
-}
-
-function nuevoFormulario() {
-  editIndex = null;
-  sigDataURL = '';
-  var sc = document.getElementById('sig-canvas');
-  if (sc) sc.getContext('2d').clearRect(0, 0, sc.width, sc.height);
-  getFolio(function(actual) {
-    document.getElementById('folio-num').value     = folioStr(actual + 1);
-    document.getElementById('folio-anio').value    = new Date().getFullYear();
-    document.getElementById('fecha').value         = new Date().toISOString().slice(0, 10);
-    document.getElementById('escuadrilla').value   = 'Bandada Instalaciones';
-    document.getElementById('cdte').value          = '';
-    document.getElementById('observaciones').value = '';
-    document.getElementById('firma-nombre').value  = '';
-    document.getElementById('firma-grado').value   = '';
-    document.getElementById('firma-cargo').value   = '';
-    items = [];
-    agregarItem();
-    actualizarFolioHeader();
-    irPaso(1);
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-// IMPRIMIR PDF — FIX-005: 800ms para S25
-// ═══════════════════════════════════════════════════════
-function imprimirPDF() {
-  var t    = calcTotals();
-  var anio = document.getElementById('folio-anio').value;
-  var num  = document.getElementById('folio-num').value;
-  document.getElementById('p-folio').textContent        = 'ADQ-' + anio + '-' + num;
-  document.getElementById('p-fecha').textContent        = fmtFecha(document.getElementById('fecha').value);
-  document.getElementById('p-escuadrilla').textContent  = document.getElementById('escuadrilla').value;
-  document.getElementById('p-cdte').textContent         = document.getElementById('cdte').value || '—';
-  document.getElementById('p-obs').textContent          = document.getElementById('observaciones').value || '';
-  document.getElementById('p-sub').textContent          = Math.round(t.sub).toLocaleString('es-CL');
-  document.getElementById('p-iva').textContent          = Math.round(t.iva).toLocaleString('es-CL');
-  document.getElementById('p-total').textContent        = Math.round(t.total).toLocaleString('es-CL');
-  document.getElementById('p-firma-nombre').textContent = document.getElementById('firma-nombre').value.toUpperCase();
-  document.getElementById('p-firma-grado').textContent  = document.getElementById('firma-grado').value;
-  document.getElementById('p-firma-cargo').textContent  = document.getElementById('firma-cargo').value;
-
-  var sigImg = document.getElementById('p-sig-img');
-  var url = capturarFirma();
-  if (url) { sigImg.src = url; sigImg.style.display = 'block'; }
-  else { sigImg.style.display = 'none'; }
-
-  var tbody = document.getElementById('p-items');
-  tbody.innerHTML = '';
-  items.filter(function(it) { return it.descripcion; }).forEach(function(it) {
-    var tr = document.createElement('tr');
-    var sub = calcSub(it);
-    [it.cant, it.unidad, it.descripcion,
-     '$ ' + Math.round(it.pUnitario).toLocaleString('es-CL'),
-     '$ ' + Math.round(sub).toLocaleString('es-CL')
-    ].forEach(function(txt, ci) {
-      var td = document.createElement('td');
-      td.style.cssText = 'border:1px solid #ccc;padding:4px 8px;font-size:12px' + (ci > 2 ? ';text-align:right' : '');
-      td.textContent = txt;
-      tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-  });
-
-  setTimeout(function() { window.print(); }, 800);
-}
-
-// ═══════════════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════════════
-function mostrarToast(msg) {
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, 2500);
-}
-
-// ═══════════════════════════════════════════════════════
-// FIX-011 — MANIFEST INLINE (sin manifest.json externo)
-// ═══════════════════════════════════════════════════════
-(function() {
-  var m = {
-    name: 'Solicitud Adquisición — AGA',
-    short_name: 'Solicitud AGA',
-    description: 'Solicitud de adquisición de materiales — Academia de Guerra Aérea FACH',
-    start_url: '/scorpion-tail/solicitud.html',
-    display: 'standalone',
-    background_color: '#0d1f3c',
-    theme_color: '#0d1f3c',
-    orientation: 'portrait-primary',
-    icons: []
-  };
-  var b = new Blob([JSON.stringify(m)], { type: 'application/json' });
-  document.getElementById('sol-manifest').href = URL.createObjectURL(b);
-})();
-
-// ═══════════════════════════════════════════════════════
-// FIX-010 — SERVICE WORKER INLINE (sin sw.js externo)
-// ═══════════════════════════════════════════════════════
-if ('serviceWorker' in navigator) {
-  var swCode = [
-    "const CACHE='aga-solicitud-v1';",
-    "self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add('.')).then(()=>self.skipWaiting()));});",
-    "self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});",
-    "self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{var rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));return res;}).catch(()=>caches.match(e.request))));});"
-  ].join('\n');
-  var swBlob = new Blob([swCode], { type: 'application/javascript' });
-  navigator.serviceWorker.register(URL.createObjectURL(swBlob), { scope: './' })
-    .catch(function(e) { console.warn('[SW Solicitud]', e); });
-}
+function ajustarCanvas(){var sc=document.getElementById('sig-canvas');if(!sc)return;var wrap=document.getElementById('sig-wrap');var w=wrap.getBoundingClientRect().width;if(w===0)return;sc.width=w;sc.height=160;var ctx=sc.getContext('2d');ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';}
+function initCanvas(){var sc=document.getElementById('sig-canvas');if(!sc)return;ajustarCanvas();if(sc._siginit)return;sc._siginit=true;var ctx=sc.getContext('2d');var drawing=false;function getPos(e){var r=sc.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*(sc.width/r.width),y:(t.clientY-r.top)*(sc.height/r.height)};}
+sc.addEventListener('mousedown',function(e){drawing=true;ctx.beginPath();var p=getPos(e);ctx.moveTo(p.x,p.y);});sc.addEventListener('mousemove',function(e){if(!drawing)return;var p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();});sc.addEventListener('mouseup',function(){drawing=false;});sc.addEventListener('mouseleave',function(){drawing=false;});
+sc.addEventListener('touchstart',function(e){e.preventDefault();drawing=true;ctx.beginPath();var p=getPos(e);ctx.moveTo(p.x,p.y);},{passive:false});sc.addEventListener('touchmove',function(e){e.preventDefault();if(!drawing)return;var p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();},{passive:false});sc.addEventListener('touchend',function(){drawing=false;});}
+window.addEventListener('resize',function(){setTimeout(ajustarCanvas,200);});
+screen.orientation&&screen.orientation.addEventListener('change',function(){setTimeout(ajustarCanvas,350);});
+function restaurarFirma(){var sc=document.getElementById('sig-canvas');if(!sc||!sigDataURL)return;ajustarCanvas();var img=new Image();img.onload=function(){sc.getContext('2d').drawImage(img,0,0,sc.width,sc.height);};img.src=sigDataURL;}
+function limpiarFirma(){var sc=document.getElementById('sig-canvas');if(sc)sc.getContext('2d').clearRect(0,0,sc.width,sc.height);sigDataURL='';}
+function capturarFirma(){var sc=document.getElementById('sig-canvas');if(!sc)return'';var tmp=document.createElement('canvas');tmp.width=sc.width;tmp.height=sc.height;var ctx=tmp.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,tmp.width,tmp.height);ctx.drawImage(sc,0,0);return tmp.toDataURL('image/jpeg',0.7);}
+function actualizarResumen(){var t=calcTotals();var anio=document.getElementById('folio-anio').value;var num=document.getElementById('folio-num').value;
+document.getElementById('resumen-datos').innerHTML=[['Folio','ADQ-'+anio+'-'+num],['Fecha',fmtFecha(document.getElementById('fecha').value)],['Escuadrilla',document.getElementById('escuadrilla').value],['Cdte.',document.getElementById('cdte').value||'—'],['Observaciones',document.getElementById('observaciones').value||'—']].map(function(r){return'<div class="resumen-fila"><span class="r-key">'+r[0]+'</span><span class="r-val">'+r[1]+'</span></div>';}).join('');
+document.getElementById('resumen-items').innerHTML='<div style="font-size:11px;font-weight:700;color:var(--azul2);margin:8px 0 4px">Ítems</div>'+items.filter(function(it){return it.descripcion;}).map(function(it,i){return'<div class="resumen-item-row"><span>'+(i+1)+'. '+it.cant+' '+it.unidad+' — '+it.descripcion+'</span><span>$'+Math.round(calcSub(it)).toLocaleString('es-CL')+'</span></div>';}).join('');
+document.getElementById('r-sub').textContent=fmtN(t.sub);document.getElementById('r-iva').textContent=fmtN(t.iva);document.getElementById('r-total').textContent=fmtN(t.total);}
+function renderHistorial(){var lista=document.getElementById('hist-lista');if(solicitudes.length===0){lista.innerHTML='<div style="text-align:center;color:#aaa;padding:20px;font-size:13px">No hay solicitudes guardadas aún.</div>';return;}lista.innerHTML=solicitudes.map(function(h){return'<div class="hist-item-app" onclick="cargarHistorial(\''+h.id+'\')"><div style="display:flex;justify-content:space-between;align-items:center"><span class="hist-folio">'+h.id+'</span><span style="color:#888;font-size:11px">'+fmtFecha(h.fecha)+'</span></div><div class="hist-det">'+h.escuadrilla+' · '+h.items.length+' ítem(s) · Total: $'+Math.round(h.total).toLocaleString('es-CL')+'</div>'+(h.observaciones?'<div class="hist-obs">'+h.observaciones+'</div>':'')+'<button class="btn-eliminar-hist" onclick="event.stopPropagation();eliminarHistorial(\''+h.id+'\')">Eliminar</button></div>';}).join('');}
+function guardarHistorial(){if(!db)return alert('Base de datos no lista.');var t=calcTotals();var anio=document.getElementById('folio-anio').value||new Date().getFullYear().toString();var num=document.getElementById('folio-num').value||'0001';var folioId='ADQ-'+anio+'-'+num;var rec={id:folioId,folioAnio:anio,folioNum:num,fecha:document.getElementById('fecha').value||new Date().toISOString().slice(0,10),escuadrilla:document.getElementById('escuadrilla').value||'',cdte:document.getElementById('cdte').value||'',observaciones:document.getElementById('observaciones').value||'',firmaNombre:document.getElementById('firma-nombre').value||'',firmaGrado:document.getElementById('firma-grado').value||'',firmaCargo:document.getElementById('firma-cargo').value||'',firmaImg:capturarFirma(),items:items.map(function(it){return Object.assign({},it);}),total:t.total,ts:Date.now()};
+var tx=db.transaction(STORE_SOL,'readwrite');tx.onerror=function(e){alert('Error al guardar: '+e.target.error);};tx.objectStore(STORE_SOL).put(rec);tx.oncomplete=function(){var idx=solicitudes.findIndex(function(s){return s.id===folioId;});if(idx>=0){solicitudes[idx]=rec;}else{solicitudes.unshift(rec);}editIndex=null;mostrarToast('✓ Guardado: '+folioId);setTimeout(function(){sigDataURL='';setFolio(parseInt(num)||1,function(){getFolio(function(actual){document.getElementById('folio-num').value=folioStr(actual+1);document.getElementById('folio-anio').value=new Date().getFullYear();document.getElementById('fecha').value=new Date().toISOString().slice(0,10);document.getElementById('escuadrilla').value='Bandada Instalaciones';document.getElementById('cdte').value='';document.getElementById('observaciones').value='';document.getElementById('firma-nombre').value='';document.getElementById('firma-grado').value='';document.getElementById('firma-cargo').value='';items=[];agregarItem();actualizarFolioHeader();irPaso(1);});});},1000);};}
+function cargarHistorial(id){var h=solicitudes.find(function(s){return s.id===id;});if(!h)return alert('Registro no encontrado.');editIndex=id;document.getElementById('folio-anio').value=h.folioAnio;document.getElementById('folio-num').value=h.folioNum;document.getElementById('fecha').value=h.fecha;document.getElementById('escuadrilla').value=h.escuadrilla;document.getElementById('cdte').value=h.cdte||'';document.getElementById('observaciones').value=h.observaciones||'';document.getElementById('firma-nombre').value=h.firmaNombre||'';document.getElementById('firma-grado').value=h.firmaGrado||'';document.getElementById('firma-cargo').value=h.firmaCargo||'';sigDataURL=h.firmaImg||'';items=h.items.map(function(it){return Object.assign({},it);});renderItems();volverDeHistorial();actualizarFolioHeader();irPaso(1);mostrarToast('Solicitud '+h.id+' cargada');}
+function eliminarHistorial(id){if(!db)return alert('Base de datos no lista.');if(!confirm('¿Eliminar la solicitud '+id+'?'))return;var tx=db.transaction(STORE_SOL,'readwrite');tx.onerror=function(e){alert('Error al eliminar: '+e.target.error);};tx.objectStore(STORE_SOL).delete(id);tx.oncomplete=function(){solicitudes=solicitudes.filter(function(s){return s.id!==id;});renderHistorial();mostrarToast('✓ Solicitud eliminada');};}
+function verHistorial(){document.querySelectorAll('.step-panel').forEach(function(p){p.classList.remove('activo');});document.getElementById('panel-hist').classList.add('activo');renderHistorial();document.getElementById('nav-bar').classList.add('oculta');var b=document.getElementById('btn-volver-hist');if(!b){var nb=document.createElement('div');nb.style.cssText='padding:10px 16px;background:linear-gradient(90deg,#071429,#0d2550);border-top:1px solid rgba(200,168,75,0.3)';nb.innerHTML='<button id="btn-volver-hist" class="btn-nav btn-atras" style="width:100%" onclick="volverDeHistorial()">← Volver al formulario</button>';document.querySelector('.app').appendChild(nb);}}
+function volverDeHistorial(){var extra=document.getElementById('btn-volver-hist');if(extra&&extra.parentNode)extra.parentNode.remove();document.getElementById('nav-bar').classList.remove('oculta');irPaso(pasoActual);}
+function nuevoFormulario(){editIndex=null;sigDataURL='';var sc=document.getElementById('sig-canvas');if(sc)sc.getContext('2d').clearRect(0,0,sc.width,sc.height);getFolio(function(actual){document.getElementById('folio-num').value=folioStr(actual+1);document.getElementById('folio-anio').value=new Date().getFullYear();document.getElementById('fecha').value=new Date().toISOString().slice(0,10);document.getElementById('escuadrilla').value='Bandada Instalaciones';document.getElementById('cdte').value='';document.getElementById('observaciones').value='';document.getElementById('firma-nombre').value='';document.getElementById('firma-grado').value='';document.getElementById('firma-cargo').value='';items=[];agregarItem();actualizarFolioHeader();irPaso(1);});}
+function imprimirPDF(){var t=calcTotals();var anio=document.getElementById('folio-anio').value;var num=document.getElementById('folio-num').value;document.getElementById('p-folio').textContent='ADQ-'+anio+'-'+num;document.getElementById('p-fecha').textContent=fmtFecha(document.getElementById('fecha').value);document.getElementById('p-escuadrilla').textContent=document.getElementById('escuadrilla').value;document.getElementById('p-cdte').textContent=document.getElementById('cdte').value||'—';document.getElementById('p-obs').textContent=document.getElementById('observaciones').value||'';document.getElementById('p-sub').textContent=Math.round(t.sub).toLocaleString('es-CL');document.getElementById('p-iva').textContent=Math.round(t.iva).toLocaleString('es-CL');document.getElementById('p-total').textContent=Math.round(t.total).toLocaleString('es-CL');document.getElementById('p-firma-nombre').textContent=document.getElementById('firma-nombre').value.toUpperCase();document.getElementById('p-firma-grado').textContent=document.getElementById('firma-grado').value;document.getElementById('p-firma-cargo').textContent=document.getElementById('firma-cargo').value;var sigImg=document.getElementById('p-sig-img');var url=capturarFirma();if(url){sigImg.src=url;sigImg.style.display='block';}else{sigImg.style.display='none';}var tbody=document.getElementById('p-items');tbody.innerHTML='';items.filter(function(it){return it.descripcion;}).forEach(function(it){var tr=document.createElement('tr');var sub=calcSub(it);[it.cant,it.unidad,it.descripcion,'$ '+Math.round(it.pUnitario).toLocaleString('es-CL'),'$ '+Math.round(sub).toLocaleString('es-CL')].forEach(function(txt,ci){var td=document.createElement('td');td.style.cssText='border:1px solid #ccc;padding:4px 8px;font-size:12px'+(ci>2?';text-align:right':'');td.textContent=txt;tr.appendChild(td);});tbody.appendChild(tr);});setTimeout(function(){window.print();},800);}
+function mostrarToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+(function(){var m={name:'Solicitud Adquisición — AGA',short_name:'Solicitud AGA',start_url:'/scorpion-tail/solicitud.html',display:'standalone',background_color:'#0d1f3c',theme_color:'#0d1f3c',orientation:'portrait-primary',icons:[]};var b=new Blob([JSON.stringify(m)],{type:'application/json'});document.getElementById('sol-manifest').href=URL.createObjectURL(b);})();
+if('serviceWorker'in navigator){var swCode=["const CACHE='aga-solicitud-v2';","self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add('.')).then(()=>self.skipWaiting()));});","self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});","self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{var rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));return res;}).catch(()=>caches.match(e.request))));});"].join('\n');var swBlob=new Blob([swCode],{type:'application/javascript'});navigator.serviceWorker.register(URL.createObjectURL(swBlob),{scope:'./'}).catch(function(e){console.warn('[SW]',e);});}
 </script>
 </body>
 </html>
