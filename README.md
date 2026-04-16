@@ -1,6 +1,6 @@
 # 🦂 PROYECTO SCORPION TAIL — README TÉCNICO COMPLETO
 **Academia de Guerra Aérea · Fuerza Aérea de Chile**
-`v2.0` · Desarrollado por Toti's® (Víctor Manuel Garcés Borje) · Systems Technician AGA
+`v2.1` · Desarrollado por Toti's® (Víctor Manuel Garcés Borje) · Systems Technician AGA
 
 ---
 
@@ -10,7 +10,7 @@
 3. [Estructura de Archivos](#estructura-de-archivos)
 4. [Flujo de Desarrollo Obligatorio](#flujo-de-desarrollo-obligatorio)
 5. [Módulos Activos](#módulos-activos)
-6. [Sistema de Login (SHA-256)](#sistema-de-login-sha-256)
+6. [Sistema de Login SHA-256](#sistema-de-login-sha-256)
 7. [10 FIXES Obligatorios](#10-fixes-obligatorios)
 8. [Convenciones de Código](#convenciones-de-código)
 9. [TODO / Roadmap](#todo--roadmap)
@@ -20,13 +20,15 @@
 
 ## Descripción General
 
-**Scorpion Tail** es el sistema de gestión institucional de la Academia de Guerra Aérea (AGA), FACH. Es una PWA (Progressive Web App) de arquitectura **single-file** que centraliza módulos operativos del área de Sistemas: adquisiciones, vales de entrega, mantención, bitácora, inventario, presupuesto, control de personal, informes y más.
+**Scorpion Tail** es el sistema de gestión institucional de la Academia de Guerra Aérea (AGA), FACH. Es una suite de PWA (Progressive Web Apps) de arquitectura **single-file** que centraliza módulos operativos del área de Sistemas: custodias de materiales, adquisiciones, vales de entrega, equipos de transferencia de calor, mantención, bitácora, inventario, presupuesto, control de personal e informes.
 
 El sistema está protegido por **dos capas de seguridad**:
 - **Capa 1 (Cloudflare Zero Trust Access)**: control perimetral vía email PIN en `totis.cl`
 - **Capa 2 (SHA-256 Login)**: autenticación interna en `index.html` con hash de contraseña via `crypto.subtle`
 
 Acceso público (autenticado): `https://totis.cl` → redirige a `https://vgarcesb-cpu.github.io/scorpion-tail/`
+
+> **v2.1**: Todos los módulos PWA principales están consolidados en este único repositorio. Los repos externos anteriores (`solicitud-fach`, `vale-de-entrega`, `Poseidon-s-Seal`, `NLS-2003-004`) han sido migrados como archivos `.html` independientes en la raíz del monorepo.
 
 ---
 
@@ -47,29 +49,34 @@ Acceso público (autenticado): `https://totis.cl` → redirige a `https://vgarce
 │              GITHUB PAGES                             │
 │   vgarcesb-cpu.github.io/scorpion-tail/               │
 │   ┌─────────────────────────────────────────────┐    │
-│   │  index.html  (Login + App Shell + Router)    │    │
-│   │  manifest.json  sw.js  icon-192.png          │    │
-│   │  mantencion.html  bitacora.html              │    │
-│   │  inventario.html  presupuesto.html           │    │
-│   │  personal.html    informes.html              │    │
+│   │  index.html        ← Login + Root redirect  │    │
+│   │  portal/           ← Hub central (dashboard) │    │
+│   │                                              │    │
+│   │  ── MÓDULOS PWA ACTIVOS ──────────────────── │    │
+│   │  poseidon.html     ← Custodias / Materiales  │    │
+│   │  solicitud.html    ← Solicitud Adquisición   │    │
+│   │  vale.html         ← Vale de Entrega         │    │
+│   │  nls.html          ← NLS-2003-004 (Calor)    │    │
+│   │                                              │    │
+│   │  ── MÓDULOS LEGACY (en repo) ─────────────── │    │
+│   │  mantencion.html   bitacora.html             │    │
+│   │  inventario.html   presupuesto.html          │    │
+│   │  personal.html     informes.html             │    │
 │   │  informe.html                                │    │
 │   └─────────────────────────────────────────────┘    │
 └──────────────────────────────────────────────────────┘
-
-MÓDULOS EXTERNOS (repos independientes):
-  vgarcesb-cpu.github.io/solicitud-fach/    ← Solicitud Adquisición
-  vgarcesb-cpu.github.io/vale-de-entrega/   ← Vale de Entrega
-  vgarcesb-cpu.github.io/Poseidon-s-Seal/   ← Sello Poseidón (custodias)
 ```
+
+> ⚠️ **Nota de migración**: Los repos independientes `solicitud-fach`, `vale-de-entrega`, `Poseidon-s-Seal` y `NLS-2003-004` siguen existiendo en GitHub pero están **desactualizados**. La versión canónica de cada módulo es la que reside en este repo.
 
 **Stack tecnológico:**
 - HTML5 + CSS3 + Vanilla JS (sin frameworks)
-- IndexedDB para persistencia local
-- Service Worker para offline (cache-first)
+- IndexedDB para persistencia local (guards FIX-001/002/003 obligatorios)
+- Service Worker inline (Blob URL, sin `sw.js` externo)
+- Manifest PWA inline (Blob URL, sin `manifest.json` externo)
 - Web Crypto API (`crypto.subtle`) para hashing SHA-256
 - `sessionStorage` para control de sesión en `index.html`
-- `localStorage` para estadísticas de módulos externos
-- CDN: QRCode.js (cdnjs), Html5-QRCode (unpkg)
+- CDN: QRCode.js (cdnjs 1.0.0), Html5-QRCode (unpkg 2.3.8)
 
 ---
 
@@ -77,19 +84,42 @@ MÓDULOS EXTERNOS (repos independientes):
 
 ```
 scorpion-tail/
-├── index.html          ← HUB principal: login + dashboard + router de módulos
-├── manifest.json       ← PWA manifest (nombre, iconos, colores, display)
-├── sw.js               ← Service Worker (cache-first, offline support)
-├── icon-192.png        ← Ícono PWA 192x192
-├── icon-512.png        ← Ícono PWA 512x512 (requerido para instalación)
-├── mantencion.html     ← Módulo Check List Mantención
-├── bitacora.html       ← Módulo Bitácora de Novedades
-├── inventario.html     ← Módulo Inventario Repuestos
-├── presupuesto.html    ← Módulo Saldo Presupuesto (estilo DIPRES)
-├── personal.html       ← Módulo Control Personal (salida/entrada)
-├── informes.html       ← Módulo Informes y Reportes (resumen ejecutivo)
-├── informe.html        ← Módulo Informe Técnico (fallas y accidentes)
-└── README.md           ← Este archivo
+│
+├── index.html            ← Login SHA-256 + redirect al portal
+├── CNAME                 ← totis.cl → GitHub Pages
+├── README.md             ← Este archivo
+│
+├── portal/
+│   └── index.html        ← Hub central: dashboard, cards de módulos, stats
+│
+├── ── MÓDULOS PWA ACTIVOS (single-file, SW+manifest inline) ──────────────
+│
+├── poseidon.html         ← Sello Poseidón v2.0.1: custodias de materiales
+│   │                        IDB: PoseidonDB v2 · 4 estados · firmas canvas
+│   │                        QR scanner · WhatsApp · JSON export/import · MyCloud
+│
+├── solicitud.html        ← Solicitud Adquisición Supervisor
+│   │                        IDB: SolicitudAGA v1 · Folios ADQ-{AÑO}-{NNNN}
+│   │                        Canvas firmas · PDF print · 4 pasos wizard
+│
+├── vale.html             ← Vale de Entrega
+│   │                        IDB: ValeEntregaDB v1 · QR trazabilidad
+│   │                        3 firmas · PDF institucional
+│
+├── nls.html              ← NLS-2003-004: Equipos Transferencia de Calor
+│   │                        IDB: NLS2003004v2 · 6 tipos de equipo (Anexos A-F)
+│   │                        Catastro · Hojas de vida · Bitácoras · Gantt
+│   │                        Informes Cmd Logístico · Alertas SESMA/Montreal
+│
+├── ── MÓDULOS LEGACY (en repo, sin refactoring PWA completo) ─────────────
+│
+├── mantencion.html       ← Check List Mantención
+├── bitacora.html         ← Bitácora de Novedades
+├── inventario.html       ← Inventario Repuestos
+├── presupuesto.html      ← Saldo Presupuesto (estilo DIPRES)
+├── personal.html         ← Control Personal (salida/entrada)
+├── informes.html         ← Informes y Reportes (resumen ejecutivo)
+└── informe.html          ← Informe Técnico (fallas y accidentes)
 ```
 
 ---
@@ -100,18 +130,18 @@ scorpion-tail/
 
 ```
 ETAPA 1 — DESARROLLO (Mac)
-  ├─ Editor: VS Code / cualquier editor
+  ├─ Editor: VS Code en español
   ├─ Prueba: Chrome DevTools + Safari
   ├─ Git: commit + push a main
-  └─ Comando: git add . && git commit -m "feat: ..." && git push
+  └─ Preferencia: GitHub browser interface sobre Terminal
 
-         ↓ GitHub Actions auto-deploy (~30s)
+         ↓ GitHub Pages auto-deploy (~30s)
 
 ETAPA 2 — VALIDACIÓN PÚBLICA (GitHub Pages)
   ├─ URL: https://vgarcesb-cpu.github.io/scorpion-tail/
   ├─ Verificar: consola sin errores, flujos completos
   ├─ Verificar: PDF, firmas canvas, IndexedDB
-  └─ Verificar: PWA instalable (manifest + SW activo)
+  └─ Verificar: PWA instalable (manifest + SW activos)
 
          ↓ Si ETAPA 2 OK
 
@@ -130,78 +160,96 @@ ETAPA 3 — PRUEBA FINAL EN TERRENO (Samsung S25)
 
 | Dispositivo | Rol | URL de prueba |
 |---|---|---|
-| Mac (Chrome/Safari) | Desarrollo | localhost / GitHub Pages |
+| Mac (Chrome/Safari + Git) | Desarrollo principal | GitHub Pages |
 | GitHub Pages | Validación pública | vgarcesb-cpu.github.io/scorpion-tail/ |
 | Samsung S25 | Juez definitivo en terreno | totis.cl |
-| Windows PC | Consulta / impresión | totis.cl |
-| WD MyCloud | Sync automático red local | API REST WiFi local |
+| Windows PC | Consulta / impresión en oficina | totis.cl |
+| WD MyCloud NAS | Sync automático red local WiFi | API REST local |
 
 ---
 
 ## Módulos Activos
 
-### ✅ Módulos en producción (externos)
+### ✅ Módulos PWA — producción en monorepo
 
-| Módulo | Repo | URL | Estado |
+| Módulo | Archivo | IDB Store | Estado | Versión |
+|---|---|---|---|---|
+| Sello Poseidón | `poseidon.html` | PoseidonDB v2 | ✅ Activo | v2.0.1 |
+| Solicitud Adquisición | `solicitud.html` | SolicitudAGA v1 | ✅ Activo | v1.x |
+| Vale de Entrega | `vale.html` | ValeEntregaDB v1 | ✅ Activo | v1.x |
+| NLS-2003-004 · Calor | `nls.html` | NLS2003004v2 | ✅ Activo | v2.0 |
+
+### 📦 Módulos legacy en repo (sin migración PWA completa)
+
+| Módulo | Archivo | Función |
+|---|---|---|
+| Check List Mantención | `mantencion.html` | Preventivo y correctivo |
+| Bitácora | `bitacora.html` | Registro de novedades |
+| Inventario Repuestos | `inventario.html` | Control de stock |
+| Saldo Presupuesto | `presupuesto.html` | Control tipo DIPRES |
+| Control Personal | `personal.html` | Salida/entrada unidad |
+| Informes y Reportes | `informes.html` | Resumen ejecutivo |
+| Informe Técnico | `informe.html` | Fallas y accidentes |
+
+### 📊 Portal Hub (`portal/index.html`)
+
+Dashboard central con cards de módulos, filtros por estado y estadísticas en tiempo real. Estados de módulos:
+- `activo` — PWA completa, en producción
+- `nuevo` — en desarrollo / pendiente de refactoring
+- `pronto` — planificado
+- `inactivo` — deshabilitado temporalmente
+
+### 🔥 NLS-2003-004 — Detalle técnico
+
+Módulo normativo para gestión de equipos de transferencia de calor según NLS-2003-004 Rev.2.0 (17.Sept.2008).
+
+**6 tipos de equipo con campos por Anexo:**
+
+| Tipo | Anexo Unidad | Anexo CL | Umbral Responsabilidad |
 |---|---|---|---|
-| Solicitud de Adquisición | `vgarcesb-cpu/solicitud-fach` | /solicitud-fach/ | ✅ Activo |
-| Vale de Entrega | `vgarcesb-cpu/vale-de-entrega` | /vale-de-entrega/ | ✅ Activo |
-| Sello Poseidón | `vgarcesb-cpu/Poseidon-s-Seal` | /Poseidon-s-Seal/ | ✅ Activo v2.0.0 |
+| Aire Acondicionado | A | G | ≥ 40.000 BTU/HRS → Cmd Logístico |
+| Caldera | B | H | ≥ 10.083 Kcal/H → Cmd Logístico |
+| Cámara Frigorífica | C | I | Siempre Cmd Logístico |
+| Refrigerador Industrial | D | J | Siempre Cmd Logístico |
+| Ventilador Alto Caudal | E | K | Siempre Cmd Logístico |
+| Incinerador | F | L | Siempre Cmd Logístico |
 
-### ✅ Módulos en repo Scorpion Tail
+**Alertas legales automáticas:**
+- DS Nº 48: Calderas/Incineradores sin inscripción SESMA
+- Protocolo de Montreal: Gas refrigerante R-22 prohibido
 
-| Módulo | Archivo | Color | Función |
-|---|---|---|---|
-| Check List Mantención | `mantencion.html` | `#2ecc71` Verde | Preventivo y correctivo |
-| Bitácora | `bitacora.html` | `#e67e22` Naranja | Registro de novedades |
-| Inventario Repuestos | `inventario.html` | `#9b59b6` Púrpura | Control de stock |
-| Saldo Presupuesto | `presupuesto.html` | `#1abc9c` Turquesa | Control tipo DIPRES |
-| Control Personal | `personal.html` | `#e74c3c` Rojo | Salida/entrada unidad |
-| Informes y Reportes | `informes.html` | `#f39c12` Amarillo | Resumen ejecutivo |
-| Informe Técnico | `informe.html` | `#c0392b` Rojo oscuro | Fallas y accidentes |
-
-### 📊 Dashboard (index.html)
-
-El `index.html` muestra estadísticas en tiempo real:
-- **Adquisiciones**: cuenta de `localStorage["adquisicion_historial"]`
-- **Vales**: cuenta de `localStorage["vale_historial"]`
-- **Módulos**: contador estático (9 módulos totales declarados)
+**Obligaciones normativas gestionadas:**
+- Catastro inicial (30 días desde recepción norma)
+- Informe anual noviembre al Cmd Logístico (Anexos G–L)
+- Alta inmediata de equipo nuevo (Anexo A–F)
+- Protocolo de Mantención de Depósito (autorización previa CL)
 
 ---
 
-## Sistema de Login (SHA-256)
+## Sistema de Login SHA-256
 
 ```javascript
 // CREDENCIALES EN PRODUCCIÓN
-var U = "victor";                      // Usuario en texto plano
-var H = "5c10b00d...";                 // Hash SHA-256 de la contraseña
+var U = "victor";          // Usuario en texto plano
+var H = "5c10b00d...";     // Hash SHA-256 de la contraseña
 
 // FLUJO DE VERIFICACIÓN
 async function verificarLogin() {
-  // 1. Hashear la contraseña ingresada con crypto.subtle
   var buf = await crypto.subtle.digest("SHA-256",
               new TextEncoder().encode(passwordIngresada));
   var hex = Array.from(new Uint8Array(buf))
               .map(b => b.toString(16).padStart(2,"0")).join("");
-
-  // 2. Comparar: usuario === U && hash === H
   if (u === U && hex === H) {
-    sessionStorage.setItem("st_auth", "ok");   // Sesión activa
+    sessionStorage.setItem("st_auth", "ok");
     mostrarApp();
   } else {
     mostrarError();
   }
 }
 
-// PERSISTENCIA DE SESIÓN (recarga de página)
+// PERSISTENCIA DE SESIÓN
 if (sessionStorage.getItem("st_auth") === "ok") mostrarApp();
 ```
-
-**Notas de seguridad:**
-- La contraseña NUNCA viaja ni se almacena en texto plano
-- `sessionStorage` se borra al cerrar el navegador/pestaña
-- La Capa 1 (Cloudflare Zero Trust) agrega autenticación perimetral adicional
-- Para cambiar contraseña: generar nuevo SHA-256 y actualizar `var H`
 
 **Generar nuevo hash SHA-256 (consola Chrome):**
 ```javascript
@@ -210,24 +258,20 @@ crypto.subtle.digest("SHA-256", new TextEncoder().encode("nueva_clave"))
     .map(x => x.toString(16).padStart(2,"0")).join("")));
 ```
 
+**Token GitHub Personal Access Token:**
+- Nombre: `Vale_Entrega Mac`
+- Scope: `repo`
+- Expiración: 90 días desde creación
+- Renovar en: GitHub → Profile → Settings → Developer settings → Personal access tokens → Tokens (classic)
+
 ---
 
 ## 10 FIXES Obligatorios
 
 Estos fixes deben aplicarse en **TODOS** los módulos PWA del sistema. Son el resultado de bugs recurrentes detectados durante pruebas en Samsung S25.
 
----
-
 ### FIX-001 — `onerror` en IndexedDB
-
-**Problema:** Sin manejador de error, fallos de IDB quedan silenciosos y la app se congela.
-
 ```javascript
-// ❌ MAL — sin onerror
-var request = indexedDB.open("miDB", 1);
-request.onsuccess = function(e) { db = e.target.result; };
-
-// ✅ BIEN — con onerror obligatorio
 var request = indexedDB.open("miDB", 1);
 request.onerror = function(e) {
   alert("❌ Error al abrir la base de datos: " + e.target.errorCode);
@@ -235,237 +279,96 @@ request.onerror = function(e) {
 request.onsuccess = function(e) { db = e.target.result; };
 ```
 
----
-
 ### FIX-002 — Guard `!db` antes de toda operación IDB
-
-**Problema:** Operaciones sobre `db` cuando aún no está inicializada causan `TypeError`.
-
 ```javascript
-// ❌ MAL — sin guard
 function guardarRegistro(datos) {
-  var tx = db.transaction(["registros"], "readwrite");
-}
-
-// ✅ BIEN — con guard obligatorio
-function guardarRegistro(datos) {
-  if (!db) {
-    alert("⚠️ Base de datos no disponible. Recargue la página.");
-    return;
-  }
+  if (!db) { alert("⚠️ Base de datos no disponible."); return; }
   var tx = db.transaction(["registros"], "readwrite");
 }
 ```
 
----
-
 ### FIX-003 — Null-check en registros recuperados
-
-**Problema:** `get()` puede devolver `undefined` si el registro no existe.
-
 ```javascript
-// ❌ MAL — sin null-check
 request.onsuccess = function(e) {
   var registro = e.target.result;
-  document.getElementById("campo").value = registro.valor; // TypeError si undefined
-};
-
-// ✅ BIEN — con null-check
-request.onsuccess = function(e) {
-  var registro = e.target.result;
-  if (!registro) {
-    alert("⚠️ Registro no encontrado.");
-    return;
-  }
+  if (!registro) { alert("⚠️ Registro no encontrado."); return; }
   document.getElementById("campo").value = registro.valor;
 };
 ```
 
----
-
 ### FIX-004 — Canvas medido desde `sig-wrap` (padre)
-
-**Problema:** Medir el canvas por sí mismo antes de renderizar retorna 0x0.
-
 ```javascript
-// ❌ MAL — medir el canvas directamente
-var canvas = document.getElementById("firma-canvas");
-canvas.width  = canvas.offsetWidth;   // 0 antes de layout
-canvas.height = canvas.offsetHeight;
-
-// ✅ BIEN — medir desde el contenedor padre
 function ajustarCanvas() {
   var wrap = document.getElementById("sig-wrap");
-  var canvas = document.getElementById("firma-canvas");
   canvas.width  = wrap.offsetWidth;
   canvas.height = wrap.offsetHeight;
 }
 ```
 
----
-
 ### FIX-005 — `setTimeout` 150ms antes de `initCanvas`
-
-**Problema:** En S25, el DOM no ha terminado de renderizar cuando se llama `initCanvas` en `DOMContentLoaded`.
-
 ```javascript
-// ❌ MAL — llamar inmediatamente
-document.addEventListener("DOMContentLoaded", function() {
-  initCanvas();
-});
-
-// ✅ BIEN — con delay de 150ms
 document.addEventListener("DOMContentLoaded", function() {
   setTimeout(ajustarCanvas, 150);
   setTimeout(initCanvas, 200);
 });
 ```
 
----
-
 ### FIX-006 — `drawImage` con dimensiones explícitas
-
-**Problema:** `drawImage(img, 0, 0)` sin dimensiones distorsiona la imagen si el canvas fue redimensionado.
-
 ```javascript
-// ❌ MAL — sin dimensiones
-ctx.drawImage(img, 0, 0);
-
-// ✅ BIEN — con dimensiones explícitas del canvas
-ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-```
-
-**Al cargar firma guardada desde IDB:**
-```javascript
-// Forzar resize al tamaño real del contenedor ANTES de drawImage
+// Al cargar firma guardada: resize ANTES de drawImage
 ajustarCanvas();
 setTimeout(function() {
   var img = new Image();
-  img.onload = function() {
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  };
+  img.onload = function() { ctx.drawImage(img, 0, 0, canvas.width, canvas.height); };
   img.src = firmaDataURL;
 }, 50);
 ```
 
----
-
 ### FIX-007 — `try/catch` en `JSON.parse` al importar
-
-**Problema:** JSON malformado en importación crashea la app sin mensaje de error.
-
 ```javascript
-// ❌ MAL — sin try/catch
-function importarJSON(texto) {
-  var datos = JSON.parse(texto);
-  procesarDatos(datos);
-}
-
-// ✅ BIEN — con try/catch
 function importarJSON(texto) {
   try {
     var datos = JSON.parse(texto);
     if (!Array.isArray(datos)) throw new Error("Formato inválido");
     procesarDatos(datos);
   } catch(e) {
-    alert("❌ Error al importar: archivo JSON inválido o corrupto.\n" + e.message);
+    alert("❌ Error al importar: " + e.message);
   }
 }
 ```
 
----
-
 ### FIX-008 — Limpiar TODOS los campos en `nuevo()`
-
-**Problema:** Campos olvidados en `nuevo()` mezclan datos entre registros.
-
 ```javascript
-// ✅ BIEN — checklist exhaustivo para nuevo()
 function nuevo() {
-  // Campos de texto
   document.getElementById("campo1").value = "";
-  document.getElementById("campo2").value = "";
-  document.getElementById("select1").value = "opcion_default";
-
-  // Canvas de firmas
-  var ctx1 = document.getElementById("canvas-firma1").getContext("2d");
-  ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
-
-  // Variables de estado
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   registroActual = null;
   estadoActual = "EMISION";
-
-  // Botones según estado inicial
   actualizarBotones("EMISION");
-
-  // Reajustar canvas
   setTimeout(ajustarCanvas, 150);
 }
 ```
 
----
-
 ### FIX-009 — Validar campos obligatorios por paso
-
-**Problema:** Avanzar pasos sin validar permite guardar registros incompletos.
-
 ```javascript
-// ✅ BIEN — validación por paso antes de avanzar
-function avanzarPaso(numeroPaso) {
+function avanzarPaso(n) {
   var errores = [];
-
-  if (numeroPaso >= 1) {
-    if (!document.getElementById("nombre").value.trim())
-      errores.push("Nombre es obligatorio");
-    if (!document.getElementById("fecha").value)
-      errores.push("Fecha es obligatoria");
-  }
-
-  if (numeroPaso >= 2) {
-    var canvas = document.getElementById("firma-canvas");
-    if (esCanvasVacio(canvas))
-      errores.push("Firma es obligatoria");
-  }
-
+  if (!document.getElementById("nombre").value.trim())
+    errores.push("Nombre es obligatorio");
   if (errores.length > 0) {
-    alert("⚠️ Complete los campos requeridos:\n• " + errores.join("\n• "));
+    alert("⚠️ Complete:\n• " + errores.join("\n• "));
     return false;
   }
   return true;
 }
-
-function esCanvasVacio(canvas) {
-  var ctx = canvas.getContext("2d");
-  var pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-  return pixels.every(function(p) { return p === 0; });
-}
 ```
 
----
-
 ### FIX-010 — Resize listener para rotación pantalla S25
-
-**Problema:** Al rotar el S25, el canvas pierde dimensiones y las firmas quedan distorsionadas.
-
 ```javascript
-// ✅ BIEN — listener de resize con debounce
-var resizeTimer;
 window.addEventListener("resize", function() {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(function() {
-    ajustarCanvas();
-    // Si hay firma guardada, redibujarla
-    if (firmaGuardada) {
-      var img = new Image();
-      img.onload = function() {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      };
-      img.src = firmaGuardada;
-    }
-  }, 200);
+  resizeTimer = setTimeout(ajustarCanvas, 200);
 });
-
-// También escuchar orientationchange para S25
 window.addEventListener("orientationchange", function() {
   setTimeout(ajustarCanvas, 300);
 });
@@ -478,7 +381,6 @@ window.addEventListener("orientationchange", function() {
 ### CSS — Impresión PDF
 
 ```css
-/* OBLIGATORIO en todo elemento con color de fondo en PDF */
 .estado-emision {
   background: #f39c12 !important;
   border: 2px solid #000 !important;
@@ -490,27 +392,39 @@ window.addEventListener("orientationchange", function() {
 ### JS — Impresión con modal (evitar pantalla blanca S25)
 
 ```javascript
-// ❌ MAL — imprimir inmediatamente
 function generarPDF() {
   actualizarVistaImpresion();
-  window.print();  // Pantalla blanca en S25
-}
-
-// ✅ BIEN — modal + setTimeout mínimo 700ms
-function generarPDF() {
-  actualizarVistaImpresion();
-  mostrarModalImprimiendo();         // Mostrar modal antes
+  mostrarModalImprimiendo();
   setTimeout(function() {
     window.print();
-    cerrarModalImprimiendo();        // Cerrar modal después
-  }, 700);                           // Mínimo 700ms, idealmente 1000ms
+    cerrarModalImprimiendo();
+  }, 700); // mínimo 700ms, idealmente 1000ms
+}
+```
+
+### JS — Service Worker y Manifest inline (patrón v2.1)
+
+```javascript
+// Sin sw.js ni manifest.json externos — todo embebido en el HTML
+(function(){
+  var m = { name:'Modulo AGA', start_url:'/scorpion-tail/modulo.html',
+    display:'standalone', background_color:'#003087', theme_color:'#003087' };
+  var b = new Blob([JSON.stringify(m)], {type:'application/json'});
+  document.getElementById('manifest-link').href = URL.createObjectURL(b);
+})();
+
+if ('serviceWorker' in navigator) {
+  var sw = "const C='aga-v1';\n" +
+    "self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.add('.'))));\n" +
+    "self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));";
+  navigator.serviceWorker.register(URL.createObjectURL(
+    new Blob([sw], {type:'application/javascript'})), {scope:'./'});
 }
 ```
 
 ### JS — WhatsApp sharing
 
 ```javascript
-// Siempre usar wa.me (nunca api.whatsapp.com)
 function compartirWhatsApp(mensaje) {
   var url = "https://wa.me/?text=" + encodeURIComponent(mensaje);
   window.open(url, "_blank");
@@ -520,25 +434,11 @@ function compartirWhatsApp(mensaje) {
 ### JS — Estados de custodias (Poseidón / Vales)
 
 ```
-EN EMISIÓN (amarillo  #f39c12) → EN CUSTODIA (rojo  #e74c3c)
+EN EMISIÓN (amarillo #f39c12) → EN CUSTODIA (rojo #e74c3c)
          → EN DEVOLUCIÓN (naranja #e67e22) → CERRADO (verde #2ecc71)
 ```
 
-Reglas:
-- **NUNCA** auto-limpiar pantalla al guardar
-- Cambiar botones visibles según estado actual
-- El usuario limpia manualmente con `nuevo()`
-
-### JS — QR en PDFs
-
-```javascript
-// Siempre URLs completas (no texto plano) para compatibilidad
-const QR_BASE_URL = "https://vgarcesb-cpu.github.io/Poseidon-s-Seal/";
-const qrContent   = QR_BASE_URL + "?id=" + registroId;
-
-// Tamaño estándar QR en PDF
-const QR_SIZE = 120;  // 120x120px
-```
+Reglas: NUNCA auto-limpiar pantalla al guardar. El usuario limpia con `nuevo()`.
 
 ---
 
@@ -546,53 +446,57 @@ const QR_SIZE = 120;  // 120x120px
 
 ### 🔴 ALTA PRIORIDAD
 
-- [ ] **Poseidón v2.x — PDF sin QR**: Variante de PDF para terceros que reciben vía WhatsApp sin app instalada. Omitir sección QR, mantener todos los campos de datos.
-- [ ] **Poseidón v2.x — Google Drive Integration**: Subfolder por mes (`YYYY-MM/`), upload automático al cerrar custodia (estado CERRADO), credenciales OAuth en Service Worker.
-- [ ] **Poseidón v2.x — Botones por estado**: Revisar layout de botones para cada estado del flujo EN EMISIÓN → EN CUSTODIA → EN DEVOLUCIÓN → CERRADO. Ocultar/mostrar según estado activo.
-- [ ] **index.html — Activar www CNAME proxy**: El CNAME `www.totis.cl` está en modo DNS-only en Cloudflare. Pendiente activar proxy para que quede protegido por Zero Trust Access.
+- [ ] **Poseidón — PDF sin QR (P-1)**: Variante de PDF para terceros vía WhatsApp. Omitir sección QR, mantener todos los campos de datos.
+- [ ] **Poseidón — Google Drive Integration (P-2)**: Subfolder por año/mes (`YYYY/MM/`), upload automático al estado CERRADO, OAuth2 PKCE.
+- [ ] **index.html — Activar www CNAME proxy**: El CNAME `www.totis.cl` está en modo DNS-only en Cloudflare. Pendiente activar proxy para Zero Trust Access.
+- [ ] **Archivar repos externos**: Marcar como archived en GitHub los repos `solicitud-fach`, `vale-de-entrega`, `Poseidon-s-Seal`, `NLS-2003-004`. Agregar aviso de migración en su README.
 
 ### 🟡 MEDIA PRIORIDAD
 
-- [ ] **Módulo Bajas**: Nuevo módulo para baja de equipos/materiales. Formulario con PDF institucional, firma digital, QR de trazabilidad. Integrar al hub index.html.
-- [ ] **Estadísticas en index.html**: Actualmente lee de `localStorage`. Migrar a IndexedDB centralizado que agregue datos de todos los módulos. Mostrar gráfico semanal/mensual.
-- [ ] **Service Worker — Cache versioning**: Implementar versionado explícito del SW (`CACHE_VERSION = "v2.0"`) con limpieza de caches anteriores en `activate`.
-- [ ] **Bitácora — Export PDF**: Agregar botón de exportación PDF mensual al módulo `bitacora.html`.
-- [ ] **Personal — Reporte diario**: Generar PDF de control de personal por fecha desde `personal.html`.
+- [ ] **Módulo Bajas**: Formulario con PDF institucional, firma digital, QR de trazabilidad.
+- [ ] **Estadísticas en portal/index.html**: Migrar de `localStorage` a lectura directa de IDB de cada módulo. Gráfico semanal/mensual.
+- [ ] **Módulos legacy → migración PWA**: Aplicar los 10 FIXES y el patrón inline SW+manifest a `mantencion.html`, `bitacora.html`, `inventario.html`, `presupuesto.html`, `personal.html`, `informes.html`, `informe.html`.
+- [ ] **Bitácora — Export PDF mensual**.
+- [ ] **Personal — Reporte diario PDF**.
 
-### 🟢 BAJA PRIORIDAD / MEJORAS
+### 🟢 BAJA PRIORIDAD
 
-- [ ] **Dark/Light mode**: Toggle en header de `index.html`. Usar CSS variables (`--azul`, `--blanco`) ya implementadas como base.
-- [ ] **Notificaciones Push**: Service Worker con Push API para alertas de mantención preventiva vencida.
-- [ ] **WD MyCloud — Sync bidireccional**: Actualmente Poseidón solo sube (PUT). Implementar GET para consultar custodias desde otros dispositivos en la red local.
-- [ ] **Buscador global**: Campo de búsqueda en el hub que consulte IndexedDB de todos los módulos locales y retorne resultados unificados.
-- [ ] **icon-512.png real**: El ícono actual es un base64 embebido en JS. Crear PNG real 512x512 con el escorpión AGA y moverlo a `icon-512.png` en el repo.
-- [ ] **Offline fallback page**: Agregar `/offline.html` al Service Worker. Mostrarla cuando no hay red y el recurso no está en cache.
+- [ ] **Dark/Light mode**: Toggle en portal. CSS variables base ya implementadas.
+- [ ] **Notificaciones Push**: SW con Push API para alertas de mantención vencida (NLS).
+- [ ] **WD MyCloud — Sync bidireccional**: GET para consultar desde otros dispositivos en red local.
+- [ ] **Buscador global**: Campo en portal que consulte IDB de todos los módulos.
+- [ ] **Offline fallback page**: `/offline.html` en SW, mostrar cuando no hay red.
 
 ### 🔧 DEUDA TÉCNICA
 
-- [ ] **Unificar estilos CSS**: Variables `--dorado`, `--azul`, `--verde` etc. definidas en cada módulo independientemente. Extraer a `styles-aga.css` compartido vía CDN propio o import.
-- [ ] **Módulo "proximamente"**: La card `➕ Más módulos en camino...` muestra `onclick="proximamente()"`. Reemplazar por grid real con módulos planificados (Bajas, Búsqueda global).
-- [ ] **sessionStorage vs localStorage**: Estandarizar uso. `sessionStorage` para auth, `localStorage` para datos persistentes entre sesiones.
-- [ ] **Error boundary global**: Agregar `window.onerror` y `window.onunhandledrejection` para capturar errores no manejados y mostrar mensaje amigable en S25.
+- [ ] **Acentos en strings JS de nls.html**: Los labels internos de TIPOS/CAMP en el JS quedaron sin caracteres especiales por limitaciones del proceso de migración. Cosmético, no afecta lógica.
+- [ ] **Unificar estilos CSS**: Variables `--dorado`, `--azul`, `--verde` definidas en cada módulo. Extraer a `styles-aga.css` compartido.
+- [ ] **Error boundary global**: `window.onerror` + `window.onunhandledrejection` para S25.
+- [ ] **SW scope unificado**: Actualmente cada módulo tiene su SW independiente. Evaluar SW maestro en raíz del repo.
 
 ---
 
 ## Historial de Versiones
 
-### v2.0 (actual)
-- ✅ Hub centralizado con 9 módulos
+### v2.1 (actual — Abril 2026)
+- ✅ Migración completa al monorepo: `poseidon.html`, `solicitud.html`, `vale.html`, `nls.html`
+- ✅ Portal hub centralizado (`portal/index.html`) con cards de módulos
+- ✅ Patrón SW + manifest inline en todos los módulos migrados
+- ✅ Fixes de compatibilidad S25: `position:fixed`, `100dvh`, `viewport-fit:cover`
+- ✅ NLS-2003-004 v2.0: catastro, hojas de vida, bitácoras, Gantt, informes CL, alertas SESMA/Montreal
+- ✅ Poseidón v2.0.1: fix `const sb` SyntaxError + 4 fixes adicionales
+
+### v2.0
+- ✅ Hub centralizado con 9 módulos legacy
 - ✅ Login SHA-256 con `crypto.subtle` (Capa 2)
 - ✅ Cloudflare Zero Trust Access (Capa 1)
 - ✅ DNS `totis.cl` con 4 A records proxiados
-- ✅ Stats dinámicas en dashboard (adquisiciones + vales)
-- ✅ Módulos: Mantención, Bitácora, Inventario, Presupuesto, Personal, Informes, Informe Técnico
 - ✅ Integración Poseidón v2.0.0 (QR scanner, WD MyCloud, firmas, 4 estados)
 
 ### v1.x
-- ✅ Single HTML con login overlay (sin SHA-256)
+- ✅ Single HTML con login overlay
 - ✅ Módulos: Solicitud Adquisición, Vale de Entrega
-- ✅ GitHub Pages + dominio `totis.cl` vía NIC Chile → Cloudflare
-- ✅ Bitácora técnica de configuración DNS generada
+- ✅ GitHub Pages + dominio `totis.cl`
 
 ---
 
@@ -602,11 +506,12 @@ const QR_SIZE = 120;  // 120x120px
 |---|---|
 | Hub principal | https://totis.cl |
 | GitHub Account | https://github.com/vgarcesb-cpu |
-| Scorpion Tail repo | https://github.com/vgarcesb-cpu/scorpion-tail |
-| Poseidón repo | https://github.com/vgarcesb-cpu/Poseidon-s-Seal |
-| Vale de Entrega repo | https://github.com/vgarcesb-cpu/vale-de-entrega |
-| Solicitud FACH repo | https://github.com/vgarcesb-cpu/solicitud-fach |
+| Scorpion Tail (monorepo) | https://github.com/vgarcesb-cpu/scorpion-tail |
+| Poseidón (legacy, archivado) | https://github.com/vgarcesb-cpu/Poseidon-s-Seal |
+| Vale de Entrega (legacy) | https://github.com/vgarcesb-cpu/vale-de-entrega |
+| Solicitud FACH (legacy) | https://github.com/vgarcesb-cpu/solicitud-fach |
+| NLS-2003-004 (legacy) | https://github.com/vgarcesb-cpu/NLS-2003-004 |
 
 ---
 
-*🦂 PROYECTO SCORPION TAIL · Academia de Guerra Aérea FACH · Desarrollado por Toti's® · v2.0*
+*🦂 PROYECTO SCORPION TAIL · Academia de Guerra Aérea FACH · Desarrollado por Toti's® · v2.1 · Abril 2026*
