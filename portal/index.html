@@ -462,7 +462,7 @@ var MODULOS = [
     desc:   'Formulario de solicitud de adquisición para supervisor con folio correlativo y firma.',
     tag:    'SOLICITUD · v1.0',
     estado: 'activo',
-    url:    'https://vgarcesb-cpu.github.io/Solicitud-Supervisor/'
+    url:    '../solicitud.html'
   },
   {
     icono:  '🧾',
@@ -588,7 +588,8 @@ function renderModulos(filtro, query) {
     var card = document.createElement('a');
     card.className = clases;
     card.href = m.url || '#';
-    if (m.url) card.target = '_blank';
+    // ── CAMBIO A: solo URLs externas abren en nueva pestaña ──
+    if (m.url && m.url.startsWith('http')) card.target = '_blank';
     card.innerHTML =
       '<div class="card-top">' +
         '<div class="card-icon">' + m.icono + '</div>' +
@@ -607,12 +608,6 @@ function renderModulos(filtro, query) {
 
     if (!m.url) {
       card.addEventListener('click', function(e) { e.preventDefault(); mostrarToast('Módulo no disponible aún'); });
-    } else {
-      card.addEventListener('click', function(e) {
-        if (e.target.classList.contains('card-btn') || e.currentTarget === card) {
-          // deja que el <a> navegue
-        }
-      });
     }
 
     grid.appendChild(card);
@@ -710,20 +705,7 @@ var manifest = {
 };
 var mBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
 document.getElementById('pwa-manifest').href = URL.createObjectURL(mBlob);
-// ─── SERVICE WORKER ──────────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  var swCode = [
-    "const CACHE='scorpion-portal-v1';",
-    "self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add('.')).then(()=>self.skipWaiting()));});",
-    "self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});",
-    "self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{var rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));return res;}).catch(()=>caches.match(e.request))));});"
-  ].join('\n');
-  var swBlob = new Blob([swCode], { type: 'application/javascript' });
-  navigator.serviceWorker.register(URL.createObjectURL(swBlob), { scope: './' })
-    .then(function(){ console.log('[SW] Portal listo'); })
-    .catch(function(e){ console.warn('[SW]', e); });
-}
-
+// Service Worker eliminado del portal — hub lanzador no requiere caché offline
 </script>
 </body>
 </html>
