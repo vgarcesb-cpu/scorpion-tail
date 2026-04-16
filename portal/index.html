@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#050e1f">
+<title>Scorpion Tail — Portal AGA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --azul-noche: #050e1f;
+  --azul-prof:  #0a1a35;
+  --azul:       #0d1f3c;
+  --azul2:      #1a3a6e;
+  --azul3:      #2456a4;
+  --dorado:     #c8a84b;
+  --dorado2:    #e8c96e;
+  --dorado3:    #a07830;
+  --blanco:     #ffffff;
+  --gris-claro: #d0d8e8;
+  --verde:      #2ecc71;
+  --naranja:    #e67e22;
+  --rojo:       #e74c3c;
+  --amarillo:   #f1c40f;
+  --gris-inact: #4a5a70;
+  --card-bg:    rgba(13,31,60,0.85);
+  --card-borde: rgba(200,168,75,0.25);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Exo 2', 'Segoe UI', sans-serif;
+  background: var(--azul-noche);
+  color: var(--blanco);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── FONDO ANIMADO ─── */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(200,168,75,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,168,75,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridDrift 40s linear infinite;
+}
+@keyframes gridDrift { from { background-position: 0 0; } to { background-position: 40px 40px; } }
+
+.bg-glow {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(26,58,110,0.6) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(200,168,75,0.06) 0%, transparent 60%);
+}
+
+/* ─── HEADER ─── */
+.header {
+  position: relative; z-index: 10;
+  background: linear-gradient(180deg, rgba(5,14,31,0.98) 0%, rgba(10,26,53,0.95) 100%);
+  border-bottom: 1px solid rgba(200,168,75,0.4);
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 18px;
+  height: 72px;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+}
+
+.header::after {
+  content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--dorado), transparent);
+}
+
+.header-escudo {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 2px solid var(--dorado);
+  background: linear-gradient(135deg, var(--azul2), var(--azul-prof));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(200,168,75,0.3);
+}
+
+.header-texto { flex: 1; }
+.header-titulo {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px; font-weight: 700; letter-spacing: 3px;
+  color: var(--dorado); text-transform: uppercase; line-height: 1;
+}
+.header-sub {
+  font-size: 10px; letter-spacing: 1.5px; color: #7090b8;
+  text-transform: uppercase; margin-top: 3px;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.header-right { text-align: right; flex-shrink: 0; }
+.header-version {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; color: var(--dorado3); letter-spacing: 1px;
+}
+.header-date {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; color: #5070a0; margin-top: 2px;
+}
+
+/* ─── HERO BAND ─── */
+.hero-band {
+  position: relative; z-index: 10;
+  background: linear-gradient(90deg, rgba(26,58,110,0.4) 0%, rgba(200,168,75,0.08) 50%, rgba(26,58,110,0.4) 100%);
+  border-bottom: 1px solid rgba(200,168,75,0.15);
+  padding: 20px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+
+.hero-titulo {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 28px; font-weight: 700; letter-spacing: 2px;
+  color: var(--blanco); text-transform: uppercase;
+  line-height: 1;
+}
+.hero-titulo span { color: var(--dorado); }
+
+.hero-desc {
+  font-size: 12px; color: #7090b8; margin-top: 4px;
+  letter-spacing: 0.5px; max-width: 400px;
+}
+
+.stats-band {
+  display: flex; gap: 20px;
+}
+.stat-item { text-align: center; }
+.stat-num {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 22px; font-weight: 700;
+  line-height: 1;
+}
+.stat-num.verde  { color: var(--verde); }
+.stat-num.dorado { color: var(--dorado); }
+.stat-num.gris   { color: var(--gris-inact); }
+.stat-lbl { font-size: 9px; color: #5070a0; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+/* ─── BARRA BUSQUEDA / FILTROS ─── */
+.toolbar {
+  position: relative; z-index: 10;
+  padding: 14px 24px;
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+  background: rgba(10,26,53,0.6);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.search-wrap {
+  flex: 1; min-width: 200px; position: relative;
+}
+.search-wrap .ico { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0.5; }
+.search-input {
+  width: 100%; padding: 10px 12px 10px 36px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(200,168,75,0.2);
+  border-radius: 8px; color: var(--blanco);
+  font-family: 'Exo 2', sans-serif; font-size: 13px;
+  outline: none; transition: border-color 0.2s;
+}
+.search-input::placeholder { color: #4a6080; }
+.search-input:focus { border-color: rgba(200,168,75,0.5); }
+
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  padding: 7px 14px; border-radius: 20px;
+  border: 1px solid rgba(200,168,75,0.2);
+  background: transparent; color: #6080a0;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  font-family: 'Exo 2', sans-serif;
+  transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.chip:hover  { border-color: var(--dorado); color: var(--dorado); }
+.chip.activo { background: rgba(200,168,75,0.15); border-color: var(--dorado); color: var(--dorado2); }
+
+/* ─── GRID MÓDULOS ─── */
+.main { position: relative; z-index: 10; padding: 24px; }
+
+.section-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 3px;
+  color: var(--dorado3); text-transform: uppercase;
+  margin-bottom: 16px; padding-left: 2px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(200,168,75,0.3), transparent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+/* ─── CARD MÓDULO ─── */
+.mod-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-borde);
+  border-radius: 14px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.25s;
+  display: flex; flex-direction: column; gap: 14px;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(10px);
+  text-decoration: none; color: inherit;
+}
+.mod-card::before {
+  content: ''; position: absolute; inset: 0; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(200,168,75,0.05) 0%, transparent 60%);
+  opacity: 0; transition: opacity 0.25s;
+}
+.mod-card:hover { border-color: rgba(200,168,75,0.5); transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(200,168,75,0.08); }
+.mod-card:hover::before { opacity: 1; }
+.mod-card:active { transform: scale(0.98); }
+
+.mod-card.inactivo { opacity: 0.45; cursor: default; }
+.mod-card.inactivo:hover { transform: none; box-shadow: none; border-color: var(--card-borde); }
+
+/* acento lateral por estado */
+.mod-card::after {
+  content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+  width: 3px; border-radius: 0 2px 2px 0;
+  background: var(--dorado3); transition: background 0.2s;
+}
+.mod-card.activo::after  { background: var(--verde); }
+.mod-card.nuevo::after   { background: var(--amarillo); }
+.mod-card.beta::after    { background: var(--naranja); }
+.mod-card.inactivo::after { background: var(--gris-inact); }
+
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+
+.card-icon {
+  width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  background: rgba(200,168,75,0.08);
+  border: 1px solid rgba(200,168,75,0.15);
+}
+
+.card-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 1px;
+  padding: 4px 10px; border-radius: 20px;
+  font-weight: 600; text-transform: uppercase; flex-shrink: 0;
+}
+.badge-activo   { background: rgba(46,204,113,0.15); color: var(--verde); border: 1px solid rgba(46,204,113,0.3); }
+.badge-nuevo    { background: rgba(241,196,15,0.15); color: #f1c40f; border: 1px solid rgba(241,196,15,0.3); }
+.badge-beta     { background: rgba(230,126,34,0.15); color: var(--naranja); border: 1px solid rgba(230,126,34,0.3); }
+.badge-inactivo { background: rgba(74,90,112,0.3); color: var(--gris-inact); border: 1px solid rgba(74,90,112,0.3); }
+.badge-pronto   { background: rgba(36,86,164,0.2); color: #5080c0; border: 1px solid rgba(36,86,164,0.3); }
+
+.card-nombre {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 17px; font-weight: 700; color: var(--blanco);
+  letter-spacing: 0.5px; line-height: 1.2; margin-top: 10px;
+}
+.card-desc { font-size: 12px; color: #7090b8; line-height: 1.5; }
+
+.card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; }
+.card-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; color: #3a5070; letter-spacing: 1px;
+}
+.card-btn {
+  padding: 7px 16px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--azul2), var(--azul3));
+  color: var(--dorado); border: 1px solid rgba(200,168,75,0.3);
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s;
+}
+.card-btn:hover { background: linear-gradient(135deg, var(--azul3), #2a66c4); border-color: var(--dorado); }
+.card-btn.disabled { background: rgba(74,90,112,0.2); color: var(--gris-inact); border-color: rgba(74,90,112,0.3); cursor: default; }
+
+/* card PLACEHOLDER */
+.mod-card.placeholder {
+  border-style: dashed; border-color: rgba(200,168,75,0.12);
+  background: rgba(10,26,53,0.3); cursor: default;
+}
+.mod-card.placeholder:hover { transform: none; box-shadow: none; }
+.mod-card.placeholder::after { display: none; }
+.placeholder-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px 0; }
+.placeholder-inner .ph-ico { font-size: 28px; opacity: 0.2; }
+.placeholder-inner .ph-txt { font-size: 11px; color: #2a4060; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ─── SCORPION WATERMARK ─── */
+.watermark {
+  position: fixed; bottom: -20px; right: -20px; z-index: 0; pointer-events: none;
+  font-size: 200px; opacity: 0.025; user-select: none; line-height: 1;
+}
+
+/* ─── FOOTER ─── */
+.footer {
+  position: relative; z-index: 10;
+  border-top: 1px solid rgba(200,168,75,0.1);
+  padding: 16px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+}
+.footer-brand { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #2a4060; }
+.footer-brand span { color: var(--dorado3); }
+.footer-links { display: flex; gap: 16px; }
+.footer-link { font-size: 11px; color: #2a4060; text-decoration: none; transition: color 0.2s; }
+.footer-link:hover { color: var(--dorado); }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--azul2); color: var(--blanco); padding: 10px 22px;
+  border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s;
+  pointer-events: none; z-index: 999; border: 1px solid var(--dorado);
+  font-family: 'Exo 2', sans-serif; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 600px) {
+  .header { padding: 0 16px; gap: 12px; }
+  .hero-band { padding: 16px; }
+  .hero-titulo { font-size: 22px; }
+  .toolbar { padding: 12px 16px; }
+  .main { padding: 16px; }
+  .grid { grid-template-columns: 1fr; gap: 12px; }
+  .stats-band { gap: 14px; }
+  .stat-num { font-size: 18px; }
+  .footer { padding: 14px 16px; flex-direction: column; align-items: flex-start; }
+  .watermark { font-size: 120px; }
+}
+
+/* ─── ANIMATIONS ─── */
+.mod-card { animation: cardIn 0.4s ease both; }
+.mod-card:nth-child(1)  { animation-delay: 0.05s; }
+.mod-card:nth-child(2)  { animation-delay: 0.10s; }
+.mod-card:nth-child(3)  { animation-delay: 0.15s; }
+.mod-card:nth-child(4)  { animation-delay: 0.20s; }
+.mod-card:nth-child(5)  { animation-delay: 0.25s; }
+.mod-card:nth-child(6)  { animation-delay: 0.30s; }
+.mod-card:nth-child(7)  { animation-delay: 0.35s; }
+.mod-card:nth-child(8)  { animation-delay: 0.40s; }
+.mod-card:nth-child(9)  { animation-delay: 0.45s; }
+.mod-card:nth-child(10) { animation-delay: 0.50s; }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-band, .header { animation: fadeDown 0.5s ease both; }
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="watermark">🦂</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-escudo">✈️</div>
+  <div class="header-texto">
+    <div class="header-titulo">Scorpion Tail</div>
+    <div class="header-sub">Academia de Guerra Aérea · FACH · División de Educación</div>
+  </div>
+  <div class="header-right">
+    <div class="header-version">v3.0</div>
+    <div class="header-date" id="hdr-fecha">—</div>
+  </div>
+</header>
+
+<!-- HERO BAND -->
+<div class="hero-band">
+  <div>
+    <div class="hero-titulo">Portal de <span>Módulos</span></div>
+    <div class="hero-desc">Suite institucional de aplicaciones PWA — gestión operativa interna AGA</div>
+  </div>
+  <div class="stats-band">
+    <div class="stat-item">
+      <div class="stat-num verde" id="cnt-activo">0</div>
+      <div class="stat-lbl">Activos</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num dorado" id="cnt-nuevo">0</div>
+      <div class="stat-lbl">Nuevos</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num gris" id="cnt-total">0</div>
+      <div class="stat-lbl">Total</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="ico">🔍</span>
+    <input type="text" class="search-input" id="search" placeholder="Buscar módulo...">
+  </div>
+  <div class="filter-chips">
+    <button class="chip activo" data-filter="todos">Todos</button>
+    <button class="chip" data-filter="activo">🟢 Activos</button>
+    <button class="chip" data-filter="nuevo">🟡 Nuevos</button>
+    <button class="chip" data-filter="pronto">🔵 Próximos</button>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<main class="main">
+
+  <div class="section-label">Módulos del sistema</div>
+
+  <div class="grid" id="grid-modulos"></div>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-brand">
+    Toti's® · <span>Proyecto Scorpion Tail</span> · AGA · FACH
+  </div>
+  <div class="footer-links">
+    <a class="footer-link" href="https://github.com/vgarcesb-cpu/scorpion-tail" target="_blank">GitHub ↗</a>
+    <a class="footer-link" href="https://totis.cl" target="_blank">totis.cl ↗</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── MÓDULOS ────────────────────────────────────────────────────────
+var MODULOS = [
+  {
+    icono:  '🔱',
+    nombre: "Poseidon's Seal",
+    desc:   'Trazabilidad de bienes y materiales con cadena de custodia, firmas digitales y QR.',
+    tag:    'POSEIDON · v2.0.1',
+    estado: 'activo',
+    url:    '../poseidon-seal/'
+  },
+  {
+    icono:  '📋',
+    nombre: 'Solicitud Adquisición',
+    desc:   'Formulario de solicitud de adquisición para supervisor con folio correlativo y firma.',
+    tag:    'SOLICITUD · v1.0',
+    estado: 'activo',
+    url:    '../solicitud-supervisor/'
+  },
+  {
+    icono:  '🧾',
+    nombre: 'Vale Entrega',
+    desc:   'Control y registro de vales de entrega con trazabilidad y exportación PDF.',
+    tag:    'VALE-ENTREGA · v1.0',
+    estado: 'activo',
+    url:    '../vale-entrega/'
+  },
+  {
+    icono:  '📦',
+    nombre: 'Inventario & Repuestos',
+    desc:   'Control de stock, alertas de stock bajo, movimientos de entrada/salida y reportes.',
+    tag:    'INVENTARIO · v1.0',
+    estado: 'nuevo',
+    url:    '../inventario/'
+  },
+  {
+    icono:  '📓',
+    nombre: 'Bitácora AGA',
+    desc:   'Registro cronológico de actividades, novedades e incidencias operativas.',
+    tag:    'BITACORA · v1.0',
+    estado: 'nuevo',
+    url:    '../bitacora/'
+  },
+  {
+    icono:  '📄',
+    nombre: 'Informe Técnico',
+    desc:   'Generación de informes técnicos estandarizados con membrete institucional y firmas.',
+    tag:    'INFORME · v1.0',
+    estado: 'nuevo',
+    url:    '../informe/'
+  },
+  {
+    icono:  '📊',
+    nombre: 'Informes y Reportes',
+    desc:   'Panel consolidado para generación y visualización de reportes institucionales.',
+    tag:    'INFORMES · v1.0',
+    estado: 'nuevo',
+    url:    '../informes/'
+  },
+  {
+    icono:  '🔧',
+    nombre: 'Check List Mantención',
+    desc:   'Listas de verificación para mantención de equipos con seguimiento y PDF.',
+    tag:    'MANTENCION · v1.0',
+    estado: 'nuevo',
+    url:    '../mantencion/'
+  },
+  {
+    icono:  '👥',
+    nombre: 'Control Personal',
+    desc:   'Gestión de asistencia, novedades y control de personal de la unidad.',
+    tag:    'PERSONAL · v1.0',
+    estado: 'nuevo',
+    url:    '../personal/'
+  },
+  {
+    icono:  '💰',
+    nombre: 'Saldo Presupuestario',
+    desc:   'Control y seguimiento del saldo presupuestario con registros de movimientos.',
+    tag:    'PRESUPUESTO · v1.0',
+    estado: 'nuevo',
+    url:    '../presupuesto/'
+  },
+  {
+    icono:  '🔥',
+    nombre: 'NLS-2003-004 · Calor',
+    desc:   'Panel de alertas de cumplimiento normativo para equipos de transferencia de calor (calderas, quemadores, DS Nº 66).',
+    tag:    'NLS-2003-004 · v1.0',
+    estado: 'nuevo',
+    url:    '../nls-2003-004/'
+  },
+  {
+    icono:  '➕',
+    nombre: 'Módulo Próximo',
+    desc:   'Slot reservado para el próximo módulo según necesidad operativa.',
+    tag:    'PENDIENTE',
+    estado: 'pronto',
+    url:    null
+  }
+];
+
+// ─── RENDER ─────────────────────────────────────────────────────────
+function badgeHTML(estado) {
+  var map = {
+    activo:   ['badge-activo',   '● ACTIVO'],
+    nuevo:    ['badge-nuevo',    '◆ NUEVO'],
+    beta:     ['badge-beta',     '▲ BETA'],
+    inactivo: ['badge-inactivo', '○ INACTIVO'],
+    pronto:   ['badge-pronto',   '◎ PRÓXIMO']
+  };
+  var d = map[estado] || map.inactivo;
+  return '<span class="card-badge ' + d[0] + '">' + d[1] + '</span>';
+}
+
+function renderModulos(filtro, query) {
+  var grid = document.getElementById('grid-modulos');
+  var lista = MODULOS.filter(function(m) {
+    if (filtro && filtro !== 'todos' && m.estado !== filtro) return false;
+    if (query) {
+      var q = query.toLowerCase();
+      return m.nombre.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q) || m.tag.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  grid.innerHTML = '';
+
+  lista.forEach(function(m) {
+    var esProximo = m.estado === 'pronto';
+    var esInactivo = m.estado === 'inactivo';
+    var clases = 'mod-card ' + m.estado + (esInactivo || esProximo ? ' inactivo' : '');
+
+    if (esProximo) {
+      var ph = document.createElement('div');
+      ph.className = 'mod-card placeholder';
+      ph.innerHTML = '<div class="placeholder-inner"><div class="ph-ico">' + m.icono + '</div><div class="ph-txt">Módulo pendiente</div></div>';
+      grid.appendChild(ph);
+      return;
+    }
+
+    var card = document.createElement('a');
+    card.className = clases;
+    card.href = m.url || '#';
+    if (m.url) card.target = '_blank';
+    card.innerHTML =
+      '<div class="card-top">' +
+        '<div class="card-icon">' + m.icono + '</div>' +
+        badgeHTML(m.estado) +
+      '</div>' +
+      '<div>' +
+        '<div class="card-nombre">' + m.nombre + '</div>' +
+        '<div class="card-desc">' + m.desc + '</div>' +
+      '</div>' +
+      '<div class="card-footer">' +
+        '<span class="card-tag">' + m.tag + '</span>' +
+        (m.url
+          ? '<button class="card-btn">Abrir ↗</button>'
+          : '<button class="card-btn disabled">No disponible</button>') +
+      '</div>';
+
+    if (!m.url) {
+      card.addEventListener('click', function(e) { e.preventDefault(); mostrarToast('Módulo no disponible aún'); });
+    } else {
+      card.addEventListener('click', function(e) {
+        if (e.target.classList.contains('card-btn') || e.currentTarget === card) {
+          // deja que el <a> navegue
+        }
+      });
+    }
+
+    grid.appendChild(card);
+  });
+
+  actualizarStats();
+}
+
+function actualizarStats() {
+  var activos = MODULOS.filter(function(m){ return m.estado === 'activo'; }).length;
+  var nuevos  = MODULOS.filter(function(m){ return m.estado === 'nuevo'; }).length;
+  var total   = MODULOS.filter(function(m){ return m.estado !== 'pronto'; }).length;
+  document.getElementById('cnt-activo').textContent = activos;
+  document.getElementById('cnt-nuevo').textContent  = nuevos;
+  document.getElementById('cnt-total').textContent  = total;
+}
+
+// ─── FECHA ──────────────────────────────────────────────────────────
+function actualizarFecha() {
+  var d = new Date();
+  var dias = ['DOM','LUN','MAR','MIE','JUE','VIE','SAB'];
+  var meses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  var str = dias[d.getDay()] + ' ' +
+    String(d.getDate()).padStart(2,'0') + ' ' + meses[d.getMonth()] + ' ' + d.getFullYear() +
+    ' · ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  document.getElementById('hdr-fecha').textContent = str;
+}
+
+// ─── FILTROS / BÚSQUEDA ─────────────────────────────────────────────
+var filtroActivo = 'todos';
+var queryActivo  = '';
+
+document.querySelectorAll('.chip').forEach(function(chip) {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('activo'); });
+    chip.classList.add('activo');
+    filtroActivo = chip.dataset.filter;
+    renderModulos(filtroActivo, queryActivo);
+  });
+});
+
+document.getElementById('search').addEventListener('input', function() {
+  queryActivo = this.value.trim();
+  renderModulos(filtroActivo, queryActivo);
+});
+
+// ─── TOAST ──────────────────────────────────────────────────────────
+function mostrarToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────
+actualizarFecha();
+setInterval(actualizarFecha, 30000);
+renderModulos('todos', '');
+</script>
+</body>
+</html>
