@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#003087">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NLS-2003-004">
+<link rel="manifest" id="nls-manifest">
+<link rel="apple-touch-icon" id="nls-apple-icon">
+<title>NLS-2003-004 · Equipos Transferencia de Calor · FACH</title>
+<!-- MIG-001: Manifest inline | MIG-002: SW inline
+     MIG-003: 100dvh+viewport-fit | MIG-004: position:fixed body
+     Proyecto Scorpion Tail - scorpion-tail/nls.html -->
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --az:#003087;--az2:#0055B3;--az3:#1976D2;
+  --or:#C8A951;--or2:#E6C870;
+  --ro:#C62828;--ro2:#E53935;
+  --na:#E65100;--na2:#FF6D00;
+  --ve:#1B5E20;--ve2:#2E7D32;--ve3:#43A047;
+  --am:#F57F17;--am2:#FFF9C4;
+  --gr:#F0F4F8;--gr2:#E2E8F0;--gr3:#CBD5E0;--gr4:#718096;
+  --tx:#1A202C;--bl:#FFFFFF;
+  --pu:#6A1B9A;--pu2:#9C27B0;
+  --sw:252px;--hh:56px;
+}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;color:var(--tx)}
+body{background:var(--gr);position:fixed;width:100%}
+#app{display:flex;height:100vh;height:100dvh;overflow:hidden}
+#sb{width:var(--sw);min-width:var(--sw);background:var(--az);display:flex;flex-direction:column;overflow-y:auto;transition:transform .3s;z-index:100}
+#sb-top{padding:13px 11px 9px;background:rgba(0,0,0,.28);border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-logo{display:flex;align-items:center;gap:8px}
+.sb-circ{width:38px;height:38px;min-width:38px;background:var(--or);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:9px;color:var(--az);text-align:center;line-height:1.1}
+.sb-t h2{font-size:9.5px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.3px;line-height:1.2}
+.sb-t p{font-size:8.5px;color:rgba(255,255,255,.5);margin-top:1px}
+#sb-alertas{margin-top:8px;display:flex;flex-direction:column;gap:3px}
+.sb-alert-item{background:var(--ro);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:5px;display:none}
+.sb-alert-item.warn{background:var(--na)}.sb-alert-item.info{background:var(--az3)}
+nav a{display:flex;align-items:center;gap:8px;padding:9px 13px;color:rgba(255,255,255,.72);text-decoration:none;font-size:12px;cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:all .16s;border-left:3px solid transparent}
+nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+nav a.active{background:rgba(200,169,81,.16);color:var(--or2);border-left-color:var(--or);font-weight:700}
+nav a .ni{font-size:14px;min-width:16px;text-align:center}
+nav a .nb{background:var(--ro);color:#fff;font-size:8.5px;font-weight:800;padding:1px 5px;border-radius:8px;margin-left:auto}
+nav a .nb.warn{background:var(--na)}
+.nsep{font-size:8.5px;text-transform:uppercase;letter-spacing:.7px;color:rgba(255,255,255,.28);padding:11px 13px 2px;font-weight:700}
+#sb-foot{padding:9px 13px;border-top:1px solid rgba(255,255,255,.07);font-size:8.5px;color:rgba(255,255,255,.25);text-align:center;margin-top:auto}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#tb{height:var(--hh);min-height:var(--hh);background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 16px;box-shadow:0 2px 7px rgba(0,0,0,.08);z-index:50}
+#tb .tl{display:flex;align-items:center;gap:9px}
+#btn-m{display:none;background:none;border:none;cursor:pointer;font-size:20px;color:var(--az);padding:3px}
+#ptitle{font-size:14px;font-weight:800;color:var(--az)}
+#tb .tr{display:flex;align-items:center;gap:7px}
+#srch{border:1px solid var(--gr3);border-radius:17px;padding:5px 12px;font-size:11.5px;width:175px;outline:none;transition:border .2s}
+#srch:focus{border-color:var(--az3)}
+#fb{font-size:10px;color:var(--gr4);white-space:nowrap}
+#cnt{flex:1;overflow-y:auto;padding:16px}
+.sec{display:none;animation:fi .2s ease}.sec.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.al{display:flex;align-items:flex-start;gap:9px;padding:11px 13px;border-radius:8px;margin-bottom:8px;font-size:12px;line-height:1.45}
+.al-ro{background:#FFEBEE;border:1px solid #FFCDD2;color:#B71C1C}
+.al-na{background:#FFF3E0;border:1px solid #FFCC80;color:#BF360C}
+.al-or{background:#FFF8E1;border:1px solid #FFE082;color:#7B5000}
+.al-ve{background:#E8F5E9;border:1px solid #C8E6C9;color:#1B5E20}
+.al-az{background:#E3F2FD;border:1px solid #BBDEFB;color:#0D47A1}
+.al-pu{background:#F3E5F5;border:1px solid #CE93D8;color:#4A148C}
+.al .ai{font-size:17px;min-width:19px;margin-top:1px}
+.al strong{display:block;font-weight:800;margin-bottom:2px}
+.al ul{margin:4px 0 0 14px}.al ul li{margin-bottom:2px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px;margin-bottom:16px}
+.st{background:#fff;border-radius:8px;padding:12px;border:1px solid var(--gr3);text-align:center}
+.sv{font-size:24px;font-weight:900}
+.sv.ro{color:var(--ro)}.sv.na{color:var(--na)}.sv.ve{color:var(--ve2)}.sv.az{color:var(--az3)}.sv.or{color:#9A7500}.sv.pu{color:var(--pu)}
+.sl{font-size:9.5px;color:var(--gr4);margin-top:2px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:13px;margin-top:13px}
+.card{background:#fff;border-radius:9px;border:1px solid var(--gr3);padding:15px;transition:box-shadow .2s,transform .2s;cursor:pointer}
+.card:hover{box-shadow:0 5px 16px rgba(0,0,0,.1);transform:translateY(-2px)}
+.ch{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.ci{width:40px;height:40px;min-width:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.ci.az{background:#E3F2FD}.ci.ve{background:#E8F5E9}.ci.na{background:#FFF3E0}.ci.or{background:#FFF8E1}.ci.ro{background:#FFEBEE}.ci.pu{background:#F3E5F5}
+.ct{font-size:12.5px;font-weight:700;line-height:1.3}.cs{font-size:10.5px;color:var(--gr4);margin-top:1px}
+.cd{font-size:11px;color:var(--gr4);line-height:1.5;margin-bottom:9px}
+.cf{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--gr);padding-top:8px}
+.shr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;margin-bottom:4px}
+.shr h2{font-size:16px;font-weight:800;color:var(--az)}.shr p{font-size:11.5px;color:var(--gr4);margin-top:1px}
+.b{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:9.5px;font-weight:700}
+.b.ve{background:#E8F5E9;color:var(--ve3)}.b.az{background:#E3F2FD;color:var(--az3)}.b.or{background:#FFF8E1;color:#9A7500}.b.ro{background:#FFEBEE;color:var(--ro2)}.b.na{background:#FFF3E0;color:var(--na2)}.b.gr{background:#F5F5F5;color:#757575}.b.CL{background:#1A237E;color:#fff}.b.pu{background:#F3E5F5;color:var(--pu)}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:11.5px;font-weight:700;border:none;cursor:pointer;transition:all .16s;text-decoration:none}
+.btn-p{background:var(--az);color:#fff}.btn-p:hover{background:var(--az2)}
+.btn-s{background:var(--gr);color:var(--tx);border:1px solid var(--gr3)}.btn-s:hover{background:var(--gr2)}
+.btn-v{background:var(--ve2);color:#fff}.btn-r{background:var(--ro);color:#fff}.btn-n{background:var(--na);color:#fff}
+.btn-sm{padding:4px 8px;font-size:10px}
+.tw{overflow-x:auto;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.06);border:1px solid var(--gr3);margin-top:13px}
+table{width:100%;border-collapse:collapse;background:#fff;font-size:11.5px}
+th{background:var(--az);color:#fff;padding:9px 11px;text-align:left;font-size:10.5px;font-weight:700;white-space:nowrap}
+td{padding:8px 11px;border-bottom:1px solid var(--gr);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#F7FAFC}
+.fp{background:#fff;border-radius:9px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,.06);border:1px solid var(--gr3);margin-top:13px}
+.fg2{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:11px}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg.full{grid-column:1/-1}
+label{font-size:10px;font-weight:700;color:var(--gr4);text-transform:uppercase;letter-spacing:.35px}
+input,select,textarea{padding:7px 10px;border:1px solid var(--gr3);border-radius:6px;font-size:11.5px;color:var(--tx);outline:none;transition:border .18s;background:#fff;width:100%;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:var(--az3);box-shadow:0 0 0 2px rgba(25,118,210,.09)}
+textarea{resize:vertical;min-height:68px}
+.req{color:var(--ro);font-weight:900}
+.tabs{display:flex;border-bottom:2px solid var(--gr3);margin-bottom:13px;overflow-x:auto}
+.tb{padding:7px 13px;font-size:11.5px;font-weight:700;border:none;background:none;cursor:pointer;color:var(--gr4);white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .16s}
+.tb.active{color:var(--az);border-bottom-color:var(--az)}
+.tc{display:none}.tc.active{display:block}
+#gantt-wrap{overflow-x:auto;margin-top:13px}
+.gw{background:#fff;border-radius:8px;border:1px solid var(--gr3);overflow:hidden}
+.gh{display:flex;background:var(--az);color:#fff}
+.grow{display:flex;border-bottom:1px solid var(--gr)}.grow:last-child{border-bottom:none}
+.gtl{padding:6px 9px;font-size:10.5px;font-weight:600;background:#fff;border-right:2px solid var(--gr3);display:flex;align-items:center;min-width:185px;overflow:hidden}
+.acc{background:#fff;border-radius:9px;border:1px solid var(--gr3);overflow:hidden;margin-top:13px}
+.aci{border-bottom:1px solid var(--gr3)}.aci:last-child{border-bottom:none}
+.acb{width:100%;padding:12px 13px;background:none;border:none;display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-align:left;font-size:12.5px;font-weight:700;transition:background .16s}
+.acb:hover{background:var(--gr)}
+.acb .aci2{transition:transform .28s;font-size:13px}
+.acb.open .aci2{transform:rotate(180deg)}
+.acbd{display:none;padding:0 13px 13px;font-size:11.5px;color:var(--gr4);line-height:1.6}
+.acbd.open{display:block}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:1000;align-items:center;justify-content:center;padding:14px}
+.mo.open{display:flex}
+.md{background:#fff;border-radius:11px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.mh{padding:14px 17px;border-bottom:1px solid var(--gr3);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+.mh h3{font-size:14px;font-weight:800;color:var(--az)}
+.mc{padding:17px}.mf{padding:11px 17px;border-top:1px solid var(--gr3);display:flex;gap:7px;justify-content:flex-end}
+.mcls{background:none;border:none;font-size:17px;cursor:pointer;color:var(--gr4)}
+.norma-box{border-radius:7px;padding:9px 12px;margin-top:8px;font-size:11px;border:1px solid}
+.nb-ro{background:#FFEBEE;border-color:#FFCDD2;color:#B71C1C}
+.nb-na{background:#FFF3E0;border-color:#FFCC80;color:#BF360C}
+.nb-ve{background:#E8F5E9;border-color:#C8E6C9;color:#1B5E20}
+.nb-az{background:#E3F2FD;border-color:#BBDEFB;color:#0D47A1}
+.nb-pu{background:#F3E5F5;border-color:#CE93D8;color:#4A148C}
+.nb-or{background:#FFF8E1;border-color:#FFE082;color:#7B5000}
+#toast{position:fixed;bottom:18px;right:16px;background:var(--ve2);color:#fff;padding:10px 16px;border-radius:9px;font-size:12.5px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:9999;transform:translateY(68px);opacity:0;transition:all .3s cubic-bezier(.175,.885,.32,1.275);max-width:310px}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.err{background:var(--ro)}#toast.warn{background:var(--na)}#toast.info{background:var(--az2)}#toast.pu{background:var(--pu)}
+.empty{text-align:center;padding:38px 18px;color:var(--gr4)}
+.empty .ei{font-size:42px;margin-bottom:9px}
+.empty h3{font-size:13.5px;font-weight:700;margin-bottom:4px;color:var(--tx)}
+.empty p{font-size:11.5px;line-height:1.5}
+.sdiv{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--gr4);padding:12px 0 5px;border-bottom:2px solid var(--gr2);margin-bottom:10px}
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:90}
+@media(max-width:768px){
+  #sb{position:fixed;top:0;left:0;height:100%;transform:translateX(-100%);z-index:200}
+  #sb.open{transform:translateX(0)}
+  #btn-m{display:block}
+  #ov.show{display:block}
+  #cnt{padding:11px}
+  .cg{grid-template-columns:1fr}
+  #srch{width:110px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .fg2{grid-template-columns:1fr}
+}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.17);border-radius:3px}
+</style>
+</head>
+<body>
+<div id="app">
+<aside id="sb">
+  <div id="sb-top">
+    <div class="sb-logo">
+      <div class="sb-circ">NLS<br>004</div>
+      <div class="sb-t"><h2>Transf. de Calor</h2><p>NLS-2003-004 &middot; FACH &middot; AGA</p></div>
+    </div>
+    <div id="sb-alertas">
+      <div class="sb-alert-item" id="sba-sesma">&#9888; SIN INSCRIPCI&#211;N SESMA</div>
+      <div class="sb-alert-item warn" id="sba-montreal">&#9888; GAS R-22 DETECTADO</div>
+      <div class="sb-alert-item warn" id="sba-nov">&#128197; INFORME NOV PR&#211;XIMO</div>
+      <div class="sb-alert-item" id="sba-venc">&#128308; MANTENCIONES VENCIDAS</div>
+    </div>
+  </div>
+  <nav>
+    <a onclick="goTo('inicio')" class="active" id="nav-inicio"><span class="ni">&#127968;</span> Dashboard</a>
+    <div class="nsep">Equipos NLS-2003-004</div>
+    <a onclick="goTo('catastro')" id="nav-catastro"><span class="ni">&#128194;</span> Catastro Equipos<span class="nb" id="nb-eq" style="display:none">0</span></a>
+    <a onclick="goTo('hojas-vida')" id="nav-hojas-vida"><span class="ni">&#128203;</span> Hojas de Vida (A&ndash;F)<span class="nb warn" id="nb-hv" style="display:none">!</span></a>
+    <a onclick="goTo('mantencion')" id="nav-mantencion"><span class="ni">&#128295;</span> Bit&aacute;coras / Mantenciones<span class="nb" id="nb-mt" style="display:none">0</span></a>
+    <div class="nsep">Planificaci&oacute;n</div>
+    <a onclick="goTo('gantt')" id="nav-gantt"><span class="ni">&#128197;</span> Carta Gantt</a>
+    <a onclick="goTo('informe-cl')" id="nav-informe-cl"><span class="ni">&#128232;</span> Informes Cmd Log&iacute;stico<span class="nb" id="nb-cl" style="display:none">!</span></a>
+    <div class="nsep">Referencia</div>
+    <a onclick="goTo('alertas')" id="nav-alertas"><span class="ni">&#128680;</span> Alertas NLS<span class="nb" id="nb-al" style="display:none">!</span></a>
+    <a onclick="goTo('norma')" id="nav-norma"><span class="ni">&#128214;</span> Norma NLS-2003-004</a>
+  </nav>
+  <div id="sb-foot">NLS-2003-004 Rev.2.0 &middot; 17.Sept.2008<br>Proyecto Scorpion Tail &middot; AGA &middot; Toti's&reg;</div>
+</aside>
+<div id="main">
+  <header id="tb">
+    <div class="tl">
+      <button id="btn-m" onclick="toggleSB()">&#9776;</button>
+      <div id="ptitle">Dashboard</div>
+    </div>
+    <div class="tr">
+      <input type="search" id="srch" placeholder="&#128269; Buscar..." oninput="handleSearch(this.value)">
+      <span id="fb"></span>
+    </div>
+  </header>
+  <div id="cnt">
+
+  <!-- DASHBOARD -->
+  <div class="sec active" id="sec-inicio">
+    <div class="shr"><div><h2>Dashboard NLS-2003-004</h2><p>Equipos de Transferencia de Calor &mdash; Academia de Guerra A&eacute;rea</p></div><button class="btn btn-p btn-sm" onclick="goTo('catastro')">+ Nuevo Equipo</button></div>
+    <div id="dash-alertas" style="margin-top:12px"></div>
+    <div class="stats" style="margin-top:12px">
+      <div class="st"><div class="sv az" id="sd-eq">0</div><div class="sl">Total Equipos</div></div>
+      <div class="st"><div class="sv ro" id="sd-cl">0</div><div class="sl">Resp. Cmd Log&iacute;stico</div></div>
+      <div class="st"><div class="sv na" id="sd-venc">0</div><div class="sl">&#9888; Mant. Vencidas</div></div>
+      <div class="st"><div class="sv ro" id="sd-sesma">0</div><div class="sl">Sin SESMA</div></div>
+      <div class="st"><div class="sv pu" id="sd-r22">0</div><div class="sl">Gas R-22 (prohibido)</div></div>
+      <div class="st"><div class="sv or" id="sd-pend">0</div><div class="sl">Informes Pendientes CL</div></div>
+    </div>
+    <div class="sdiv" style="margin-top:4px">RECORDATORIOS OBLIGATORIOS NLS-2003-004</div>
+    <div id="recordatorios-fijos"></div>
+    <div class="sdiv" style="margin-top:6px">ACCESOS R&Aacute;PIDOS</div>
+    <div class="cg" style="margin-top:0">
+      <div class="card" onclick="goTo('catastro')"><div class="ch"><div class="ci az">&#128194;</div><div><div class="ct">Catastro de Equipos</div><div class="cs">Hojas de Vida Anexos A&ndash;F</div></div></div><div class="cd">Registro completo por tipo con campos exactos de cada anexo. Detecta autom&aacute;ticamente responsabilidad CL.</div><div class="cf"><span class="b az" id="dc-eq">0 equipos</span><span style="font-size:10px;color:var(--az3)">&rarr; Ver catastro</span></div></div>
+      <div class="card" onclick="goTo('hojas-vida')"><div class="ch"><div class="ci or">&#128203;</div><div><div class="ct">Hojas de Vida</div><div class="cs">Reporte Anexo A&ndash;F por equipo</div></div></div><div class="cd">Vista consolidada de la Hoja de Vida oficial de cada equipo seg&uacute;n su Anexo NLS.</div><div class="cf"><span class="b na" id="dc-hv">Seleccionar equipo</span><span style="font-size:10px;color:var(--na)">&rarr; Ver HV</span></div></div>
+      <div class="card" onclick="goTo('mantencion')"><div class="ch"><div class="ci na">&#128295;</div><div><div class="ct">Bit&aacute;coras / Mantenciones</div><div class="cs">Org&aacute;nico &middot; Campa&ntilde;a &middot; Dep&oacute;sito</div></div></div><div class="cd">3 niveles de mantenimiento. Bit&aacute;cora obligatoria por equipo.</div><div class="cf"><span class="b or" id="dc-mt">0 registros</span><span style="font-size:10px;color:var(--na)">&rarr; Gestionar</span></div></div>
+      <div class="card" onclick="goTo('informe-cl')"><div class="ch"><div class="ci ro">&#128232;</div><div><div class="ct">Informes Cmd Log&iacute;stico</div><div class="cs">Catastro &middot; Noviembre &middot; Dep&oacute;sito</div></div></div><div class="cd">Seguimiento de todos los informes obligatorios al Comando Log&iacute;stico.</div><div class="cf"><span class="b ro" id="dc-cl">0 pendientes</span><span style="font-size:10px;color:var(--ro)">&rarr; Gestionar</span></div></div>
+      <div class="card" onclick="goTo('alertas')"><div class="ch"><div class="ci ro">&#128680;</div><div><div class="ct">Panel de Alertas NLS</div><div class="cs">Cumplimiento normativo</div></div></div><div class="cd">Panel centralizado: SESMA, Protocolo Montreal, mantenciones vencidas, informes pendientes.</div><div class="cf"><span class="b ro" id="dc-al">Ver alertas</span><span style="font-size:10px;color:var(--ro)">&rarr; Ver todas</span></div></div>
+      <div class="card" onclick="goTo('gantt')"><div class="ch"><div class="ci or">&#128197;</div><div><div class="ct">Carta Gantt</div><div class="cs">Planificaci&oacute;n mensual</div></div></div><div class="cd">Visualizaci&oacute;n mensual de mantenciones y recordatorios NLS fijos.</div><div class="cf"><span class="b or" id="dc-gt">0 tareas</span><span style="font-size:10px;color:#9A7500">&rarr; Ver Gantt</span></div></div>
+    </div>
+  </div>
+
+  <!-- CATASTRO -->
+  <div class="sec" id="sec-catastro">
+    <div class="shr"><div><h2>Catastro de Equipos</h2><p>NLS-2003-004 &mdash; Registro por tipo de equipo</p></div><button class="btn btn-p btn-sm" onclick="abrirModalEquipo()">+ Nuevo Equipo</button></div>
+    <div class="al al-az" style="margin-top:11px"><span class="ai">&#128208;</span><div><strong>Umbrales de Responsabilidad &mdash; Art. VII.B NLS-2003-004</strong><ul><li><strong>AA / Climatizadores</strong> &ge; 40.000 BTU/HRS &rarr; <span class="b CL">Cmd Log&iacute;stico</span> &nbsp;|&nbsp; &lt; 40.000 &rarr; <span class="b ve">Unidad</span></li><li><strong>Calderas</strong> &ge; 10.083 Kcal/H &rarr; <span class="b CL">Cmd Log&iacute;stico</span> &nbsp;|&nbsp; &lt; 10.083 &rarr; <span class="b ve">Unidad</span></li><li><strong>C&aacute;maras Frigor&iacute;ficas &middot; Refrig. Industriales &middot; Ventiladores &middot; Incineradores</strong> &rarr; <span class="b CL">SIEMPRE Cmd Log&iacute;stico</span></li></ul></div></div>
+    <div style="display:flex;gap:7px;margin-top:13px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="flt-eq" placeholder="&#128269; Filtrar..." style="max-width:200px" oninput="renderEquipos()">
+      <select id="flt-tipo" onchange="renderEquipos()" style="max-width:195px"><option value="">Todos los tipos</option><option value="aa">Aire Acondicionado</option><option value="caldera">Caldera (C. T&eacute;rmica)</option><option value="camara">C&aacute;mara Frigor&iacute;fica</option><option value="refrig">Refrigerador Industrial</option><option value="ventilador">Ventilador Alto Caudal</option><option value="incinerador">Incinerador</option></select>
+      <select id="flt-niv" onchange="renderEquipos()" style="max-width:170px"><option value="">Todos los niveles</option><option value="unidad">Responsabilidad Unidad</option><option value="cl">Cmd Log&iacute;stico</option></select>
+    </div>
+    <div class="tw"><table><thead><tr><th>N&ordm; Control</th><th>Tipo / Anexo</th><th>Identificaci&oacute;n</th><th>Capacidad</th><th>Ubicaci&oacute;n</th><th>Responsabilidad</th><th>Alertas</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tbody-eq"><tr><td colspan="9"><div class="empty"><div class="ei">&#128194;</div><h3>Sin equipos registrados</h3><p>Haga clic en "+ Nuevo Equipo" para comenzar el catastro.</p></div></td></tr></tbody></table></div>
+  </div>
+
+  <!-- HOJAS DE VIDA -->
+  <div class="sec" id="sec-hojas-vida">
+    <div class="shr"><div><h2>Hojas de Vida &mdash; Anexos A&ndash;F</h2><p>Vista oficial por equipo seg&uacute;n NLS-2003-004</p></div></div>
+    <div class="al al-na" style="margin-top:11px"><span class="ai">&#128203;</span><div><strong>Obligaci&oacute;n NLS-2003-004 Art. VII.B.2.a</strong> Cada equipo nuevo debe tener su Hoja de Vida completa enviada inmediatamente al Comando Log&iacute;stico (Anexos A&ndash;F). En noviembre de cada a&ntilde;o remitir actualizaciones.</div></div>
+    <div style="margin-top:13px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select id="sel-hv-eq" onchange="renderHojaVida()" style="max-width:320px"><option value="">&mdash; Seleccione equipo para ver su Hoja de Vida &mdash;</option></select>
+      <button class="btn btn-s btn-sm" onclick="renderHojaVida()">&#128260; Actualizar</button>
+    </div>
+    <div id="hoja-vida-content" style="margin-top:13px"><div class="empty" style="background:#fff;border-radius:9px;border:1px solid var(--gr3);padding:40px"><div class="ei">&#128203;</div><h3>Seleccione un equipo</h3><p>Elija un equipo del listado para ver su Hoja de Vida oficial.</p></div></div>
+  </div>
+
+  <!-- MANTENCIONES -->
+  <div class="sec" id="sec-mantencion">
+    <div class="shr"><div><h2>Bit&aacute;coras / Mantenciones</h2><p>3 niveles obligatorios NLS-2003-004</p></div><button class="btn btn-p btn-sm" onclick="abrirModalMant()">+ Nueva Mantenci&oacute;n</button></div>
+    <div class="al al-ro" style="margin-top:11px"><span class="ai">&#9888;&#65039;</span><div><strong>Obligaci&oacute;n Art. VII.B.2.e &mdash; Bit&aacute;cora completa por equipo</strong>Cada Unidad Usuaria debe mantener una bit&aacute;cora completa por cada equipo con descripci&oacute;n t&eacute;cnica y fechas de mantenci&oacute;n de campa&ntilde;a.</div></div>
+    <div class="al al-na" style="margin-top:6px"><span class="ai">&#128308;</span><div><strong>Mantenci&oacute;n de Dep&oacute;sito &mdash; Requiere autorizaci&oacute;n previa del CL</strong>NO enviar equipo al CL sin autorizaci&oacute;n y financiamiento. Informar en noviembre para Anteproyecto Presupuesto.</div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px"><div class="st"><div class="sv ve" id="sm-org">0</div><div class="sl">&#129001; Org&aacute;nico</div></div><div class="st"><div class="sv az" id="sm-camp">0</div><div class="sl">&#128309; Campa&ntilde;a</div></div><div class="st"><div class="sv ro" id="sm-dep">0</div><div class="sl">&#128308; Dep&oacute;sito CL</div></div></div>
+    <div class="tabs" style="margin-top:13px">
+      <button class="tb active" onclick="switchTab(this,'tab-hist')">&#128220; Historial Bit&aacute;coras</button>
+      <button class="tb" onclick="switchTab(this,'tab-prox')">&#128197; Pr&oacute;ximas Mantenciones</button>
+    </div>
+    <div class="tc active" id="tab-hist">
+      <div style="display:flex;gap:7px;margin-bottom:11px;flex-wrap:wrap">
+        <select id="flt-mt-eq" onchange="renderMantenciones()" style="max-width:220px"><option value="">Todos los equipos</option></select>
+        <select id="flt-mt-niv" onchange="renderMantenciones()" style="max-width:175px"><option value="">Todos los niveles</option><option value="organico">Org&aacute;nico</option><option value="campana">Campa&ntilde;a</option><option value="deposito">Dep&oacute;sito CL</option></select>
+      </div>
+      <div class="tw"><table><thead><tr><th>Fecha</th><th>Equipo</th><th>Nivel</th><th>Trabajo</th><th>T&eacute;cnico / Empresa</th><th>Estado Post</th><th>Pr&oacute;x. Mant.</th><th></th></tr></thead><tbody id="tbody-mt"><tr><td colspan="8"><div class="empty"><div class="ei">&#128295;</div><h3>Sin bit&aacute;coras registradas</h3><p>Registre la primera mantenci&oacute;n con "+ Nueva Mantenci&oacute;n".</p></div></td></tr></tbody></table></div>
+    </div>
+    <div class="tc" id="tab-prox"><div class="tw"><table><thead><tr><th>Equipo</th><th>Tipo</th><th>Fecha Programada</th><th>Nivel</th><th>D&iacute;as Restantes</th><th>Estado</th><th></th></tr></thead><tbody id="tbody-prox"><tr><td colspan="7"><div class="empty"><div class="ei">&#128197;</div><h3>Sin mantenciones programadas</h3></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <!-- GANTT -->
+  <div class="sec" id="sec-gantt">
+    <div class="shr"><div><h2>Carta Gantt de Recordatorios</h2><p>Planificaci&oacute;n mensual &mdash; NLS-2003-004</p></div><button class="btn btn-p btn-sm" onclick="abrirModalTarea()">+ Nueva Tarea</button></div>
+    <div class="al al-az" style="margin-top:11px"><span class="ai">&#128197;</span><div><strong>Fechas autom&aacute;ticas NLS-2003-004</strong> <strong>Noviembre</strong>: Informe anual novedades al CL &middot; <strong>Marzo</strong>: CL comunica Programa Inversi&oacute;n Anual &middot; <strong>Inmediato</strong>: Equipo nuevo &rarr; Anexo A&ndash;F al CL</div></div>
+    <div style="display:flex;align-items:center;gap:9px;margin-top:11px;flex-wrap:wrap">
+      <button class="btn btn-s btn-sm" onclick="cambiarMes(-1)">&#9664;</button>
+      <strong id="gantt-titulo" style="font-size:14px;color:var(--az);min-width:155px;text-align:center">&mdash;</strong>
+      <button class="btn btn-s btn-sm" onclick="cambiarMes(1)">&#9654;</button>
+      <button class="btn btn-s btn-sm" onclick="irHoy()">Hoy</button>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;font-size:10px"><span>&#129001; Org&aacute;nico</span><span>&#128309; Campa&ntilde;a</span><span>&#128308; Dep&oacute;sito</span><span>&#128994; Informe CL</span><span>&#128992; Vencido</span><span>&#128197; Recordatorio</span></div>
+    </div>
+    <div id="gantt-wrap"></div>
+  </div>
+
+  <!-- INFORMES CL -->
+  <div class="sec" id="sec-informe-cl">
+    <div class="shr"><div><h2>Informes al Comando Log&iacute;stico</h2><p>Obligaciones NLS-2003-004</p></div><button class="btn btn-p btn-sm" onclick="abrirModalInforme()">+ Registrar Informe</button></div>
+    <div class="al al-ro" style="margin-top:11px"><span class="ai">&#128680;</span><div><strong>Obligaciones fijas &mdash; NLS-2003-004 Art. VII.B.2</strong><ul><li><strong>30 d&iacute;as desde recepci&oacute;n norma:</strong> Catastro completo (Anexos G&ndash;L) al Cmd Log&iacute;stico</li><li><strong>Noviembre cada a&ntilde;o:</strong> Informe novedades (equipos nuevos, dep&oacute;sito cumplido)</li><li><strong>Equipo nuevo:</strong> Inmediatamente Anexo A&ndash;F al CL</li><li><strong>Mantenci&oacute;n de Dep&oacute;sito:</strong> Solicitar autorizaci&oacute;n CL PRIMERO</li></ul></div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-top:13px"><div class="st"><div class="sv ro" id="scl-p">0</div><div class="sl">Pendientes</div></div><div class="st"><div class="sv az" id="scl-e">0</div><div class="sl">Enviados</div></div><div class="st"><div class="sv ve" id="scl-a">0</div><div class="sl">Acusados</div></div></div>
+    <div class="tw"><table><thead><tr><th>Fecha</th><th>Tipo de Informe</th><th>Equipos Incluidos</th><th>Estado</th><th>Observaciones</th><th></th></tr></thead><tbody id="tbody-cl"><tr><td colspan="6"><div class="empty"><div class="ei">&#128232;</div><h3>Sin informes registrados</h3></div></td></tr></tbody></table></div>
+    <div class="fp" style="margin-top:13px"><div class="sdiv" style="padding-top:0">PR&Oacute;XIMAS FECHAS OBLIGATORIAS</div><div id="prox-cl"></div></div>
+  </div>
+
+  <!-- ALERTAS NLS -->
+  <div class="sec" id="sec-alertas">
+    <div class="shr"><div><h2>&#128680; Panel de Alertas NLS-2003-004</h2><p>Cumplimiento normativo institucional y legal</p></div></div>
+    <div id="panel-alertas-completo" style="margin-top:12px"></div>
+  </div>
+
+  <!-- NORMA -->
+  <div class="sec" id="sec-norma">
+    <div class="shr"><div><h2>Norma NLS-2003-004</h2><p>FACH &middot; Estado Mayor General &middot; Direcci&oacute;n de Log&iacute;stica &middot; CONFIDENCIAL</p></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:11px">
+      <div class="al al-az"><span class="ai">&#128203;</span><div><strong>Identificaci&oacute;n</strong>N&ordm; NLS-2003-004 &middot; Equipos de Transferencia de Calor<br>Original v1.0 &middot; 07.JUL.2003 &middot; Revisi&oacute;n 2.0 &middot; 17.Sept.2008 &middot; CONFIDENCIAL</div></div>
+      <div class="al al-ro"><span class="ai">&#9878;&#65039;</span><div><strong>Marco Legal</strong>DS N&ordm; 48 Calderas &middot; DS N&ordm; 66 Gas &middot; DS N&ordm; 90 Combustibles &middot; Protocolo de Montreal &middot; SAE 01/2008</div></div>
+    </div>
+    <div class="acc">
+      <div class="aci"><button class="acb" onclick="toggleAcc(this)"><span>I. SITUACI&Oacute;N &mdash; &iquest;Por qu&eacute; existe esta norma?</span><span class="aci2">&#9660;</span></button><div class="acbd"><p>El Comando Log&iacute;stico, a trav&eacute;s de la Divisi&oacute;n de Infraestructura (SDM), es el organismo responsable del Control Administrativo y T&eacute;cnico de los Equipos de Transferencia de Calor (T.C.). Esta norma crea el marco &uacute;nico obligatorio para <strong>todas las unidades FACH</strong>.</p></div></div>
+      <div class="aci"><button class="acb" onclick="toggleAcc(this)"><span>II. PROP&Oacute;SITO &mdash; 4 objetivos obligatorios</span><span class="aci2">&#9660;</span></button><div class="acbd"><div class="norma-box nb-az"><strong>A.</strong> Toda adquisici&oacute;n o mantenimiento de dep&oacute;sito debe coordinarse con la Divisi&oacute;n de Infraestructura del Comando Log&iacute;stico.</div><div class="norma-box nb-az" style="margin-top:6px"><strong>B.</strong> Establecer niveles de responsabilidad para el mantenimiento de <strong>todos</strong> los equipos.</div><div class="norma-box nb-az" style="margin-top:6px"><strong>C.</strong> Mantener <strong>actualizada la informaci&oacute;n</strong> operativa y de mantenimiento.</div><div class="norma-box nb-az" style="margin-top:6px"><strong>D.</strong> Establecer responsabilidades de <strong>seguridad y medio ambiente</strong>.</div></div></div>
+      <div class="aci"><button class="acb" onclick="toggleAcc(this)"><span>&#9878;&#65039; DECRETOS Y PROTOCOLOS &mdash; Marco legal que obliga</span><span class="aci2">&#9660;</span></button><div class="acbd"><div class="norma-box nb-ro"><strong>DS N&ordm; 48 &mdash; Reglamento Calderas y Generadores de Vapor</strong><br>Inscripci&oacute;n obligatoria en SESMA de toda caldera e incinerador. Sin inscripci&oacute;n SESMA = ilegal.</div><div class="norma-box nb-na" style="margin-top:6px"><strong>DS N&ordm; 66 &mdash; Instalaciones Interiores y Medidores de Gas</strong><br>Solo instaladores autorizados pueden intervenir instalaciones de gas.</div><div class="norma-box nb-na" style="margin-top:6px"><strong>DS N&ordm; 90 (1996) &mdash; Seguridad en Combustible L&iacute;quido</strong><br>Protocolos de seguridad en almacenamiento y distribuci&oacute;n de combustibles.</div><div class="norma-box nb-pu" style="margin-top:6px"><strong>Protocolo de Montreal &mdash; Sustancias que agotan la capa de ozono</strong><br>Gas refrigerante R-22 est&aacute; PROHIBIDO. Todo equipo con R-22 debe planificarse su sustituci&oacute;n.</div><div class="norma-box nb-az" style="margin-top:6px"><strong>Cartilla SAE N&ordm; 01/2008 &mdash; Preventiva y control de riesgo calderas</strong><br>Seguir los protocolos de la Cartilla para operaci&oacute;n y mantenci&oacute;n de calderas en todas las unidades FACH.</div></div></div>
+      <div class="aci"><button class="acb" onclick="toggleAcc(this)"><span>VII. DISPOSICIONES &mdash; Responsabilidades Cmd Log&iacute;stico</span><span class="aci2">&#9660;</span></button><div class="acbd"><div class="norma-box nb-ro"><strong>Mantenimiento de Dep&oacute;sito bajo responsabilidad del CL:</strong><br>&bull; AA y Climatizadores &ge; 40.000 BTU/HRS<br>&bull; Calderas &ge; 10.083 Kcal/H<br>&bull; <strong>TODAS</strong> las C&aacute;maras Frigor&iacute;ficas, Ventiladores Alto Caudal e Incineradores</div><div class="norma-box nb-or" style="margin-top:6px"><strong>Programa de Inversi&oacute;n Anual:</strong> El CL comunica en <strong>marzo</strong> de cada a&ntilde;o el programa de inversiones para el a&ntilde;o siguiente.</div><div class="norma-box nb-az" style="margin-top:6px"><strong>Control mediante Anexos G&ndash;L:</strong> G(AA), H(Calderas), I(C&aacute;maras), J(Refrig.), K(Vent.), L(Incin.)</div></div></div>
+      <div class="aci"><button class="acb" onclick="toggleAcc(this)"><span>VII. DISPOSICIONES &mdash; Responsabilidades Unidad Usuaria (AGA)</span><span class="aci2">&#9660;</span></button><div class="acbd"><div class="norma-box nb-ro"><strong>30 d&iacute;as desde recibir la norma:</strong> Remitir catastro completo (Anexos G&ndash;L) al CL.</div><div class="norma-box nb-ro" style="margin-top:5px"><strong>Noviembre cada a&ntilde;o:</strong> Informar novedades al CL &mdash; equipos nuevos, dep&oacute;sito cumplido. Incluir Anexos actualizados.</div><div class="norma-box nb-ro" style="margin-top:5px"><strong>Equipo nuevo:</strong> Enviar inmediatamente Anexo A&ndash;F + Hoja de Vida al CL.</div><div class="norma-box nb-na" style="margin-top:5px"><strong>Mantenci&oacute;n de Dep&oacute;sito &mdash; protocolo obligatorio:</strong><br>1. Solicitar autorizaci&oacute;n del CL y financiamiento PRIMERO<br>2. Enviar equipo COMPLETO (sin canibalizaci&oacute;n), bien embalado<br>3. Adjuntar COPIA del historial y bit&aacute;cora<br>4. Al recibirlo: emitir Informe T&eacute;cnico de Recepci&oacute;n al CL</div><div class="norma-box nb-ve" style="margin-top:5px"><strong>Bit&aacute;cora obligatoria permanente:</strong> Mantener bit&aacute;cora completa por cada equipo.</div></div></div>
+      <div class="aci"><button class="acb" onclick="toggleAcc(this)"><span>&#128203; ANEXOS A&ndash;L &mdash; Qu&eacute; debe contener cada Hoja de Vida</span><span class="aci2">&#9660;</span></button><div class="acbd"><div class="norma-box nb-az" style="margin-bottom:5px"><strong>Anexo A &mdash; AA &gt;40.000 BTU/HRS:</strong> Tipo, Cap. BTU/HRS, Marca/Modelo/Serie, Gas Refrigerante, Compresor, Horas, Firmas</div><div class="norma-box nb-na" style="margin-bottom:5px"><strong>Anexo B &mdash; Calderas:</strong> Cap. T&eacute;rmica Kcal/H, Tipo combustible, <strong>Inscripci&oacute;n SESMA (S&iacute;/No)</strong>, Quemador, Firmas</div><div class="norma-box nb-ve" style="margin-bottom:5px"><strong>Anexo C &mdash; C&aacute;maras Frigor&iacute;ficas:</strong> <strong>Dimensiones LAA metros</strong>, Gas Refrigerante, Condensadora/Evaporadora, Estado, Firmas</div><div class="norma-box nb-or" style="margin-bottom:5px"><strong>Anexo D &mdash; Refrigeradores Industriales:</strong> N&ordm; C&aacute;maras, Gas Refrigerante, Pies c&uacute;bicos, Firmas</div><div class="norma-box nb-pu" style="margin-bottom:5px"><strong>Anexo E &mdash; Ventiladores Alto Caudal:</strong> Tipo (Centr&iacute;fugo/Axial), Cap Motor HP, Caudal m&sup3;/h, Estado, Firmas</div><div class="norma-box nb-ro" style="margin-bottom:5px"><strong>Anexo F &mdash; Incineradores:</strong> Cap. T&eacute;rmica, <strong>Inscripci&oacute;n SESMA (S&iacute;/No)</strong>, Quemador, Combustible, Firmas</div><div class="norma-box nb-az"><strong>Anexos G&ndash;L &mdash; Inventarios Catastrales:</strong> Tablas multi-equipo para el CL. G(AA), H(Calderas), I(C&aacute;maras), J(Refrig.), K(Vent.), L(Incin.)</div></div></div>
+    </div>
+  </div>
+
+  </div><!-- /cnt -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODAL EQUIPO -->
+<div class="mo" id="modal-eq">
+  <div class="md">
+    <div class="mh"><h3 id="meq-titulo">&#128194; Registrar Nuevo Equipo &mdash; NLS-2003-004</h3><button class="mcls" onclick="closeModal('modal-eq')">&#10005;</button></div>
+    <div class="mc">
+      <div class="sdiv" style="padding-top:0">DATOS DE IDENTIFICACI&Oacute;N</div>
+      <div class="fg2">
+        <div class="fg"><label>Tipo de Equipo <span class="req">*</span></label><select id="eq-tipo" onchange="onTipoChange()"><option value="">&mdash; Seleccione tipo &mdash;</option><option value="aa">Aire Acondicionado / Climatizador</option><option value="caldera">Caldera (Central T&eacute;rmica)</option><option value="camara">C&aacute;mara Frigor&iacute;fica</option><option value="refrig">Refrigerador Industrial</option><option value="ventilador">Ventilador Alto Caudal</option><option value="incinerador">Incinerador</option></select></div>
+        <div class="fg"><label>N&ordm; Control Inventario <span class="req">*</span></label><input type="text" id="eq-ninv" placeholder="ej: INV-AGA-2025-0001"></div>
+        <div class="fg"><label>Unidad Interna Usuaria</label><input type="text" id="eq-unidad" placeholder="ej: Secci&oacute;n Servicios AGA"></div>
+        <div class="fg"><label>Unidad de Origen</label><input type="text" id="eq-origen" placeholder="Unidad que lo asign&oacute;"></div>
+        <div class="fg"><label>Marca</label><input type="text" id="eq-marca"></div>
+        <div class="fg"><label>Modelo</label><input type="text" id="eq-modelo"></div>
+        <div class="fg"><label>N&ordm; de Serie</label><input type="text" id="eq-serie"></div>
+        <div class="fg"><label>Ubicaci&oacute;n F&iacute;sica <span class="req">*</span></label><input type="text" id="eq-ubi" placeholder="ej: Pabellón B, Sala 3"></div>
+        <div class="fg"><label>Fecha Instalaci&oacute;n</label><input type="date" id="eq-finst"></div>
+        <div class="fg"><label>Estado Operativo</label><select id="eq-estado"><option value="Operativo">Operativo</option><option value="Operativo con Restricciones">Op. con Restricciones</option><option value="Fuera de Servicio">Fuera de Servicio</option><option value="En Mantenci&#243;n">En Mantenci&oacute;n</option></select></div>
+        <div class="fg"><label>Empresa que hace Mantenci&oacute;n</label><input type="text" id="eq-empresa" placeholder="Nombre empresa (si aplica)"></div>
+        <div class="fg"><label>Horas Trabajadas (mensual)</label><input type="number" id="eq-horas-m" placeholder="horas/mes"></div>
+        <div class="fg"><label>Horas Trabajadas (anual)</label><input type="number" id="eq-horas-a" placeholder="horas/a&ntilde;o"></div>
+      </div>
+      <div id="campos-especificos" style="margin-top:11px"></div>
+      <div id="ind-cl" style="margin-top:8px"></div>
+      <div id="alertas-eq-form" style="margin-top:8px"></div>
+      <div class="fg2" style="margin-top:10px">
+        <div class="fg full"><label>Observaciones / Antecedentes</label><textarea id="eq-obs" placeholder="Estado inicial, novedades, antecedentes t&eacute;cnicos..."></textarea></div>
+        <div class="fg"><label>Nombre Firma Responsable</label><input type="text" id="eq-firma-resp" placeholder="Nombre completo"></div>
+        <div class="fg"><label>Nombre Jefe Grupo Base A&eacute;rea</label><input type="text" id="eq-firma-jefe" placeholder="Nombre completo"></div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="closeModal('modal-eq')">Cancelar</button><button class="btn btn-p" onclick="guardarEquipo()">&#128190; Guardar Equipo</button></div>
+  </div>
+</div>
+
+<!-- MODAL MANTENCION -->
+<div class="mo" id="modal-mt">
+  <div class="md">
+    <div class="mh"><h3>&#128295; Registrar Bit&aacute;cora / Mantenci&oacute;n</h3><button class="mcls" onclick="closeModal('modal-mt')">&#10005;</button></div>
+    <div class="mc">
+      <div id="alerta-deposito" style="display:none;margin-bottom:11px"></div>
+      <div class="fg2">
+        <div class="fg full"><label>Equipo <span class="req">*</span></label><select id="mt-eq" onchange="onMantEqChange()"><option value="">&mdash; Seleccione equipo &mdash;</option></select></div>
+        <div class="fg"><label>Fecha <span class="req">*</span></label><input type="date" id="mt-fecha"></div>
+        <div class="fg"><label>Nivel de Mantenci&oacute;n <span class="req">*</span></label><select id="mt-nivel" onchange="onNivelChange()"><option value="">&mdash; Seleccione nivel &mdash;</option><option value="organico">&#129001; Org&aacute;nico (Unidad)</option><option value="campana">&#128309; Campa&ntilde;a (Unidad)</option><option value="deposito">&#128308; Dep&oacute;sito (Cmd Log&iacute;stico)</option></select></div>
+        <div class="fg"><label>Tipo de Trabajo <span class="req">*</span></label><select id="mt-tipo"><option value="">&mdash; Seleccione &mdash;</option><option>Mantenci&oacute;n Preventiva</option><option>Mantenci&oacute;n Correctiva</option><option>Inspecci&oacute;n T&eacute;cnica</option><option>Reparaci&oacute;n</option><option>Limpieza y Ajuste</option><option>Cambio de Componentes</option><option>Revisi&oacute;n General</option><option>Instalaci&oacute;n / Alta</option><option>Recepci&oacute;n desde Dep&oacute;sito CL</option><option>Baja / Retiro</option></select></div>
+        <div class="fg"><label>T&eacute;cnico Responsable <span class="req">*</span></label><input type="text" id="mt-tecnico" placeholder="Nombre del t&eacute;cnico acreditado"></div>
+        <div class="fg"><label>Acreditaci&oacute;n T&eacute;cnico</label><input type="text" id="mt-acred" placeholder="ej: SEREMI Salud, SEC, empresa"></div>
+        <div class="fg"><label>Empresa Externa (si aplica)</label><input type="text" id="mt-empresa" placeholder="Empresa con acreditaciones CL"></div>
+        <div class="fg"><label>Folio / Orden de Trabajo</label><input type="text" id="mt-folio" placeholder="ej: OT-2025-0042"></div>
+        <div class="fg"><label>Autorizaci&oacute;n CL (si Dep&oacute;sito)</label><input type="text" id="mt-autcl" placeholder="N&ordm; oficio/autorizaci&oacute;n CL"></div>
+        <div class="fg"><label>Pr&oacute;xima Mantenci&oacute;n Programada</label><input type="date" id="mt-prox"></div>
+        <div class="fg"><label>Estado Equipo Post-Intervenci&oacute;n</label><select id="mt-post"><option value="">&mdash; Seleccione &mdash;</option><option>Operativo</option><option>Operativo con Restricciones</option><option>Fuera de Servicio</option><option>En Espera de Repuestos</option><option>Enviado a Dep&oacute;sito CL</option><option>Recibido de Dep&oacute;sito CL</option><option>Dado de Baja</option></select></div>
+        <div class="fg full"><label>Descripci&oacute;n del Trabajo Realizado <span class="req">*</span></label><textarea id="mt-desc" placeholder="Detalle acciones, repuestos, observaciones t&eacute;cnicas..."></textarea></div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="closeModal('modal-mt')">Cancelar</button><button class="btn btn-p" onclick="guardarMantencion()">&#128190; Guardar en Bit&aacute;cora</button></div>
+  </div>
+</div>
+
+<!-- MODAL TAREA GANTT -->
+<div class="mo" id="modal-gt">
+  <div class="md">
+    <div class="mh"><h3>&#128197; Nueva Tarea Gantt</h3><button class="mcls" onclick="closeModal('modal-gt')">&#10005;</button></div>
+    <div class="mc">
+      <div class="fg2">
+        <div class="fg full"><label>T&iacute;tulo <span class="req">*</span></label><input type="text" id="gt-tit" placeholder="ej: Mantenci&oacute;n preventiva AA Pabellón B"></div>
+        <div class="fg"><label>Equipo Relacionado</label><select id="gt-eq"><option value="">&mdash; Sin equipo espec&iacute;fico &mdash;</option></select></div>
+        <div class="fg"><label>Tipo <span class="req">*</span></label><select id="gt-tipo"><option value="">&mdash; Seleccione &mdash;</option><option value="organico">&#129001; Mantenci&oacute;n Org&aacute;nica</option><option value="campana">&#128309; Mantenci&oacute;n Campa&ntilde;a</option><option value="deposito">&#128308; Mantenci&oacute;n Dep&oacute;sito CL</option><option value="cl">&#128994; Informe Cmd Log&iacute;stico</option><option value="record">&#128197; Recordatorio NLS</option></select></div>
+        <div class="fg"><label>Fecha Inicio <span class="req">*</span></label><input type="date" id="gt-ini"></div>
+        <div class="fg"><label>Fecha Fin <span class="req">*</span></label><input type="date" id="gt-fin"></div>
+        <div class="fg"><label>Responsable</label><input type="text" id="gt-resp" placeholder="Nombre responsable"></div>
+        <div class="fg full"><label>Observaciones</label><textarea id="gt-obs" style="min-height:52px" placeholder="Notas, referencias NLS, autorizaciones..."></textarea></div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="closeModal('modal-gt')">Cancelar</button><button class="btn btn-p" onclick="guardarTarea()">&#128190; Agregar al Gantt</button></div>
+  </div>
+</div>
+
+<!-- MODAL INFORME CL -->
+<div class="mo" id="modal-inf">
+  <div class="md">
+    <div class="mh"><h3>&#128232; Registrar Informe al Cmd Log&iacute;stico</h3><button class="mcls" onclick="closeModal('modal-inf')">&#10005;</button></div>
+    <div class="mc">
+      <div class="fg2">
+        <div class="fg"><label>Fecha de Env&iacute;o <span class="req">*</span></label><input type="date" id="inf-fecha"></div>
+        <div class="fg"><label>Tipo de Informe <span class="req">*</span></label><select id="inf-tipo"><option value="">&mdash; Seleccione &mdash;</option><option value="catastro_inicial">Catastro Inicial (30 d&iacute;as)</option><option value="noviembre_anual">Informe Anual Noviembre</option><option value="solicitud_deposito">Solicitud Mantenci&oacute;n Dep&oacute;sito</option><option value="recepcion_deposito">Informe Recepci&oacute;n desde Dep&oacute;sito</option><option value="alta_equipo">Alta Equipo Nuevo (Anexo A&ndash;F)</option><option value="baja_equipo">Proposici&oacute;n de Baja</option><option value="informe_tecnico">Informe T&eacute;cnico</option><option value="otro">Otro</option></select></div>
+        <div class="fg"><label>Estado</label><select id="inf-estado"><option value="pendiente">&#9203; Pendiente de Env&iacute;o</option><option value="enviado">&#128228; Enviado</option><option value="acusado">&#9989; Acusado Recibo CL</option></select></div>
+        <div class="fg"><label>N&ordm; Oficio / Referencia</label><input type="text" id="inf-oficio" placeholder="N&ordm; de oficio"></div>
+        <div class="fg full"><label>Equipos Incluidos (N&ordm; Control)</label><input type="text" id="inf-eqs" placeholder="ej: INV-AGA-2025-0001, INV-AGA-2025-0002"></div>
+        <div class="fg full"><label>Observaciones / Respuesta CL</label><textarea id="inf-obs" style="min-height:52px" placeholder="Descripci&oacute;n del informe, instrucciones del CL..."></textarea></div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="closeModal('modal-inf')">Cancelar</button><button class="btn btn-p" onclick="guardarInforme()">&#128190; Guardar Informe</button></div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE BITACORA -->
+<div class="mo" id="modal-det">
+  <div class="md">
+    <div class="mh"><h3>&#128203; Detalle Bit&aacute;cora</h3><button class="mcls" onclick="closeModal('modal-det')">&#10005;</button></div>
+    <div class="mc" id="det-body"></div>
+    <div class="mf"><button class="btn btn-s" onclick="closeModal('modal-det')">Cerrar</button></div>
+  </div>
+</div>
+
+<div id="ov" onclick="toggleSB()"></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const TIPOS={aa:{label:'Aire Acondicionado',anx:'A',anxInv:'G',umbral:40000,uc:'BTU/HRS',sempreCL:false},caldera:{label:'Caldera (C. Termica)',anx:'B',anxInv:'H',umbral:10083,uc:'Kcal/H',sempreCL:false},camara:{label:'Camara Frigorifica',anx:'C',anxInv:'I',umbral:0,uc:'',sempreCL:true},refrig:{label:'Refrigerador Industrial',anx:'D',anxInv:'J',umbral:0,uc:'',sempreCL:true},ventilador:{label:'Ventilador Alto Caudal',anx:'E',anxInv:'K',umbral:0,uc:'m3/h',sempreCL:true},incinerador:{label:'Incinerador',anx:'F',anxInv:'L',umbral:0,uc:'',sempreCL:true}};
+const CAMP={aa:[{id:'eq-cap',lab:'Capacidad (BTU/HRS) *',tp:'number',ph:'ej: 12000',cl:true},{id:'eq-subtipo',lab:'Subtipo',tp:'select',opts:['','Compacto','Fan Coil','Split']},{id:'eq-gas',lab:'Gas Refrigerante *',tp:'text',ph:'ej: R-410A, R-32, R-22'},{id:'eq-s-compr',lab:'N Serie Compresor',tp:'text',ph:''},{id:'eq-m-compr',lab:'Modelo Compresor',tp:'text',ph:''},{id:'eq-k-compr',lab:'Cap. Compresor (HP)',tp:'number',ph:'HP'}],caldera:[{id:'eq-cap',lab:'Cap. Termica (Kcal/H) *',tp:'number',ph:'ej: 8000',cl:true},{id:'eq-rend',lab:'Rendimiento (Lts/Hrs)',tp:'number',ph:''},{id:'eq-comb',lab:'Tipo Combustible',tp:'text',ph:'Gas, Diesel, Otro'},{id:'eq-sesma',lab:'Inscripcion SESMA *',tp:'select',opts:['','Si','No'],req:true},{id:'eq-f-sesma',lab:'Fecha Inscripcion SESMA',tp:'date',ph:''},{id:'eq-m-quem',lab:'Marca Quemador',tp:'text',ph:''},{id:'eq-s-quem',lab:'N Serie Quemador',tp:'text',ph:''},{id:'eq-modif',lab:'Tipo de Modificacion',tp:'text',ph:'si aplica'}],camara:[{id:'eq-dim-l',lab:'Largo (mts)',tp:'number',ph:''},{id:'eq-dim-a',lab:'Ancho (mts)',tp:'number',ph:''},{id:'eq-dim-h',lab:'Alto (mts)',tp:'number',ph:''},{id:'eq-gas',lab:'Gas Refrigerante *',tp:'text',ph:'ej: R-404A'},{id:'eq-apl',lab:'Tipo Aplicacion',tp:'select',opts:['','Congelados','Mantencion','Otros']},{id:'eq-m-cond',lab:'Marca U. Condensadora',tp:'text',ph:''},{id:'eq-m-evap',lab:'Marca U. Evaporadora',tp:'text',ph:''},{id:'eq-s-compr',lab:'N Serie Compresor',tp:'text',ph:''},{id:'eq-pintura',lab:'Estado Pintura',tp:'select',opts:['','Bueno','Regular','Malo']},{id:'eq-corros',lab:'Estado Corrosion',tp:'select',opts:['','Sin corrosion','Leve','Severo']},{id:'eq-elec',lab:'Instalacion Electrica',tp:'select',opts:['','Conforme','Por revisar','Deficiente']}],refrig:[{id:'eq-ncam',lab:'N de Camaras',tp:'number',ph:''},{id:'eq-cuerpos',lab:'N de Cuerpos',tp:'number',ph:''},{id:'eq-gas',lab:'Gas Refrigerante',tp:'text',ph:''},{id:'eq-pies',lab:'Capacidad (pies3)',tp:'number',ph:''},{id:'eq-s-compr',lab:'N Serie Compresor',tp:'text',ph:''}],ventilador:[{id:'eq-vtipo',lab:'Tipo Ventilador',tp:'select',opts:['','Centrifugo','Axial']},{id:'eq-cap',lab:'Cap. Motor (HP)',tp:'number',ph:'HP'},{id:'eq-caudal',lab:'Caudal Aire (m3/h)',tp:'number',ph:''},{id:'eq-pintura',lab:'Estado Pintura',tp:'select',opts:['','Bueno','Regular','Malo']},{id:'eq-corros',lab:'Estado Corrosion',tp:'select',opts:['','Sin corrosion','Leve','Severo']},{id:'eq-mec',lab:'Estado Mecanico',tp:'select',opts:['','Bueno','Regular','Deficiente']}],incinerador:[{id:'eq-cap',lab:'Cap. Termica',tp:'number',ph:''},{id:'eq-rend',lab:'Rendimiento (Lts/Hrs)',tp:'number',ph:''},{id:'eq-comb',lab:'Tipo Combustible',tp:'text',ph:''},{id:'eq-sesma',lab:'Inscripcion SESMA *',tp:'select',opts:['','Si','No'],req:true},{id:'eq-f-sesma',lab:'Fecha Inscripcion SESMA',tp:'date',ph:''},{id:'eq-m-quem',lab:'Marca Quemador',tp:'text',ph:''},{id:'eq-cant-quem',lab:'Cantidad Quemadores',tp:'number',ph:''},{id:'eq-modif',lab:'Tipo de Modificacion',tp:'text',ph:'si aplica'}]};
+function esCL(tipo,cap){const t=TIPOS[tipo];if(!t)return false;if(t.sempreCL)return true;return(parseFloat(cap)||0)>=t.umbral;}
+let db=null;
+function initDB(){const r=indexedDB.open('NLS2003004v2',2);r.onerror=e=>{console.error('IDB:',e.target.error);showToast('Error BD','err');};r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains('equipos')){const s=d.createObjectStore('equipos',{keyPath:'id',autoIncrement:true});s.createIndex('tipo','tipo',{unique:false});}if(!d.objectStoreNames.contains('bitacoras')){const s=d.createObjectStore('bitacoras',{keyPath:'id',autoIncrement:true});s.createIndex('eqId','equipoId',{unique:false});}if(!d.objectStoreNames.contains('tareas'))d.createObjectStore('tareas',{keyPath:'id',autoIncrement:true});if(!d.objectStoreNames.contains('informes'))d.createObjectStore('informes',{keyPath:'id',autoIncrement:true});};r.onsuccess=e=>{db=e.target.result;db.onerror=ev=>console.error(ev.target.error);actualizarTodo();};}
+function txGet(store,cb){if(!db){cb([]);return;}const tx=db.transaction(store,'readonly');tx.onerror=e=>console.error(e);tx.objectStore(store).getAll().onsuccess=e=>cb(e.target.result||[]);}
+const TTLS={inicio:'Dashboard NLS-2003-004',catastro:'Catastro de Equipos','hojas-vida':'Hojas de Vida (Anexos A-F)',mantencion:'Bitacoras / Mantenciones',gantt:'Carta Gantt',alertas:'Panel de Alertas NLS','informe-cl':'Informes Cmd Logistico',norma:'Norma NLS-2003-004'};
+function goTo(id){document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));const se=document.getElementById('sec-'+id);const na=document.getElementById('nav-'+id);if(se)se.classList.add('active');if(na)na.classList.add('active');document.getElementById('ptitle').textContent=TTLS[id]||id;if(window.innerWidth<=768)closeSB();const acc={catastro:renderEquipos,'hojas-vida':()=>{popularSelEq('sel-hv-eq','hv');renderHojaVida();},mantencion:()=>{popularSelEq('flt-mt-eq','todos');renderMantenciones();renderProximas();},gantt:()=>{popularSelEq('gt-eq','ninguno');renderGantt();},'informe-cl':()=>{renderInformesCL();renderProxCL();},alertas:renderPanelAlertas,inicio:actualizarTodo};if(acc[id])acc[id]();}
+function toggleSB(){document.getElementById('sb').classList.toggle('open');document.getElementById('ov').classList.toggle('show');}
+function closeSB(){document.getElementById('sb').classList.remove('open');document.getElementById('ov').classList.remove('show');}
+window.addEventListener('resize',()=>{if(window.innerWidth>768)closeSB();});
+document.getElementById('fb').textContent=new Date().toLocaleDateString('es-CL',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+function toggleAcc(b){const bd=b.nextElementSibling;const op=b.classList.contains('open');document.querySelectorAll('.acb.open').forEach(x=>{x.classList.remove('open');x.nextElementSibling.classList.remove('open');});if(!op){b.classList.add('open');bd.classList.add('open');}}
+function switchTab(b,id){const c=b.closest('.sec');c.querySelectorAll('.tb').forEach(x=>x.classList.remove('active'));c.querySelectorAll('.tc').forEach(x=>x.classList.remove('active'));b.classList.add('active');const el=document.getElementById(id);if(el)el.classList.add('active');}
+function openModal(id){const el=document.getElementById(id);if(el)el.classList.add('open');}
+function closeModal(id){const el=document.getElementById(id);if(el)el.classList.remove('open');}
+document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+let toastTmr=null;
+function showToast(msg,tipo){const t=document.getElementById('toast');t.textContent=msg;t.className='show'+(tipo?' '+tipo:'');if(toastTmr)clearTimeout(toastTmr);toastTmr=setTimeout(()=>{t.className='';},3400);}
+function onTipoChange(){const tipo=document.getElementById('eq-tipo').value;const campos=CAMP[tipo]||[];const divC=document.getElementById('campos-especificos');const divCL=document.getElementById('ind-cl');const divAl=document.getElementById('alertas-eq-form');if(!campos.length){divC.innerHTML='';divCL.innerHTML='';divAl.innerHTML='';return;}const t=TIPOS[tipo];divC.innerHTML='<div class="sdiv">DATOS ESPECIFICOS - ANEXO "'+t.anx+'" NLS-2003-004</div><div class="fg2">'+campos.map(c=>'<div class="fg"><label>'+c.lab+'</label>'+(c.tp==='select'?'<select id="'+c.id+'">'+c.opts.map(o=>'<option>'+o+'</option>').join('')+'</select>':'<input type="'+c.tp+'" id="'+c.id+'" placeholder="'+(c.ph||'')+'" '+(c.cl?'oninput="actualizarIndCL()"':'')+'>')+'</div>').join('')+'</div>';actualizarIndCL();let als='';if(tipo==='caldera'||tipo==='incinerador')als+='<div class="al al-ro"><span class="ai">&#9878;</span><div><strong>DS N&ordm; 48 - Inscripcion SESMA OBLIGATORIA</strong>Sin inscripcion SESMA la operacion es ilegal.</div></div>';if(tipo==='aa'||tipo==='camara'||tipo==='refrig')als+='<div class="al al-pu"><span class="ai">&#127758;</span><div><strong>Protocolo de Montreal - Gas Refrigerante</strong>El gas R-22 esta PROHIBIDO. Si el equipo usa R-22, debe planificarse su reemplazo.</div></div>';if(t.sempreCL||t.umbral>0)als+='<div class="al al-na"><span class="ai">&#128232;</span><div><strong>Equipo nuevo - Obligacion NLS-2003-004 Art. VII.B.2.a</strong>Al guardar este equipo debe enviar inmediatamente el Anexo "'+t.anx+'" al Comando Logistico.</div></div>';divAl.innerHTML=als;}
+function actualizarIndCL(){const tipo=document.getElementById('eq-tipo').value;const capEl=document.getElementById('eq-cap');const div=document.getElementById('ind-cl');if(!div||!tipo)return;const t=TIPOS[tipo];if(!t)return;const cap=capEl?parseFloat(capEl.value)||0:0;const cl=esCL(tipo,cap);div.innerHTML=cl?'<div class="norma-box nb-ro"><strong>&#128308; RESPONSABILIDAD: COMANDO LOGISTICO</strong><br>'+(t.sempreCL?'Este tipo de equipo es SIEMPRE responsabilidad del Cmd Logistico.':'Capacidad '+cap.toLocaleString('es-CL')+' '+t.uc+' >= '+t.umbral.toLocaleString('es-CL')+' '+t.uc+' -> Cmd Logistico.')+'</div>':'<div class="norma-box nb-ve"><strong>&#129001; RESPONSABILIDAD: UNIDAD USUARIA</strong><br>'+(cap?'Capacidad '+cap.toLocaleString('es-CL')+' '+t.uc+' < '+t.umbral.toLocaleString('es-CL')+' '+t.uc+' -> La Unidad es responsable.':'Ingrese capacidad para confirmar nivel.')+'</div>';}
+function abrirModalEquipo(){document.getElementById('eq-finst').value=new Date().toISOString().split('T')[0];openModal('modal-eq');}
+function guardarEquipo(){if(!db){showToast('BD no lista','err');return;}const tipo=document.getElementById('eq-tipo').value;const ninv=document.getElementById('eq-ninv').value.trim();const ubi=document.getElementById('eq-ubi').value.trim();if(!tipo||!ninv||!ubi){showToast('Complete campos obligatorios (*)','err');return;}const capEl=document.getElementById('eq-cap');const cap=capEl?parseFloat(capEl.value)||0:0;const cl=esCL(tipo,cap);const extras={};(CAMP[tipo]||[]).forEach(c=>{const el=document.getElementById(c.id);if(el)extras[c.id]=el.value;});if((tipo==='caldera'||tipo==='incinerador')&&extras['eq-sesma']==='No'){if(!confirm('ADVERTENCIA: Caldera/Incinerador SIN inscripcion SESMA es ilegal (DS N48). Desea continuar?'))return;}const gas=(extras['eq-gas']||'').toUpperCase();if(gas.includes('R-22')||gas.includes('R22')){if(!confirm('ADVERTENCIA: El gas R-22 esta PROHIBIDO por el Protocolo de Montreal. Desea continuar?'))return;}const eq={tipo,nControlInventario:ninv,marca:document.getElementById('eq-marca').value.trim(),modelo:document.getElementById('eq-modelo').value.trim(),serie:document.getElementById('eq-serie').value.trim(),ubicacion:ubi,unidadUsuaria:document.getElementById('eq-unidad').value.trim(),unidadOrigen:document.getElementById('eq-origen').value.trim(),fechaInstalacion:document.getElementById('eq-finst').value,estadoOperativo:document.getElementById('eq-estado').value,empresa:document.getElementById('eq-empresa').value.trim(),horasMensuales:parseFloat(document.getElementById('eq-horas-m').value)||0,horasAnuales:parseFloat(document.getElementById('eq-horas-a').value)||0,firmaResponsable:document.getElementById('eq-firma-resp').value.trim(),firmaJefe:document.getElementById('eq-firma-jefe').value.trim(),observaciones:document.getElementById('eq-obs').value.trim(),capacidad:cap,esCL:cl,extras,createdAt:new Date().toISOString()};const tx=db.transaction('equipos','readwrite');tx.onerror=e=>showToast('Error: '+e.target.error,'err');tx.objectStore('equipos').add(eq).onsuccess=()=>{closeModal('modal-eq');limpiarEq();showToast('Equipo registrado - Anexo '+TIPOS[tipo].anx);if(cl)showToast('ENVIAR Anexo '+TIPOS[tipo].anx+' al Cmd Logistico AHORA','warn');renderEquipos();actualizarTodo();};}
+function limpiarEq(){['eq-tipo','eq-ninv','eq-marca','eq-modelo','eq-serie','eq-ubi','eq-unidad','eq-origen','eq-empresa','eq-horas-m','eq-horas-a','eq-firma-resp','eq-firma-jefe','eq-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});const ee=document.getElementById('eq-estado');if(ee)ee.value='Operativo';const ef=document.getElementById('eq-finst');if(ef)ef.value='';document.getElementById('campos-especificos').innerHTML='';document.getElementById('ind-cl').innerHTML='';document.getElementById('alertas-eq-form').innerHTML='';}
+function renderEquipos(){if(!db)return;const ft=(document.getElementById('flt-eq')?.value||'').toLowerCase();const ftp=document.getElementById('flt-tipo')?.value||'';const fnv=document.getElementById('flt-niv')?.value||'';const tb=document.getElementById('tbody-eq');if(!tb)return;txGet('equipos',eqs=>{if(ftp)eqs=eqs.filter(q=>q.tipo===ftp);if(fnv==='unidad')eqs=eqs.filter(q=>!q.esCL);if(fnv==='cl')eqs=eqs.filter(q=>q.esCL);if(ft)eqs=eqs.filter(q=>(q.nControlInventario+q.marca+q.modelo+q.ubicacion).toLowerCase().includes(ft));if(!eqs.length){tb.innerHTML='<tr><td colspan="9"><div class="empty"><div class="ei">&#128194;</div><h3>Sin equipos</h3><p>Haga clic en "+ Nuevo Equipo".</p></div></td></tr>';return;}tb.innerHTML=eqs.map(q=>{const t=TIPOS[q.tipo]||{label:q.tipo,anx:'?'};const capS=q.capacidad>0?q.capacidad.toLocaleString('es-CL')+' '+(TIPOS[q.tipo]?.uc||''):'--';let als='';const gas=(q.extras?.['eq-gas']||'').toUpperCase();if(gas.includes('R-22')||gas.includes('R22'))als+='<span class="b pu">R-22</span> ';if((q.tipo==='caldera'||q.tipo==='incinerador')&&q.extras?.['eq-sesma']==='No')als+='<span class="b ro">SESMA</span>';if(!als)als='<span class="b ve">OK</span>';return '<tr><td><strong>'+q.nControlInventario+'</strong><br><small style="color:var(--gr4)">Anx. '+t.anx+'</small></td><td>'+t.label+'</td><td>'+(q.marca||'--')+' '+(q.modelo||'')+'<br><small>'+(q.serie?'S/N: '+q.serie:'')+'</small></td><td style="font-size:11px">'+capS+'</td><td>'+q.ubicacion+'</td><td>'+(q.esCL?'<span class="b CL">&#128308; Cmd Logistico</span>':'<span class="b ve">&#129001; Unidad</span>')+'</td><td>'+als+'</td><td><span class="b '+(q.estadoOperativo==='Operativo'?'ve':q.estadoOperativo?.includes('Baja')?'ro':'or')+'">'+( q.estadoOperativo||'--')+'</span></td><td style="white-space:nowrap"><button class="btn btn-s btn-sm" onclick="verHV('+q.id+')">HV</button> <button class="btn btn-n btn-sm" onclick="irBitacora('+q.id+')">&#128295;</button> <button class="btn btn-r btn-sm" onclick="elimEq('+q.id+')">&#128465;</button></td></tr>';}).join('');});}
+function verHV(id){goTo('hojas-vida');setTimeout(()=>{const s=document.getElementById('sel-hv-eq');if(s){s.value=id;renderHojaVida();}},200);}
+function irBitacora(id){goTo('mantencion');setTimeout(()=>{const s=document.getElementById('flt-mt-eq');if(s){s.value=id;renderMantenciones();}},200);}
+function elimEq(id){if(!db||!confirm('Eliminar equipo y todas sus bitacoras?'))return;const tx=db.transaction('equipos','readwrite');tx.onerror=e=>showToast('Error: '+e.target.error,'err');tx.objectStore('equipos').delete(id).onsuccess=()=>{showToast('Equipo eliminado');renderEquipos();actualizarTodo();};}
+function popularSelEq(selId,modo){if(!db)return;txGet('equipos',eqs=>{const el=document.getElementById(selId);if(!el)return;const base=modo==='todos'?'<option value="">Todos los equipos</option>':modo==='ninguno'?'<option value="">-- Sin equipo --</option>':modo==='hv'?'<option value="">-- Seleccione equipo --</option>':'<option value="">-- Seleccione --</option>';el.innerHTML=base+eqs.map(q=>'<option value="'+q.id+'">['+q.nControlInventario+'] '+(TIPOS[q.tipo]?.label||q.tipo)+' -- '+q.ubicacion+'</option>').join('');});}
+function renderHojaVida(){if(!db)return;const id=parseInt(document.getElementById('sel-hv-eq')?.value)||0;const div=document.getElementById('hoja-vida-content');if(!div)return;if(!id){div.innerHTML='<div class="empty" style="background:#fff;border-radius:9px;border:1px solid var(--gr3);padding:40px"><div class="ei">&#128203;</div><h3>Seleccione un equipo</h3></div>';return;}const txE=db.transaction('equipos','readonly');txE.objectStore('equipos').get(id).onsuccess=ev=>{const q=ev.target.result;if(!q){div.innerHTML='<div class="empty"><h3>Equipo no encontrado</h3></div>';return;}const t=TIPOS[q.tipo]||{};const gas=(q.extras?.['eq-gas']||'').toUpperCase();const r22=gas.includes('R-22')||gas.includes('R22');const sinSesma=(q.tipo==='caldera'||q.tipo==='incinerador')&&q.extras?.['eq-sesma']==='No';const txB=db.transaction('bitacoras','readonly');const idx=txB.objectStore('bitacoras').index('eqId');idx.getAll(id).onsuccess=eb=>{const bitas=(eb.target.result||[]).sort((a,b)=>b.fecha.localeCompare(a.fecha));const campos=CAMP[q.tipo]||[];const ext=q.extras||{};let ext_html='';if(campos.length){ext_html='<div class="sdiv">DATOS ESPECIFICOS ANEXO "'+(t.anx||'?')+'"</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;font-size:11.5px">'+campos.filter(c=>ext[c.id]).map(c=>{const v=ext[c.id];const isR22=(c.id==='eq-gas'&&(v.toUpperCase().includes('R-22')||v.toUpperCase().includes('R22')));const isSesmaNo=(c.id==='eq-sesma'&&v==='No');return '<div><div style="font-size:9.5px;color:var(--gr4);font-weight:700;text-transform:uppercase">'+c.lab.replace(' *','')+'</div><div style="margin-top:1px">'+(isR22?'<span class="b pu">R-22 PROHIBIDO</span>':isSesmaNo?'<span class="b ro">'+v+' - ILEGAL DS48</span>':v||'--')+'</div></div>';}).join('')+'</div>';}let bita_html='';if(!bitas.length){bita_html='<div class="al al-ro"><span class="ai">&#9888;</span><div><strong>Sin registros de bitacora</strong>Obligatorio mantener bitacora por cada equipo (Art. VII.B.2.e NLS-2003-004).</div></div>';}else{const nLbl={organico:'&#129001; Organico',campana:'&#128309; Campana',deposito:'&#128308; Deposito CL'};bita_html='<div class="tw" style="margin-top:0"><table><thead><tr><th>Fecha</th><th>Nivel</th><th>Trabajo</th><th>Tecnico</th><th>Estado Post</th><th>Proxima</th></tr></thead><tbody>'+bitas.map(b=>'<tr><td>'+b.fecha+'</td><td>'+(nLbl[b.nivel]||b.nivel)+'</td><td>'+b.tipoTrabajo+'</td><td>'+b.tecnico+'</td><td>'+(b.estadoPost||'--')+'</td><td>'+(b.proximaFecha||'--')+'</td></tr>').join('')+'</tbody></table></div>';}div.innerHTML='<div style="background:#fff;border-radius:9px;border:1px solid var(--gr3);overflow:hidden"><div style="background:var(--az);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div><div style="font-size:9px;opacity:.7;text-transform:uppercase">FUERZA AEREA DE CHILE - ESTADO MAYOR GENERAL - DIRECCION DE LOGISTICA</div><div style="font-size:11px;margin-top:2px">NORMA LOGISTICA DE SERVICIOS - EQUIPOS DE TRANSFERENCIA DE CALOR</div><div style="font-size:16px;font-weight:800;margin-top:3px">HOJA DE VIDA - ANEXO "'+(t.anx||'?')+'" - '+(t.label||'').toUpperCase()+'</div></div><div style="text-align:right;font-size:10px;opacity:.8"><div>NLS-2003-004</div><div>REV: 2.0</div><div>'+new Date().toLocaleDateString('es-CL')+'</div></div></div>'+(sinSesma?'<div class="al al-ro" style="border-radius:0;border:none;border-bottom:1px solid #FFCDD2"><span class="ai">&#9878;</span><div><strong>ALERTA LEGAL - DS N48: SIN INSCRIPCION SESMA</strong>Operacion ilegal. Regularizar inmediatamente.</div></div>':'')+(r22?'<div class="al al-pu" style="border-radius:0;border:none;border-bottom:1px solid #CE93D8"><span class="ai">&#127758;</span><div><strong>ALERTA - Protocolo de Montreal: Gas R-22 PROHIBIDO</strong>Planificar sustitucion del gas refrigerante.</div></div>':'')+'<div style="padding:14px 16px"><div class="sdiv" style="padding-top:0">IDENTIFICACION</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;font-size:11.5px">'+[['Unidad Interna',q.unidadUsuaria||'--'],['N Control','<strong>'+q.nControlInventario+'</strong>'],['Ubicacion',q.ubicacion],['Instalacion',q.fechaInstalacion||'--'],['Estado','<span class="b '+(q.estadoOperativo==='Operativo'?'ve':'or')+'">'+q.estadoOperativo+'</span>']].map(x=>'<div><div style="font-size:9.5px;color:var(--gr4);font-weight:700;text-transform:uppercase">'+x[0]+'</div><div style="margin-top:1px">'+x[1]+'</div></div>').join('')+'</div><div class="sdiv">DATOS TECNICOS</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;font-size:11.5px">'+[['Marca',q.marca||'--'],['Modelo',q.modelo||'--'],['N Serie',q.serie||'--'],['Capacidad',q.capacidad>0?q.capacidad.toLocaleString('es-CL')+' '+(t.uc||''):'--'],['Empresa Mantencion',q.empresa||'--']].map(x=>'<div><div style="font-size:9.5px;color:var(--gr4);font-weight:700;text-transform:uppercase">'+x[0]+'</div><div style="margin-top:1px">'+x[1]+'</div></div>').join('')+'</div>'+ext_html+'<div class="sdiv">BITACORA</div>'+bita_html+'<div class="sdiv">FIRMAS</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px"><div style="border:1px solid var(--gr3);border-radius:7px;padding:12px;text-align:center"><div style="font-size:10px;color:var(--gr4);font-weight:700;text-transform:uppercase;margin-bottom:20px">Firma Responsable</div>'+(q.firmaResponsable?'<div style="font-size:13px;font-weight:700;border-top:1px solid var(--tx);padding-top:6px">'+q.firmaResponsable+'</div>':'<div style="border-top:1px solid var(--gr3);padding-top:6px;font-size:11px;color:var(--gr4)">Pendiente</div>')+'</div><div style="border:1px solid var(--gr3);border-radius:7px;padding:12px;text-align:center"><div style="font-size:10px;color:var(--gr4);font-weight:700;text-transform:uppercase;margin-bottom:20px">Firma Jefe Grupo Base Aerea</div>'+(q.firmaJefe?'<div style="font-size:13px;font-weight:700;border-top:1px solid var(--tx);padding-top:6px">'+q.firmaJefe+'</div>':'<div style="border-top:1px solid var(--gr3);padding-top:6px;font-size:11px;color:var(--gr4)">Pendiente</div>')+'</div></div>'+(q.observaciones?'<div class="sdiv">OBSERVACIONES</div><div style="font-size:11.5px;line-height:1.6;background:var(--gr);padding:10px;border-radius:6px">'+q.observaciones+'</div>':'')+'</div></div>';};};} 
+function onMantEqChange(){const id=parseInt(document.getElementById('mt-eq').value)||0;if(!id||!db)return;const tx=db.transaction('equipos','readonly');tx.objectStore('equipos').get(id).onsuccess=e=>{const eq=e.target.result;if(!eq)return;if(eq.esCL){const ad=document.getElementById('alerta-deposito');ad.style.display='block';ad.innerHTML='<div class="al al-ro"><span class="ai">&#128308;</span><div><strong>Equipo bajo responsabilidad del Cmd Logistico</strong>Para Mantencion de Deposito requiere autorizacion previa del CL.</div></div>';}};}
+function onNivelChange(){const niv=document.getElementById('mt-nivel').value;const div=document.getElementById('alerta-deposito');if(niv==='deposito'){div.style.display='block';div.innerHTML='<div class="al al-ro"><span class="ai">&#9888;</span><div><strong>Mantencion de Deposito - Verificar obligaciones</strong><ul><li>Tiene autorizacion del Cmd Logistico?</li><li>El equipo ira completo, sin canibalizacion?</li><li>Adjuntara copia del historial y bitacora?</li></ul></div></div>';}else if(niv)div.style.display='none';}
+function abrirModalMant(){popularSelEq('mt-eq','seleccionar');document.getElementById('mt-fecha').value=new Date().toISOString().split('T')[0];document.getElementById('alerta-deposito').style.display='none';openModal('modal-mt');}
+function guardarMantencion(){if(!db){showToast('BD no lista','err');return;}const eqId=parseInt(document.getElementById('mt-eq').value);const fecha=document.getElementById('mt-fecha').value;const nivel=document.getElementById('mt-nivel').value;const tipo=document.getElementById('mt-tipo').value;const tec=document.getElementById('mt-tecnico').value.trim();const desc=document.getElementById('mt-desc').value.trim();if(!eqId||!fecha||!nivel||!tipo||!tec||!desc){showToast('Complete campos obligatorios (*)','err');return;}if(nivel==='deposito'&&!document.getElementById('mt-autcl').value.trim()){if(!confirm('Mantencion de Deposito sin Autorizacion CL. Desea continuar?'))return;}const reg={equipoId:eqId,fecha,nivel,tipoTrabajo:tipo,tecnico:tec,acreditacion:document.getElementById('mt-acred').value.trim(),empresa:document.getElementById('mt-empresa').value.trim(),folio:document.getElementById('mt-folio').value.trim(),autorizacionCL:document.getElementById('mt-autcl').value.trim(),proximaFecha:document.getElementById('mt-prox').value,estadoPost:document.getElementById('mt-post').value,descripcion:desc,createdAt:new Date().toISOString()};const tx=db.transaction(['bitacoras','equipos'],'readwrite');tx.onerror=e=>showToast('Error: '+e.target.error,'err');tx.objectStore('bitacoras').add(reg).onsuccess=()=>{if(reg.estadoPost){const es=tx.objectStore('equipos');es.get(eqId).onsuccess=ev=>{const eq=ev.target.result;if(eq){eq.estadoOperativo=reg.estadoPost;es.put(eq);}};}closeModal('modal-mt');limpiarMant();showToast('Registrado en bitacora ('+nivel+')');if(nivel==='deposito')showToast('Notifique al Cmd Logistico (Informe Tecnico)','warn');renderMantenciones();renderProximas();actualizarTodo();};}
+function limpiarMant(){['mt-eq','mt-fecha','mt-nivel','mt-tipo','mt-tecnico','mt-acred','mt-empresa','mt-folio','mt-autcl','mt-prox','mt-post','mt-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('alerta-deposito').style.display='none';}
+function renderMantenciones(){if(!db)return;const fEq=parseInt(document.getElementById('flt-mt-eq')?.value)||0;const fNiv=document.getElementById('flt-mt-niv')?.value||'';const tb=document.getElementById('tbody-mt');if(!tb)return;txGet('equipos',eqs=>{const em={};eqs.forEach(q=>em[q.id]=q);txGet('bitacoras',rows=>{let r=[...rows].sort((a,b)=>b.fecha.localeCompare(a.fecha));if(fEq)r=r.filter(x=>x.equipoId===fEq);if(fNiv)r=r.filter(x=>x.nivel===fNiv);document.getElementById('sm-org').textContent=rows.filter(x=>x.nivel==='organico').length;document.getElementById('sm-camp').textContent=rows.filter(x=>x.nivel==='campana').length;document.getElementById('sm-dep').textContent=rows.filter(x=>x.nivel==='deposito').length;if(!r.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><div class="ei">&#128295;</div><h3>Sin bitacoras</h3></div></td></tr>';return;}const nL={organico:'<span class="b ve">Organico</span>',campana:'<span class="b az">Campana</span>',deposito:'<span class="b ro">Deposito CL</span>'};tb.innerHTML=r.map(x=>{const eq=em[x.equipoId];const nm=eq?'['+eq.nControlInventario+'] '+(TIPOS[eq.tipo]?.label||eq.tipo):'Eq#'+x.equipoId;return '<tr><td>'+x.fecha+'</td><td>'+nm+'</td><td>'+(nL[x.nivel]||x.nivel)+'</td><td>'+x.tipoTrabajo+(x.folio?'<br><small>'+x.folio+'</small>':'')+'</td><td>'+x.tecnico+(x.empresa?'<br><small>'+x.empresa+'</small>':'')+'</td><td>'+(x.estadoPost||'--')+'</td><td>'+(x.proximaFecha||'--')+'</td><td><button class="btn btn-s btn-sm" onclick="verDetMant('+x.id+')">&#128065;</button> <button class="btn btn-r btn-sm" onclick="elimMant('+x.id+')">&#128465;</button></td></tr>';}).join('');});});}
+function renderProximas(){if(!db)return;const hoy=new Date();const h30=new Date(Date.now()+30*86400000);const tb=document.getElementById('tbody-prox');if(!tb)return;txGet('equipos',eqs=>{const em={};eqs.forEach(q=>em[q.id]=q);txGet('bitacoras',rows=>{const prox={};rows.forEach(r=>{if(r.proximaFecha&&(!prox[r.equipoId]||r.proximaFecha>prox[r.equipoId].proximaFecha))prox[r.equipoId]=r;});const sorted=Object.values(prox).sort((a,b)=>a.proximaFecha.localeCompare(b.proximaFecha));if(!sorted.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="ei">&#128197;</div><h3>Sin mantenciones programadas</h3></div></td></tr>';return;}const nL={organico:'<span class="b ve">Organico</span>',campana:'<span class="b az">Campana</span>',deposito:'<span class="b ro">Deposito CL</span>'};tb.innerHTML=sorted.map(r=>{const eq=em[r.equipoId];const nm=eq?'['+eq.nControlInventario+'] '+(TIPOS[eq.tipo]?.label||eq.tipo):'Eq#'+r.equipoId;const fp=new Date(r.proximaFecha+'T00:00:00');const dias=Math.ceil((fp-hoy)/86400000);const v=fp<hoy;const p=fp<=h30&&!v;const db2=v?'<span class="b ro">Vencida '+Math.abs(dias)+'d</span>':p?'<span class="b na">'+dias+'d</span>':'<span class="b ve">'+dias+'d</span>';return '<tr><td>'+nm+'</td><td>'+(TIPOS[eq?.tipo]?.label||'--')+'</td><td>'+r.proximaFecha+'</td><td>'+(nL[r.nivel]||r.nivel)+'</td><td>'+db2+'</td><td>'+(v?'<span class="b ro">Vencida</span>':p?'<span class="b na">Proxima</span>':'<span class="b ve">Al dia</span>')+'</td><td><button class="btn btn-p btn-sm" onclick="abrirModalMantConEq('+r.equipoId+')">+ Registrar</button></td></tr>';}).join('');});});}
+function abrirModalMantConEq(eqId){popularSelEq('mt-eq','seleccionar');document.getElementById('mt-fecha').value=new Date().toISOString().split('T')[0];document.getElementById('alerta-deposito').style.display='none';openModal('modal-mt');setTimeout(()=>{const s=document.getElementById('mt-eq');if(s){s.value=eqId;onMantEqChange();}},100);}
+function verDetMant(id){if(!db)return;txGet('equipos',eqs=>{const em={};eqs.forEach(q=>em[q.id]=q);const tx=db.transaction('bitacoras','readonly');tx.objectStore('bitacoras').get(id).onsuccess=ev=>{const r=ev.target.result;if(!r){showToast('No encontrado','err');return;}const eq=em[r.equipoId];const nL={organico:'Organico',campana:'Campana',deposito:'Deposito CL'};document.getElementById('det-body').innerHTML='<div style="display:grid;gap:9px;font-size:12px"><div><strong>Equipo:</strong> '+(eq?'['+eq.nControlInventario+'] '+(TIPOS[eq.tipo]?.label||eq.tipo):'Eq#'+r.equipoId)+'</div><div><strong>Fecha:</strong> '+r.fecha+' | <strong>Nivel:</strong> '+(nL[r.nivel]||r.nivel)+'</div><div><strong>Trabajo:</strong> '+r.tipoTrabajo+(r.folio?' | Folio: '+r.folio:'')+'</div><div><strong>Tecnico:</strong> '+r.tecnico+(r.acreditacion?' ('+r.acreditacion+')':'')+(r.empresa?' -- '+r.empresa:'')+'</div>'+(r.autorizacionCL?'<div><strong>Autorizacion CL:</strong> '+r.autorizacionCL+'</div>':'')+'<div><strong>Descripcion:</strong><div style="background:var(--gr);padding:9px;border-radius:6px;margin-top:4px;white-space:pre-wrap;line-height:1.5">'+r.descripcion+'</div></div>'+(r.estadoPost?'<div><strong>Estado post:</strong> '+r.estadoPost+'</div>':'')+(r.proximaFecha?'<div><strong>Proxima mantencion:</strong> '+r.proximaFecha+'</div>':'')+'</div>';openModal('modal-det');};})}
+function elimMant(id){if(!db||!confirm('Eliminar este registro de bitacora?'))return;const tx=db.transaction('bitacoras','readwrite');tx.onerror=e=>showToast('Error: '+e.target.error,'err');tx.objectStore('bitacoras').delete(id).onsuccess=()=>{showToast('Registro eliminado');renderMantenciones();actualizarTodo();};}
+let gM=new Date().getMonth(),gA=new Date().getFullYear();
+function cambiarMes(d){gM+=d;if(gM>11){gM=0;gA++;}if(gM<0){gM=11;gA--;}renderGantt();}
+function irHoy(){gM=new Date().getMonth();gA=new Date().getFullYear();renderGantt();}
+function abrirModalTarea(){popularSelEq('gt-eq','ninguno');document.getElementById('gt-ini').value=new Date().toISOString().split('T')[0];openModal('modal-gt');}
+function guardarTarea(){if(!db){showToast('BD no lista','err');return;}const tit=document.getElementById('gt-tit').value.trim();const tipo=document.getElementById('gt-tipo').value;const ini=document.getElementById('gt-ini').value;const fin=document.getElementById('gt-fin').value;if(!tit||!tipo||!ini||!fin){showToast('Complete campos obligatorios (*)','err');return;}if(fin<ini){showToast('Fecha fin debe ser posterior al inicio','err');return;}const t={titulo:tit,tipo,fecha_inicio:ini,fecha_fin:fin,equipoId:parseInt(document.getElementById('gt-eq').value)||null,responsable:document.getElementById('gt-resp').value.trim(),observaciones:document.getElementById('gt-obs').value.trim(),estado:'pendiente',createdAt:new Date().toISOString()};const tx=db.transaction('tareas','readwrite');tx.onerror=e=>showToast('Error: '+e.target.error,'err');tx.objectStore('tareas').add(t).onsuccess=()=>{closeModal('modal-gt');limpiarTarea();showToast('Tarea agregada al Gantt');renderGantt();actualizarTodo();};}
+function limpiarTarea(){['gt-tit','gt-tipo','gt-ini','gt-fin','gt-resp','gt-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
+function renderGantt(){if(!db)return;const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];document.getElementById('gantt-titulo').textContent=MESES[gM]+' '+gA;const dias=new Date(gA,gM+1,0).getDate();const hoy=new Date();const mStr=gA+'-'+String(gM+1).padStart(2,'0');const auto=[];if(gM===10)auto.push({id:-1,titulo:'INFORME ANUAL -> Cmd Logistico (Art.VII.B.2)',tipo:'cl',fecha_inicio:gA+'-11-01',fecha_fin:gA+'-11-30',responsable:'NLS-2003-004 OBLIGATORIO'});if(gM===2)auto.push({id:-2,titulo:'CL comunica Programa Inversion Anual',tipo:'record',fecha_inicio:gA+'-03-01',fecha_fin:gA+'-03-31',responsable:'Esperar Cmd Logistico'});if(gM===9)auto.push({id:-3,titulo:'PREPARAR Informe Noviembre -> CL',tipo:'record',fecha_inicio:gA+'-10-15',fecha_fin:gA+'-10-31',responsable:'NLS-2003-004'});txGet('equipos',eqs=>{const em={};eqs.forEach(q=>em[q.id]=q);txGet('tareas',tareas=>{const cont=document.getElementById('gantt-wrap');if(!cont)return;const todas=[...auto,...tareas];const m1=mStr+'-01';const m2=mStr+'-'+String(dias).padStart(2,'0');const filtradas=todas.filter(t=>t.fecha_inicio<=m2&&t.fecha_fin>=m1);if(!filtradas.length){cont.innerHTML='<div class="empty" style="background:#fff;border-radius:9px;border:1px solid var(--gr3);padding:36px"><div class="ei">&#128197;</div><h3>Sin tareas para '+MESES[gM]+' '+gA+'</h3><button class="btn btn-p" style="margin-top:11px" onclick="abrirModalTarea()">+ Nueva Tarea</button></div>';return;}const CW=25,LW=192;let hd='';for(let d=1;d<=dias;d++){const fd=new Date(gA,gM,d);const fds=fd.getDay()===0||fd.getDay()===6;const eh=fd.toDateString()===hoy.toDateString();hd+='<div style="width:'+CW+'px;min-width:'+CW+'px;text-align:center;font-size:9px;padding:4px 0;'+(fds?'opacity:.5':'')+(eh?'background:var(--or);color:var(--az);border-radius:3px;font-weight:900':'')+'">'+ d+'</div>';}const COLS={organico:'var(--ve2)',campana:'var(--az3)',deposito:'var(--ro)',cl:'var(--pu)',record:'var(--am)',vencido:'var(--na)'};const filas=filtradas.map(task=>{const eq=task.equipoId?em[task.equipoId]:null;const lbl=eq?'['+eq.nControlInventario+'] '+task.titulo:task.titulo;const inic=new Date(gA,gM,1);const tI=new Date(task.fecha_inicio+'T00:00:00');const tF=new Date(task.fecha_fin+'T00:00:00');const vc=tF<hoy&&task.estado!=='completado';const tc=vc?'vencido':task.tipo;const dS=Math.max(1,Math.ceil((tI-inic)/86400000)+1);const dE=Math.min(dias,Math.ceil((tF-inic)/86400000)+1);let celdas='';for(let d=1;d<=dias;d++){const en=d>=dS&&d<=dE;const fd=new Date(gA,gM,d);const fds=fd.getDay()===0||fd.getDay()===6;const eh=fd.toDateString()===hoy.toDateString();const bg=eh?'background:#FFF9C4;':fds?'background:#F7FAFC;':'';const col=COLS[tc]||'var(--az3)';celdas+=en?'<div style="width:'+CW+'px;min-width:'+CW+'px;padding:3px 1px;'+bg+'"><div style="height:18px;background:'+col+';border-radius:'+(d===dS?'3px 0 0 3px':'0')+' '+(d===dE?'0 3px 3px 0':'0')+';opacity:.85"></div></div>':'<div style="width:'+CW+'px;min-width:'+CW+'px;'+bg+'"></div>';}return '<div class="grow" style="display:flex"><div class="gtl" style="width:'+LW+'px;min-width:'+LW+'px" title="'+lbl+'"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px">'+lbl+'</span></div>'+celdas+'</div>';}).join('');cont.innerHTML='<div class="gw" style="min-width:'+(LW+dias*CW)+'px"><div style="display:flex" class="gh"><div style="width:'+LW+'px;min-width:'+LW+'px;padding:6px 9px;font-size:10px">Tarea / Equipo</div>'+hd+'</div>'+filas+'</div>';});});}
+function abrirModalInforme(){document.getElementById('inf-fecha').value=new Date().toISOString().split('T')[0];openModal('modal-inf');}
+function guardarInforme(){if(!db){showToast('BD no lista','err');return;}const fecha=document.getElementById('inf-fecha').value;const tipo=document.getElementById('inf-tipo').value;if(!fecha||!tipo){showToast('Complete campos obligatorios (*)','err');return;}const inf={fechaEnvio:fecha,tipo,estado:document.getElementById('inf-estado').value,oficio:document.getElementById('inf-oficio').value.trim(),equiposIncluidos:document.getElementById('inf-eqs').value.trim(),observaciones:document.getElementById('inf-obs').value.trim(),createdAt:new Date().toISOString()};const tx=db.transaction('informes','readwrite');tx.onerror=e=>showToast('Error: '+e.target.error,'err');tx.objectStore('informes').add(inf).onsuccess=()=>{closeModal('modal-inf');limpiarInf();showToast('Informe registrado');renderInformesCL();actualizarTodo();};}
+function limpiarInf(){['inf-fecha','inf-tipo','inf-estado','inf-oficio','inf-eqs','inf-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
+function renderInformesCL(){if(!db)return;const tb=document.getElementById('tbody-cl');if(!tb)return;txGet('informes',rows=>{const sorted=[...rows].sort((a,b)=>b.fechaEnvio.localeCompare(a.fechaEnvio));const p=sorted.filter(r=>r.estado==='pendiente').length;const e=sorted.filter(r=>r.estado==='enviado').length;const a=sorted.filter(r=>r.estado==='acusado').length;const ids=['scl-p','scl-e','scl-a'];[p,e,a].forEach((v,i)=>{const el=document.getElementById(ids[i]);if(el)el.textContent=v;});const tL={catastro_inicial:'Catastro Inicial (30d)',noviembre_anual:'Informe Anual Nov.',solicitud_deposito:'Solicitud Deposito',recepcion_deposito:'Recepcion desde Deposito',alta_equipo:'Alta Equipo (Anx A-F)',baja_equipo:'Proposicion Baja',informe_tecnico:'Informe Tecnico',otro:'Otro'};const eL={pendiente:'<span class="b na">Pendiente</span>',enviado:'<span class="b az">Enviado</span>',acusado:'<span class="b ve">Acusado</span>'};if(!sorted.length){tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="ei">&#128232;</div><h3>Sin informes registrados</h3></div></td></tr>';return;}tb.innerHTML=sorted.map(r=>'<tr><td>'+r.fechaEnvio+'</td><td>'+(tL[r.tipo]||r.tipo)+(r.oficio?'<br><small>'+r.oficio+'</small>':'')+'</td><td><small>'+(r.equiposIncluidos||'--')+'</small></td><td>'+(eL[r.estado]||r.estado)+'</td><td><small>'+(r.observaciones||'--')+'</small></td><td><button class="btn btn-r btn-sm" onclick="elimInf('+r.id+')">&#128465;</button></td></tr>').join('');});}
+function elimInf(id){if(!db||!confirm('Eliminar?'))return;const tx=db.transaction('informes','readwrite');tx.onerror=e=>showToast('Error: '+e.target.error,'err');tx.objectStore('informes').delete(id).onsuccess=()=>{showToast('Eliminado');renderInformesCL();actualizarTodo();};}
+function renderProxCL(){const hoy=new Date();const a=hoy.getFullYear();const nov=new Date(a,10,1);const dnov=Math.ceil((nov-hoy)/86400000);const marA=hoy.getMonth()>2?a+1:a;const dmar=Math.ceil((new Date(marA,2,1)-hoy)/86400000);let html='';html+=dnov<0?'<div class="al al-ro"><span class="ai">&#128680;</span><div><strong>INFORME NOVIEMBRE '+a+' -- VENCIDO</strong>Regularice inmediatamente con el Cmd Logistico.</div></div>':dnov<=30?'<div class="al al-ro"><span class="ai">&#9888;</span><div><strong>INFORME NOVIEMBRE -- '+dnov+' DIAS</strong>Prepare el informe de novedades con Anexos G-L actualizados.</div></div>':'<div class="al al-ve"><span class="ai">&#128197;</span><div><strong>Informe Noviembre '+a+'</strong>Faltan '+dnov+' dias.</div></div>';html+='<div class="al al-az" style="margin-top:6px"><span class="ai">&#128197;</span><div><strong>Programa Inversion Anual -- Marzo</strong>En '+Math.abs(dmar)+' dias '+(dmar>0?'':'atras')+' el CL debe comunicar el Programa de Inversion Anual.</div></div>';html+='<div class="al al-na" style="margin-top:6px"><span class="ai">&#128203;</span><div><strong>Equipo nuevo -- Accion inmediata</strong>Cada equipo nuevo requiere enviar Anexo A-F al Cmd Logistico inmediatamente.</div></div>';const el=document.getElementById('prox-cl');if(el)el.innerHTML=html;}
+function renderPanelAlertas(){if(!db)return;const div=document.getElementById('panel-alertas-completo');if(!div)return;txGet('equipos',eqs=>{txGet('bitacoras',bitas=>{txGet('informes',infs=>{let html='';const hoy=new Date();const h30=new Date(Date.now()+30*86400000);const a=hoy.getFullYear();const dnov=Math.ceil((new Date(a,10,1)-hoy)/86400000);const sinSESMA=eqs.filter(q=>(q.tipo==='caldera'||q.tipo==='incinerador')&&q.extras?.['eq-sesma']==='No');if(sinSESMA.length)html+='<div class="al al-ro"><span class="ai">&#9878;</span><div><strong>ALERTA LEGAL -- DS N48: '+sinSESMA.length+' equipo(s) SIN inscripcion SESMA</strong>'+sinSESMA.map(q=>'<div>- ['+q.nControlInventario+'] '+(TIPOS[q.tipo]?.label||q.tipo)+' -- '+q.ubicacion+'</div>').join('')+'</div></div>';const conR22=eqs.filter(q=>{const g=(q.extras?.['eq-gas']||'').toUpperCase();return g.includes('R-22')||g.includes('R22');});if(conR22.length)html+='<div class="al al-pu"><span class="ai">&#127758;</span><div><strong>Protocolo de Montreal -- '+conR22.length+' equipo(s) con Gas R-22 PROHIBIDO</strong>'+conR22.map(q=>'<div>- ['+q.nControlInventario+'] '+(TIPOS[q.tipo]?.label||q.tipo)+'</div>').join('')+'</div></div>';const prox={};bitas.forEach(r=>{if(r.proximaFecha&&(!prox[r.equipoId]||r.proximaFecha>prox[r.equipoId].proximaFecha))prox[r.equipoId]=r;});const vencidas=Object.values(prox).filter(r=>new Date(r.proximaFecha+'T00:00:00')<hoy);const proximas30=Object.values(prox).filter(r=>{const fd=new Date(r.proximaFecha+'T00:00:00');return fd>=hoy&&fd<=h30;});if(vencidas.length){const em={};eqs.forEach(q=>em[q.id]=q);html+='<div class="al al-ro"><span class="ai">&#128308;</span><div><strong>'+vencidas.length+' mantencion(es) VENCIDA(S)</strong>'+vencidas.map(r=>{const eq=em[r.equipoId];return '<div>- '+(eq?'['+eq.nControlInventario+'] -- vencia '+r.proximaFecha:r.proximaFecha)+'</div>';}).join('')+'</div></div>';}if(proximas30.length)html+='<div class="al al-na"><span class="ai">&#9889;</span><div><strong>'+proximas30.length+' mantencion(es) proximas a vencer (30 dias)</strong></div></div>';if(dnov<0)html+='<div class="al al-ro"><span class="ai">&#128680;</span><div><strong>INFORME NOVIEMBRE '+a+' VENCIDO</strong>El informe anual de novedades al Cmd Logistico no ha sido enviado.</div></div>';else if(dnov<=60)html+='<div class="al al-na"><span class="ai">&#128197;</span><div><strong>INFORME NOVIEMBRE -- faltan '+dnov+' dias</strong>Prepare Anexos G-L actualizados.</div></div>';const pend=infs.filter(i=>i.estado==='pendiente');if(pend.length)html+='<div class="al al-or"><span class="ai">&#128232;</span><div><strong>'+pend.length+' informe(s) pendiente(s) al Cmd Logistico</strong></div></div>';const eqsIds=new Set(bitas.map(b=>b.equipoId));const sinBita=eqs.filter(q=>!eqsIds.has(q.id));if(sinBita.length)html+='<div class="al al-or"><span class="ai">&#128203;</span><div><strong>'+sinBita.length+' equipo(s) sin registros de bitacora</strong>'+sinBita.map(q=>'<div>- ['+q.nControlInventario+'] '+(TIPOS[q.tipo]?.label||q.tipo)+'</div>').join('')+'</div></div>';if(!html)html='<div class="al al-ve"><span class="ai">&#9989;</span><div><strong>Sin alertas activas!</strong>Todas las obligaciones NLS-2003-004 estan al dia.</div></div>';div.innerHTML=html;const elNb=document.getElementById('nb-al');if(elNb){const n=[sinSESMA.length,conR22.length,vencidas.length,pend.length].reduce((a,b)=>a+b,0);elNb.textContent=n||'!';elNb.style.display=n?'inline':'none';}document.getElementById('sba-sesma').style.display=sinSESMA.length?'block':'none';document.getElementById('sba-montreal').style.display=conR22.length?'block':'none';document.getElementById('sba-nov').style.display=(dnov>=0&&dnov<=60)?'block':'none';document.getElementById('sba-venc').style.display=vencidas.length?'block':'none';});});});}
+function actualizarStats(){if(!db)return;const hoy=new Date();const a=hoy.getFullYear();const dnov=Math.ceil((new Date(a,10,1)-hoy)/86400000);txGet('equipos',eqs=>{const total=eqs.length;const cl=eqs.filter(q=>q.esCL).length;const sinSESMA=eqs.filter(q=>(q.tipo==='caldera'||q.tipo==='incinerador')&&q.extras?.['eq-sesma']==='No').length;const r22=eqs.filter(q=>{const g=(q.extras?.['eq-gas']||'').toUpperCase();return g.includes('R-22')||g.includes('R22');}).length;['sd-eq','sd-cl','sd-sesma','sd-r22'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[total,cl,sinSESMA,r22][i];});const el1=document.getElementById('dc-eq');if(el1)el1.textContent=total+' equipos';const el2=document.getElementById('nb-eq');if(el2){el2.textContent=total;el2.style.display=total?'inline':'none';}txGet('bitacoras',bitas=>{const prox={};bitas.forEach(r=>{if(r.proximaFecha&&(!prox[r.equipoId]||r.proximaFecha>prox[r.equipoId].proximaFecha))prox[r.equipoId]=r;});const venc=Object.values(prox).filter(r=>new Date(r.proximaFecha+'T00:00:00')<hoy).length;const elV=document.getElementById('sd-venc');if(elV)elV.textContent=venc;const el3=document.getElementById('dc-mt');if(el3)el3.textContent=bitas.length+' registros';const el4=document.getElementById('nb-mt');if(el4){el4.textContent=venc;el4.style.display=venc?'inline':'none';}const eqsIds=new Set(bitas.map(b=>b.equipoId));const sinBita=eqs.filter(q=>!eqsIds.has(q.id)).length;const el5=document.getElementById('nb-hv');if(el5){el5.textContent='!';el5.style.display=sinBita?'inline':'none';}txGet('informes',infs=>{const pend=infs.filter(i=>i.estado==='pendiente').length;const elP=document.getElementById('sd-pend');if(elP)elP.textContent=pend;const el6=document.getElementById('dc-cl');if(el6)el6.textContent=pend+' pendientes';const el7=document.getElementById('nb-cl');if(el7){el7.textContent='!';el7.style.display=pend?'inline':'none';}txGet('tareas',tareas=>{const el8=document.getElementById('dc-gt');if(el8)el8.textContent=tareas.length+' tareas';});const sinSESMAeqs=eqs.filter(q=>(q.tipo==='caldera'||q.tipo==='incinerador')&&q.extras?.['eq-sesma']==='No');const conR22=eqs.filter(q=>{const g=(q.extras?.['eq-gas']||'').toUpperCase();return g.includes('R-22')||g.includes('R22');});const vencidas=Object.values(prox).filter(r=>new Date(r.proximaFecha+'T00:00:00')<hoy);let html='';if(sinSESMAeqs.length)html+='<div class="al al-ro"><span class="ai">&#9878;</span><div><strong>ALERTA LEGAL -- '+sinSESMAeqs.length+' equipo(s) SIN SESMA (DS N48)</strong><button class="btn btn-r btn-sm" onclick="goTo(\'alertas\')">Ver detalle</button></div></div>';if(conR22.length)html+='<div class="al al-pu"><span class="ai">&#127758;</span><div><strong>Protocolo de Montreal -- '+conR22.length+' equipo(s) con R-22 PROHIBIDO</strong><button class="btn btn-s btn-sm" onclick="goTo(\'alertas\')">Ver detalle</button></div></div>';if(vencidas.length)html+='<div class="al al-ro"><span class="ai">&#128308;</span><div><strong>'+vencidas.length+' mantencion(es) VENCIDA(S)</strong><button class="btn btn-r btn-sm" onclick="goTo(\'mantencion\')">Ir a Mantenciones</button></div></div>';if(dnov<0)html+='<div class="al al-ro"><span class="ai">&#128680;</span><div><strong>INFORME NOVIEMBRE VENCIDO</strong><button class="btn btn-r btn-sm" onclick="goTo(\'informe-cl\')">Ir a Informes CL</button></div></div>';else if(dnov<=60)html+='<div class="al al-na"><span class="ai">&#128197;</span><div><strong>Informe Noviembre en '+dnov+' dias</strong><button class="btn btn-n btn-sm" onclick="goTo(\'informe-cl\')">Gestionar</button></div></div>';if(pend)html+='<div class="al al-or"><span class="ai">&#128232;</span><div><strong>'+pend+' informe(s) pendiente(s) al Cmd Logistico</strong><button class="btn btn-s btn-sm" onclick="goTo(\'informe-cl\')">Gestionar</button></div></div>';const r_html='<div class="al al-ro"><span class="ai">&#128197;</span><div><strong>NOVIEMBRE cada anio -- Informe novedades al Cmd Logistico (Art.VII.B.2)</strong>Incluir: equipos nuevos, equipos con mantencion de deposito cumplida. Enviar Anexos G-L actualizados. <span style="font-weight:800">Faltan '+(dnov>0?dnov:'VENCIDO')+' dias.</span></div></div><div class="al al-az" style="margin-top:6px"><span class="ai">&#128197;</span><div><strong>MARZO cada anio -- CL comunica Programa de Inversion Anual (Art.VII.B.1.c)</strong>La Division de Infraestructura del Cmd Logistico informa el programa de inversiones del anio siguiente.</div></div><div class="al al-na" style="margin-top:6px"><span class="ai">&#9889;</span><div><strong>EQUIPO NUEVO -- Accion inmediata (Art.VII.B.2.a)</strong>Al incorporar cualquier equipo nuevo: enviar Anexo A-F al Cmd Logistico INMEDIATAMENTE. Registrar en Orden del Dia y sistema de Bienes Muebles.</div></div><div class="al al-or" style="margin-top:6px"><span class="ai">&#128308;</span><div><strong>MANTENCION DE DEPOSITO -- Protocolo obligatorio (Art.VII.B.2)</strong>1) Solicitar autorizacion CL PRIMERO 2) Enviar equipo completo 3) Adjuntar historial y bitacora 4) Emitir Informe Tecnico de Recepcion al CL.</div></div>';const da=document.getElementById('dash-alertas');if(!html)html='<div class="al al-ve"><span class="ai">&#9989;</span><div><strong>Sin alertas criticas activas</strong>Sistema en cumplimiento normativo.</div></div>';if(da)da.innerHTML=html;const rf=document.getElementById('recordatorios-fijos');if(rf)rf.innerHTML=r_html;document.getElementById('sba-sesma').style.display=sinSESMAeqs.length?'block':'none';document.getElementById('sba-montreal').style.display=conR22.length?'block':'none';document.getElementById('sba-nov').style.display=(dnov>=0&&dnov<=60)?'block':'none';document.getElementById('sba-venc').style.display=vencidas.length?'block':'none';const na=document.getElementById('nb-al');if(na){const n=[sinSESMAeqs.length,conR22.length,vencidas.length,pend].reduce((a,b)=>a+b,0);na.textContent=n||'!';na.style.display=n?'inline':'none';}});});});}
+function actualizarTodo(){actualizarStats();renderProxCL();}
+function handleSearch(v){if(!v.trim())return;const k=v.toLowerCase();if(['catastro','equipo','aa','clima','caldera','camara','refrig','ventilador','incinerador','inventario'].some(w=>k.includes(w)))goTo('catastro');else if(['hoja','vida','anexo','form'].some(w=>k.includes(w)))goTo('hojas-vida');else if(['bitacora','manten','reparac','deposit','campa'].some(w=>k.includes(w)))goTo('mantencion');else if(['gantt','carta','plan','program'].some(w=>k.includes(w)))goTo('gantt');else if(['informe','comando','logistico','cl','noviembre','marzo'].some(w=>k.includes(w)))goTo('informe-cl');else if(['alerta','sesma','montreal','r-22','r22','legal'].some(w=>k.includes(w)))goTo('alertas');else if(['norma','nls','reglamento','decreto'].some(w=>k.includes(w)))goTo('norma');document.getElementById('srch').value='';}
+
+// MIG-001: MANIFEST INLINE
+(function(){
+  var c=document.createElement('canvas');c.width=c.height=128;
+  var ctx=c.getContext('2d');
+  ctx.fillStyle='#003087';ctx.fillRect(0,0,128,128);
+  ctx.strokeStyle='#C8A951';ctx.lineWidth=4;ctx.strokeRect(4,4,120,120);
+  ctx.fillStyle='#C8A951';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText('NLS-2003-004',64,12);
+  ctx.fillStyle='#E6C870';ctx.font='bold 9px sans-serif';ctx.textBaseline='bottom';
+  ctx.fillText('CALOR - AGA - FACH',64,122);
+  ctx.fillStyle='#fff';ctx.font='42px serif';ctx.textBaseline='middle';
+  ctx.fillText('\uD83D\uDD25',64,68);
+  var icon=c.toDataURL('image/png');
+  var al=document.getElementById('nls-apple-icon');if(al)al.href=icon;
+  var m={name:'NLS-2003-004 - Equipos Calor AGA',short_name:'NLS-2003-004',
+    description:'Equipos de Transferencia de Calor - Academia de Guerra Aerea FACH',
+    start_url:'/scorpion-tail/nls.html',display:'standalone',
+    background_color:'#003087',theme_color:'#003087',orientation:'landscape-primary',
+    icons:[{src:icon,sizes:'128x128',type:'image/png'}]};
+  try{
+    var b=new Blob([JSON.stringify(m)],{type:'application/json'});
+    var ml=document.getElementById('nls-manifest');
+    if(ml)ml.href=URL.createObjectURL(b);
+  }catch(e){console.warn('[manifest NLS]',e);}
+})();
+
+// MIG-002: SERVICE WORKER INLINE
+if('serviceWorker' in navigator){
+  var swCode=[
+    "const CACHE='aga-nls-v1';",
+    "self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add('.')).then(()=>self.skipWaiting()));});",
+    "self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});",
+    "self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{var rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));return res;}).catch(()=>caches.match(e.request))));});"
+  ].join('\n');
+  try{
+    var swBlob=new Blob([swCode],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob),{scope:'./'})
+      .then(function(){console.log('[SW NLS-2003-004] registrado OK');})
+      .catch(function(e){console.warn('[SW NLS]',e);});
+  }catch(e){console.warn('[SW NLS blob]',e);}
+}
+
+initDB();
+</script>
+</body>
+</html>
