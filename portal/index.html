@@ -6,6 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#050e1f">
 <title>Scorpion Tail — Portal AGA</title>
+<link rel="manifest" id="pwa-manifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Scorpion Tail">
+<link rel="apple-touch-icon" id="apple-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -665,6 +670,60 @@ function mostrarToast(msg) {
 actualizarFecha();
 setInterval(actualizarFecha, 30000);
 renderModulos('todos', '');
+
+// ─── PWA: ICONO CANVAS ───────────────────────────────────────────────
+function generarIcono(size) {
+  var c = document.createElement('canvas');
+  c.width = c.height = size;
+  var ctx = c.getContext('2d');
+  ctx.fillStyle = '#050e1f';
+  ctx.fillRect(0, 0, size, size);
+  ctx.strokeStyle = '#c8a84b';
+  ctx.lineWidth = size * 0.04;
+  var m = size * 0.05;
+  ctx.strokeRect(m, m, size - m*2, size - m*2);
+  ctx.font = (size * 0.55) + 'px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🦂', size / 2, size / 2);
+  ctx.fillStyle = '#c8a84b';
+  ctx.font = 'bold ' + (size * 0.10) + 'px sans-serif';
+  ctx.fillText('AGA', size / 2, size * 0.88);
+  return c.toDataURL('image/png');
+}
+var iconData  = generarIcono(512);
+var iconSmall = generarIcono(192);
+document.getElementById('apple-icon').href = iconData;
+var manifest = {
+  name: 'Scorpion Tail — AGA',
+  short_name: 'Scorpion Tail',
+  description: 'Portal de módulos institucionales — Academia de Guerra Aérea FACH',
+  start_url: '/scorpion-tail/portal/',
+  display: 'standalone',
+  background_color: '#050e1f',
+  theme_color: '#050e1f',
+  orientation: 'portrait-primary',
+  icons: [
+    { src: iconSmall, sizes: '192x192', type: 'image/png' },
+    { src: iconData,  sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+  ]
+};
+var mBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+document.getElementById('pwa-manifest').href = URL.createObjectURL(mBlob);
+// ─── SERVICE WORKER ──────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  var swCode = [
+    "const CACHE='scorpion-portal-v1';",
+    "self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add('.')).then(()=>self.skipWaiting()));});",
+    "self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});",
+    "self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{var rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));return res;}).catch(()=>caches.match(e.request))));});"
+  ].join('\n');
+  var swBlob = new Blob([swCode], { type: 'application/javascript' });
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob), { scope: './' })
+    .then(function(){ console.log('[SW] Portal listo'); })
+    .catch(function(e){ console.warn('[SW]', e); });
+}
+
 </script>
 </body>
 </html>
