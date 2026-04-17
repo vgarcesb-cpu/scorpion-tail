@@ -23,51 +23,73 @@ body{font-family:Arial,sans-serif;background:#0a1628;color:#fff;display:flex;ali
 <div class="err" id="err"></div>
 <script>
 (function(){
-  // Leer token del hash de la URL (flujo implícito)
-  var hash = window.location.hash.substring(1);
-  var params = new URLSearchParams(hash);
-  var token      = params.get('access_token');
-  var expiresIn  = parseInt(params.get('expires_in')||'3600');
-  var error      = params.get('error');
+  var CLIENT_ID     = '865991409359-s6dnib021q5kg9b3fbmcfktv1j1fsno0.apps.googleusercontent.com';
+  var CLIENT_SECRET = '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';
+  var REDIRECT      = 'https://vgarcesb-cpu.github.io/auth.html';
 
-  // También revisar query string (por si viene error ahí)
-  var query = new URLSearchParams(window.location.search);
-  if(!error) error = query.get('error');
+  var params = new URLSearchParams(window.location.search);
+  var code   = params.get('code');
+  var error  = params.get('error');
+
+  function irReturn(){
+    var ret = sessionStorage.getItem('st_return')||'https://totis.cl/portal/index.html';
+    sessionStorage.removeItem('st_return');
+    window.location.href = ret;
+  }
 
   if(error){
     document.getElementById('spinner').style.display='none';
     document.getElementById('msg').textContent='Autenticación cancelada';
     document.getElementById('err').textContent='Error: '+error;
-    setTimeout(function(){
-      var ret = sessionStorage.getItem('st_return')||'/scorpion-tail/portal/index.html';
-      sessionStorage.removeItem('st_return');
-      window.location.href = ret;
-    }, 2500);
+    setTimeout(irReturn, 2500);
     return;
   }
 
-  if(!token){
+  if(!code){
     document.getElementById('spinner').style.display='none';
-    document.getElementById('msg').textContent='Sin token de acceso';
-    document.getElementById('err').textContent='No se recibió token. Intente nuevamente.';
+    document.getElementById('msg').textContent='Sin código de autorización';
+    document.getElementById('err').textContent='No se recibió código. Intente nuevamente.';
     return;
   }
 
-  // Guardar token
-  var expiry = Date.now() + (expiresIn - 60) * 1000;
-  localStorage.setItem('st_gtoken',  token);
-  localStorage.setItem('st_gexpiry', String(expiry));
+  document.getElementById('msg').textContent='Conectando con Google Drive...';
 
-  // Éxito
-  document.getElementById('spinner').style.display='none';
-  document.getElementById('msg').textContent='';
-  document.querySelector('.logo').textContent='✅';
-  document.querySelector('.sub').textContent='Google Drive conectado — volviendo...';
-  document.querySelector('.titulo').style.color='#43A047';
+  fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({
+      code:          code,
+      client_id:     CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+      redirect_uri:  REDIRECT,
+      grant_type:    'authorization_code'
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(data.error){
+      document.getElementById('spinner').style.display='none';
+      document.getElementById('msg').textContent='Error de autenticación';
+      document.getElementById('err').textContent=data.error_description||data.error;
+      return;
+    }
+    var expiry = Date.now() + (parseInt(data.expires_in||3600) - 60) * 1000;
+    localStorage.setItem('st_gtoken',  data.access_token);
+    localStorage.setItem('st_gexpiry', String(expiry));
+    if(data.refresh_token) localStorage.setItem('st_grefresh', data.refresh_token);
 
-  var ret = sessionStorage.getItem('st_return')||'/scorpion-tail/portal/index.html';
-  sessionStorage.removeItem('st_return');
-  setTimeout(function(){ window.location.href = ret; }, 1500);
+    document.getElementById('spinner').style.display='none';
+    document.querySelector('.logo').textContent='✅';
+    document.querySelector('.titulo').style.color='#43A047';
+    document.querySelector('.titulo').textContent='Drive conectado';
+    document.getElementById('msg').textContent='Volviendo a Scorpion Tail...';
+    setTimeout(irReturn, 1500);
+  })
+  .catch(function(e){
+    document.getElementById('spinner').style.display='none';
+    document.getElementById('msg').textContent='Error de red';
+    document.getElementById('err').textContent=e.message;
+  });
 })();
 </script>
 </body>
