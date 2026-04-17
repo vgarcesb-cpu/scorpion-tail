@@ -73,7 +73,7 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
 .hist-det { font-size: 11px; color: #888; margin-top: 3px; }
 .hist-obs { font-size: 11px; color: #aaa; margin-top: 2px; font-style: italic; }
 .btn-eliminar-hist { margin-top: 8px; padding: 5px 12px; background: #fee; border: 1px solid #fcc; color: var(--rojo); border-radius: 6px; font-size: 11px; cursor: pointer; font-family: inherit; }
-.nav-bar { display: flex; gap: 8px; padding: 10px 16px; background: linear-gradient(90deg,#071429,#0d2550); border-top: 1px solid rgba(200,168,75,0.3); flex-shrink: 0; }
+.nav-bar { display: flex; gap: 8px; padding: 10px 16px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(90deg,#071429,#0d2550); border-top: 1px solid rgba(200,168,75,0.3); flex-shrink: 0; }
 .nav-bar.oculta { display: none; }
 .btn-nav { flex: 1; padding: 11px 8px; border-radius: 10px; border: 1px solid rgba(200,168,75,0.25); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
 .btn-nav:disabled { opacity: 0.35; }
