@@ -107,6 +107,7 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
   th, td { border: 1px solid #ccc !important; }
 }
 </style>
+<script src="st-drive.js"></script>
 </head>
 <body>
 <div class="app">
@@ -116,9 +117,12 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
         <span class="inst">Academia de Guerra Aérea · FACH</span>
         <span class="titulo">Solicitud Adquisición</span>
       </div>
-      <div class="header-folio">
-        <span class="folio-badge" id="folio-show">ADQ-…</span>
-        Folio
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="btn-drive" onclick="toggleDrive()" style="background:none;border:1px solid rgba(200,168,75,.4);border-radius:14px;color:#C8A951;font-size:10px;font-weight:700;padding:3px 9px;cursor:pointer;font-family:Arial,sans-serif" title="Google Drive Sync"></button>
+        <div class="header-folio">
+          <span class="folio-badge" id="folio-show">ADQ-…</span>
+          Folio
+        </div>
       </div>
     </div>
   </div>
@@ -249,6 +253,23 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
 <script>
 var db, pasoActual=1, items=[], editIndex=null, solicitudes=[], sigDataURL='';
 var IDB_NAME='AGA_DB_SOLICITUDES', IDB_VERSION=1, STORE_SOL='solicitudes', STORE_CFG='config';
+
+function actualizarBtnDrive(){
+  var btn=document.getElementById('btn-drive');if(!btn)return;
+  if(typeof STDrive!=='undefined'&&STDrive.isConnected()){
+    btn.textContent='☁️ Drive';btn.style.borderColor='rgba(200,168,75,.8)';btn.style.color='#C8A951';
+  } else {
+    btn.textContent='☁️ Conectar';btn.style.borderColor='rgba(255,255,255,.2)';btn.style.color='rgba(255,255,255,.4)';
+  }
+}
+function toggleDrive(){
+  if(typeof STDrive==='undefined'){mostrarToast('⚠️ Modulo Drive no cargado');return;}
+  if(STDrive.isConnected()){
+    if(confirm('Desconectar Google Drive?')){STDrive.logout();actualizarBtnDrive();mostrarToast('Drive desconectado');}
+  } else {
+    STDrive.login(window.location.href);
+  }
+}
 var idbReq=indexedDB.open(IDB_NAME,IDB_VERSION);
 idbReq.onerror=function(){alert('Error al abrir la base de datos.');};
 idbReq.onupgradeneeded=function(e){var d=e.target.result;if(!d.objectStoreNames.contains(STORE_SOL))d.createObjectStore(STORE_SOL,{keyPath:'id'});if(!d.objectStoreNames.contains(STORE_CFG))d.createObjectStore(STORE_CFG,{keyPath:'key'});};
@@ -261,7 +282,7 @@ function folioStr(n){return String(n).padStart(4,'0');}
 function fmtN(n){return n>0?Math.round(n).toLocaleString('es-CL'):'—';}
 function fmtFecha(f){if(!f)return '';var p=f.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:f;}
 function actualizarFolioHeader(){var anio=document.getElementById('folio-anio').value||new Date().getFullYear();var num=document.getElementById('folio-num').value||'????';document.getElementById('folio-show').textContent='ADQ-'+anio+'-'+num;}
-function init(){getFolio(function(actual){document.getElementById('folio-num').value=folioStr(actual+1);document.getElementById('folio-anio').value=new Date().getFullYear();document.getElementById('fecha').value=new Date().toISOString().slice(0,10);actualizarFolioHeader();agregarItem();});}
+function init(){getFolio(function(actual){document.getElementById('folio-num').value=folioStr(actual+1);document.getElementById('folio-anio').value=new Date().getFullYear();document.getElementById('fecha').value=new Date().toISOString().slice(0,10);actualizarFolioHeader();agregarItem();actualizarBtnDrive();});}
 function resetContador(){if(!confirm('¿Resetear el contador de folios a 0001?'))return;setFolio(0,function(){document.getElementById('folio-num').value='0001';actualizarFolioHeader();mostrarToast('✓ Contador reseteado a 0001');});}
 function agregarItem(){items.push({cant:1,unidad:'UN',descripcion:'',pUnitario:0});renderItems();}
 function eliminarItem(i){if(items.length>1){items.splice(i,1);renderItems();}}
@@ -318,7 +339,7 @@ document.getElementById('resumen-items').innerHTML='<div style="font-size:11px;f
 document.getElementById('r-sub').textContent=fmtN(t.sub);document.getElementById('r-iva').textContent=fmtN(t.iva);document.getElementById('r-total').textContent=fmtN(t.total);}
 function renderHistorial(){var lista=document.getElementById('hist-lista');if(solicitudes.length===0){lista.innerHTML='<div style="text-align:center;color:#aaa;padding:20px;font-size:13px">No hay solicitudes guardadas aún.</div>';return;}lista.innerHTML=solicitudes.map(function(h){return'<div class="hist-item-app" onclick="cargarHistorial(\''+h.id+'\')"><div style="display:flex;justify-content:space-between;align-items:center"><span class="hist-folio">'+h.id+'</span><span style="color:#888;font-size:11px">'+fmtFecha(h.fecha)+'</span></div><div class="hist-det">'+h.escuadrilla+' · '+h.items.length+' ítem(s) · Total: $'+Math.round(h.total).toLocaleString('es-CL')+'</div>'+(h.observaciones?'<div class="hist-obs">'+h.observaciones+'</div>':'')+'<button class="btn-eliminar-hist" onclick="event.stopPropagation();eliminarHistorial(\''+h.id+'\')">Eliminar</button></div>';}).join('');}
 function guardarHistorial(){if(!db)return alert('Base de datos no lista.');var t=calcTotals();var anio=document.getElementById('folio-anio').value||new Date().getFullYear().toString();var num=document.getElementById('folio-num').value||'0001';var folioId='ADQ-'+anio+'-'+num;var rec={id:folioId,folioAnio:anio,folioNum:num,fecha:document.getElementById('fecha').value||new Date().toISOString().slice(0,10),escuadrilla:document.getElementById('escuadrilla').value||'',cdte:document.getElementById('cdte').value||'',observaciones:document.getElementById('observaciones').value||'',firmaNombre:document.getElementById('firma-nombre').value||'',firmaGrado:document.getElementById('firma-grado').value||'',firmaCargo:document.getElementById('firma-cargo').value||'',firmaImg:capturarFirma(),items:items.map(function(it){return Object.assign({},it);}),total:t.total,ts:Date.now()};
-var tx=db.transaction(STORE_SOL,'readwrite');tx.onerror=function(e){alert('Error al guardar: '+e.target.error);};tx.objectStore(STORE_SOL).put(rec);tx.oncomplete=function(){var idx=solicitudes.findIndex(function(s){return s.id===folioId;});if(idx>=0){solicitudes[idx]=rec;}else{solicitudes.unshift(rec);}editIndex=null;mostrarToast('✓ Guardado: '+folioId);setFolio(parseInt(num)||1,function(){setTimeout(function(){sigDataURL='';getFolio(function(actual){document.getElementById('folio-num').value=folioStr(actual+1);document.getElementById('folio-anio').value=new Date().getFullYear();document.getElementById('fecha').value=new Date().toISOString().slice(0,10);document.getElementById('escuadrilla').value='Bandada Instalaciones';document.getElementById('cdte').value='';document.getElementById('observaciones').value='';document.getElementById('firma-nombre').value='';document.getElementById('firma-grado').value='';document.getElementById('firma-cargo').value='';items=[];agregarItem();actualizarFolioHeader();irPaso(1);});},1000);});};}
+var tx=db.transaction(STORE_SOL,'readwrite');tx.onerror=function(e){alert('Error al guardar: '+e.target.error);};tx.objectStore(STORE_SOL).put(rec);tx.oncomplete=function(){var idx=solicitudes.findIndex(function(s){return s.id===folioId;});if(idx>=0){solicitudes[idx]=rec;}else{solicitudes.unshift(rec);}editIndex=null;mostrarToast('✓ Guardado: '+folioId);if(typeof STDrive!=='undefined'&&STDrive.isConnected()){STDrive.guardar('solicitud',folioId,rec).catch(function(){});}setFolio(parseInt(num)||1,function(){setTimeout(function(){sigDataURL='';getFolio(function(actual){document.getElementById('folio-num').value=folioStr(actual+1);document.getElementById('folio-anio').value=new Date().getFullYear();document.getElementById('fecha').value=new Date().toISOString().slice(0,10);document.getElementById('escuadrilla').value='Bandada Instalaciones';document.getElementById('cdte').value='';document.getElementById('observaciones').value='';document.getElementById('firma-nombre').value='';document.getElementById('firma-grado').value='';document.getElementById('firma-cargo').value='';items=[];agregarItem();actualizarFolioHeader();irPaso(1);});},1000);});};}
 function cargarHistorial(id){var h=solicitudes.find(function(s){return s.id===id;});if(!h)return alert('Registro no encontrado.');editIndex=id;document.getElementById('folio-anio').value=h.folioAnio;document.getElementById('folio-num').value=h.folioNum;document.getElementById('fecha').value=h.fecha;document.getElementById('escuadrilla').value=h.escuadrilla;document.getElementById('cdte').value=h.cdte||'';document.getElementById('observaciones').value=h.observaciones||'';document.getElementById('firma-nombre').value=h.firmaNombre||'';document.getElementById('firma-grado').value=h.firmaGrado||'';document.getElementById('firma-cargo').value=h.firmaCargo||'';sigDataURL=h.firmaImg||'';items=h.items.map(function(it){return Object.assign({},it);});renderItems();volverDeHistorial();actualizarFolioHeader();irPaso(1);mostrarToast('Solicitud '+h.id+' cargada');}
 function eliminarHistorial(id){if(!db)return alert('Base de datos no lista.');if(!confirm('¿Eliminar la solicitud '+id+'?'))return;var tx=db.transaction(STORE_SOL,'readwrite');tx.onerror=function(e){alert('Error al eliminar: '+e.target.error);};tx.objectStore(STORE_SOL).delete(id);tx.oncomplete=function(){solicitudes=solicitudes.filter(function(s){return s.id!==id;});renderHistorial();mostrarToast('✓ Solicitud eliminada');};}
 function verHistorial(){document.querySelectorAll('.step-panel').forEach(function(p){p.classList.remove('activo');});document.getElementById('panel-hist').classList.add('activo');renderHistorial();document.getElementById('nav-bar').classList.add('oculta');var b=document.getElementById('btn-volver-hist');if(!b){var nb=document.createElement('div');nb.style.cssText='padding:10px 16px;background:linear-gradient(90deg,#071429,#0d2550);border-top:1px solid rgba(200,168,75,0.3)';nb.innerHTML='<button id="btn-volver-hist" class="btn-nav btn-atras" style="width:100%" onclick="volverDeHistorial()">← Volver al formulario</button>';document.querySelector('.app').appendChild(nb);}}
