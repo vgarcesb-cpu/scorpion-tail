@@ -515,3 +515,89 @@ Reglas: NUNCA auto-limpiar pantalla al guardar. El usuario limpia con `nuevo()`.
 ---
 
 *🦂 PROYECTO SCORPION TAIL · Academia de Guerra Aérea FACH · Desarrollado por Toti's® · v2.1 · Abril 2026*
+
+---
+
+## 📋 Sesión 16 Abril 2026 — Correcciones Impresión y Contador Folios
+
+### Encabezado Universal AGA
+
+Estándar definido para todos los módulos con impresión:
+
+```
+FUERZA AÉREA DE CHILE        ← centrado
+DIVISIÓN DE EDUCACIÓN        ← centrado
+ACADEMIA DE GUERRA AÉREA     ← centrado + subrayado
+```
+
+**Especificaciones:** Arial 12px · line-height 16px · text-align center · Academia subrayada · bloque izquierda página
+
+```html
+<!-- ENCABEZADO UNIVERSAL AGA — copiar en todo módulo con impresión -->
+<div style="margin-bottom:12px;display:inline-block;padding-left:5px">
+  <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center">FUERZA AÉREA DE CHILE</div>
+  <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center">DIVISIÓN DE EDUCACIÓN</div>
+  <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center;text-decoration:underline">ACADEMIA DE GUERRA AÉREA</div>
+</div>
+```
+
+**CSS @page estándar:**
+```css
+@media print {
+  @page { size: letter portrait; margin: 10mm 20mm 15mm 20mm; }
+  #print-area { display: block !important; padding: 0; margin-top: 0; font-family: Arial, sans-serif; color: #000; }
+}
+```
+
+**Configuración Chrome Mac para imprimir:**
+
+| Ajuste | Valor |
+|--------|-------|
+| Tamaño papel | Letter |
+| Márgenes | Predeterminados |
+| Encabezado y pie de página | **Desactivado** |
+| Gráficos de fondo | Activado |
+
+---
+
+### Fix Contador Folios — `solicitud.html`
+
+**Problema:** Al cargar un registro del historial para imprimir y luego presionar `+ Nuevo`, el folio no incrementaba — se quedaba pegado en el mismo número.
+
+**Causa:** `nuevoFormulario()` dependía del contador IDB que quedaba desincronizado al cargar registros del historial.
+
+**Solución:** Calcular el siguiente folio leyendo el número más alto del historial en memoria:
+
+```javascript
+// ANTES — fallaba
+getFolio(function(actual){
+  document.getElementById('folio-num').value = folioStr(actual + 1);
+});
+
+// DESPUÉS — confiable
+function getNextFolioNum(){
+  var max = 0;
+  solicitudes.forEach(function(s){
+    var n = parseInt(s.folioNum) || 0;
+    if(n > max) max = n;
+  });
+  return max;
+}
+// nuevoFormulario() usa: folioStr(getNextFolioNum() + 1)
+```
+
+**Resultado verificado:** Cargar 0001 o 0002 del historial → imprimir → presionar Nuevo → muestra **0003** ✅
+
+---
+
+### Archivos actualizados esta sesión
+
+| Archivo | Cambio |
+|---------|--------|
+| `solicitud.html` | Encabezado universal AGA · fix contador folios · @page 10mm |
+| `vale.html` | Encabezado universal AGA |
+| `poseidon.html` | Encabezado universal AGA |
+| `nls.html` | Migrado al monorepo desde repo independiente |
+| `portal/index.html` | NLS activado como módulo activo v2.0 |
+| `README.md` | Actualizado a v2.1 |
+
