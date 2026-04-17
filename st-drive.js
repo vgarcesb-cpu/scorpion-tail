@@ -10,7 +10,7 @@ var STDrive = (function(){
 
   var CLIENT_ID = '865991409359-s6dnib021q5kg9b3fbmcfktv1j1fsno0.apps.googleusercontent.com';
   var SCOPES    = 'https://www.googleapis.com/auth/drive.file';
-  var REDIRECT  = window.location.origin + '/auth.html';
+  var REDIRECT  = 'https://vgarcesb-cpu.github.io/auth.html';
   var FOLDER_NAME = 'ScorpionTail';
 
   // ─── TOKEN ───────────────────────────────────────────────
