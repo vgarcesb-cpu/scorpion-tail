@@ -40,23 +40,16 @@ var STDrive = (function(){
   }
 
   function login(returnUrl){
-    var verifier  = randomB64(64);
-    sessionStorage.setItem('st_cv', verifier);
     sessionStorage.setItem('st_return', returnUrl || window.location.href);
-    sha256B64(verifier).then(function(challenge){
-      var url = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-        new URLSearchParams({
-          client_id:             CLIENT_ID,
-          redirect_uri:          REDIRECT,
-          response_type:         'code',
-          scope:                 SCOPES,
-          code_challenge:        challenge,
-          code_challenge_method: 'S256',
-          access_type:           'offline',
-          prompt:                'consent'
-        });
-      window.location.href = url;
-    });
+    var url = 'https://accounts.google.com/o/oauth2/v2/auth?' +
+      new URLSearchParams({
+        client_id:     CLIENT_ID,
+        redirect_uri:  REDIRECT,
+        response_type: 'token',
+        scope:         SCOPES,
+        prompt:        'consent'
+      });
+    window.location.href = url;
   }
 
   function logout(){
