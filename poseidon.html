@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Poseidon's Seal | AGA FACH</title>
+    <!--
+    ╔══════════════════════════════════════════════════════════════════════╗
+    ║      SISTEMA POSEIDON'S SEAL — ACADEMIA DE GUERRA AÉREA — FACH      ║
+    ║                                                                      ║
+    ║  Versión    : 2.2.0 — Migrado a scorpion-tail                       ║
+    ║  Repositorio: vgarcesb-cpu/scorpion-tail (GitHub Pages)             ║
+    ║  URL QR     : https://vgarcesb-cpu.github.io/scorpion-tail/poseidon.html?folio= ║
+    ║                                                                      ║
+    ║  FIXES MIGRACIÓN:                                                    ║
+    ║  MIG-001 │ Manifest inline (sin manifest.json externo)              ║
+    ║  MIG-002 │ SW inline (sin sw.js externo)                            ║
+    ║  MIG-003 │ Icono generado por canvas (sin icono.png externo)        ║
+    ║  MIG-004 │ QR_BASE_URL actualizado a scorpion-tail                  ║
+    ║  MIG-005 │ position:fixed + min-height:0 para nav-bar S25           ║
+    ╚══════════════════════════════════════════════════════════════════════╝
+    -->
+    <link rel="manifest" id="poseidon-manifest">
+    <link rel="apple-touch-icon" id="apple-icon-poseidon">
+    <link rel="icon" type="image/png" id="favicon-poseidon">
+    <meta name="theme-color" content="#0a1628">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Poseidon's Seal">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        :root {
+            --azul:    #0a1628;
+            --azul2:   #152a52;
+            --azul3:   #1e3d7a;
+            --dorado:  #c8a84b;
+            --dorado2: #9a7a2e;
+            --blanco:  #ffffff;
+            --gris:    #f0f4f8;
+            --borde:   #d8e0ec;
+            --verde:   #1a9e5c;
+            --rojo:    #c0392b;
+            --naranja: #d4680e;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; overflow: hidden; }
+        /* MIG-005 — position fixed para S25 */
+        body { font-family: "Segoe UI", system-ui, sans-serif; font-size: 14px; background: var(--azul); color: #111; position: fixed; width: 100%; }
+
+        .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+
+        .app-header {
+            background: linear-gradient(135deg, #050d1a 0%, #0d2248 50%, #050d1a 100%);
+            border-bottom: 2px solid var(--dorado);
+            padding: calc(var(--safe-top) + 8px) 14px 8px;
+            display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+        }
+        .app-header img { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--dorado); flex-shrink: 0; }
+        .h-titulo .inst { font-size: 10px; font-weight: 700; color: var(--dorado); letter-spacing: 1.2px; text-transform: uppercase; }
+        .h-titulo .sub  { font-size: 8px; color: #7a9cc8; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 1px; }
+        .h-right { margin-left: auto; text-align: right; flex-shrink: 0; }
+        .h-right .h-label { font-size: 8px; color: #7a9cc8; text-transform: uppercase; }
+        .h-folio { font-family: "Courier New", monospace; font-size: 11px; font-weight: bold; color: var(--dorado); }
+
+        .nav-tabs { background: #060e1c; border-bottom: 1px solid rgba(200,168,75,0.25); display: flex; flex-shrink: 0; }
+        .nav-tab  { flex: 1; padding: 8px 2px; text-align: center; font-size: 9px; font-weight: 700; color: #5a7aaa; text-transform: uppercase; letter-spacing: 0.3px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; line-height: 1.3; }
+        .nav-tab.activo { color: var(--dorado); border-bottom-color: var(--dorado); background: rgba(200,168,75,0.05); }
+
+        .screen { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+        .steps-bar { background: var(--azul2); padding: 10px 14px 0; flex-shrink: 0; }
+        .steps-track { display: flex; align-items: flex-start; justify-content: space-between; position: relative; }
+        .steps-track::before { content: ""; position: absolute; top: 13px; left: 14px; right: 14px; height: 2px; background: #2a3f6a; z-index: 0; }
+        .step-item { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; position: relative; z-index: 1; }
+        .step-circle { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; background: #2a3f6a; color: #5a7aaa; border: 2px solid #2a3f6a; transition: all 0.3s; }
+        .step-item.activo   .step-circle { background: var(--dorado); color: #fff; border-color: var(--dorado); box-shadow: 0 0 10px rgba(200,168,75,0.4); }
+        .step-item.completo .step-circle { background: var(--verde); color: #fff; border-color: var(--verde); }
+        .step-label { font-size: 8px; color: #5a7aaa; text-transform: uppercase; text-align: center; line-height: 1.2; padding-bottom: 6px; }
+        .step-item.activo   .step-label { color: var(--dorado); }
+        .step-item.completo .step-label { color: var(--verde); }
+
+        /* MIG-005 — min-height: 0 para que nav-bar no quede cortado en S25 */
+        .steps-content { flex: 1; min-height: 0; overflow: hidden; position: relative; }
+        .step-panel { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .step-panel.activo { opacity: 1; pointer-events: all; }
+
+        .card { background: var(--blanco); border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); }
+        .card-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--azul2); border-bottom: 2px solid var(--dorado); padding-bottom: 8px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+        .campo-group { margin-bottom: 10px; }
+        .campo-label { font-size: 10px; font-weight: 700; color: #4a5a7a; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.3px; }
+        .campo-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--borde); border-radius: 8px; font-size: 14px; font-family: inherit; color: #111; background: var(--gris); transition: all 0.2s; outline: none; -webkit-appearance: none; }
+        .campo-input:focus { border-color: var(--azul3); background: #fff; box-shadow: 0 0 0 3px rgba(30,61,122,0.1); }
+        .campo-input[readonly] { background: #e4e9f2; color: var(--azul2); font-weight: bold; border-color: transparent; font-family: "Courier New", monospace; font-size: 13px; }
+        textarea.campo-input { min-height: 65px; resize: none; }
+        .campo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .status-box { text-align: center; font-weight: 800; padding: 12px; margin-bottom: 14px; border-radius: 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; border: 3px solid #000 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        .s-emision    { background: #f0c30e !important; color: #000 !important; }
+        .s-registrado { background: #c0392b !important; color: #fff !important; }
+        .s-devolucion { background: #d4680e !important; color: #fff !important; }
+        .s-cerrado    { background: #1a9e5c !important; color: #fff !important; }
+
+        .item-wrap { background: var(--gris); border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1.5px solid var(--borde); position: relative; }
+        .item-num  { font-size: 9px; font-weight: 800; color: var(--azul2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .btn-del-item { position: absolute; top: 10px; right: 10px; background: #fce8e8; border: 1px solid #f0b8b8; color: #c0392b; border-radius: 50%; width: 24px; height: 24px; font-size: 15px; cursor: pointer; line-height: 1; padding: 0; }
+        .item-fila { display: grid; grid-template-columns: 1fr 80px; gap: 8px; }
+        .btn-agregar { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--azul2), var(--azul)); color: #fff; border: 2px dashed rgba(200,168,75,0.5); border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit; }
+
+        .firma-block { margin-bottom: 18px; }
+        .firma-titulo { font-size: 12px; font-weight: 800; color: var(--azul2); margin-bottom: 3px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
+        .firma-nombre { font-size: 11px; color: #666; text-align: center; margin-bottom: 6px; font-style: italic; min-height: 16px; }
+        .sig-wrap { border: 2px solid var(--azul3); border-radius: 10px; background: #fff; overflow: hidden; height: 130px; position: relative; }
+        .sig-canvas { display: block; touch-action: none; width: 100%; height: 100%; }
+        .btn-borrar { width: 100%; padding: 7px; margin-top: 5px; background: #eef0f5; border: 1px solid #d0d8e8; border-radius: 6px; font-size: 11px; cursor: pointer; font-family: inherit; color: #555; }
+
+        .r-header { background: linear-gradient(135deg, var(--azul), var(--azul2)); padding: 12px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--dorado); border-radius: 14px 14px 0 0; }
+        .r-header img { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--dorado); }
+        .r-fila { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--gris); font-size: 12px; }
+        .r-key  { color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .r-val  { font-weight: 700; color: #111; text-align: right; max-width: 58%; }
+
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: all 0.2s; box-shadow: 0 3px 8px rgba(0,0,0,0.12); margin-bottom: 8px; letter-spacing: 0.5px; }
+        .btn-dorado  { background: linear-gradient(135deg, var(--dorado), var(--dorado2)); color: #fff; }
+        .btn-azul    { background: linear-gradient(135deg, var(--azul2), var(--azul)); color: #fff; border: 1px solid rgba(200,168,75,0.3); }
+        .btn-verde   { background: var(--verde); color: #fff; }
+        .btn-rojo    { background: var(--rojo); color: #fff; }
+        .btn-naranja { background: var(--naranja); color: #fff; }
+        .btn-wa      { background: #1da851; color: #fff; }
+        .btn-gris    { background: #7a8ca8; color: #fff; }
+        .btn-outline { background: rgba(255,255,255,0.06); color: #7a9cc8; border: 1.5px solid rgba(255,255,255,0.12); }
+
+        .nav-bar-pasos { background: linear-gradient(90deg, #060e1c, #0d2248); border-top: 1px solid rgba(200,168,75,0.25); padding: 10px 14px; display: flex; gap: 10px; flex-shrink: 0; padding-bottom: calc(10px + var(--safe-bottom)); }
+        .btn-nav  { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .btn-atras    { background: rgba(255,255,255,0.07); color: #7a9cc8; border: 1.5px solid rgba(255,255,255,0.1); }
+        .btn-siguiente{ background: linear-gradient(135deg, var(--azul2), #0d2248); color: #fff; border: 1.5px solid rgba(200,168,75,0.35); }
+        .btn-siguiente.dorado { background: linear-gradient(135deg, var(--dorado), var(--dorado2)); border-color: var(--dorado); }
+        .btn-nav:disabled { opacity: 0.3; pointer-events: none; }
+
+        .h-item { background: #fff; border-radius: 10px; padding: 12px 13px; margin-bottom: 8px; border-left: 4px solid var(--azul2); cursor: pointer; transition: transform 0.15s; }
+        .h-item:active { transform: scale(0.98); }
+        .h-folio  { font-family: "Courier New", monospace; font-size: 11px; font-weight: bold; color: var(--azul2); }
+        .h-names  { font-size: 13px; font-weight: 700; color: #111; margin: 3px 0 2px; }
+        .h-meta   { font-size: 11px; color: #888; display: flex; justify-content: space-between; align-items: center; }
+        .h-item.registrado { border-left-color: var(--rojo); }
+        .h-item.devolucion { border-left-color: var(--naranja); }
+        .h-item.cerrado    { border-left-color: var(--verde); }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .b-emision    { background: #fef5cc; color: #8a6a00; }
+        .b-registrado { background: #fde8e8; color: #8a1a1a; }
+        .b-devolucion { background: #fef0e0; color: #8a4000; }
+        .b-cerrado    { background: #e0f5ec; color: #0a5a2a; }
+
+        .filter-bar { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
+        .f-btn { padding: 6px 12px; border-radius: 16px; border: 1.5px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: #7a9cc8; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: inherit; text-transform: uppercase; letter-spacing: 0.3px; }
+        .f-btn.activo { background: var(--dorado); border-color: var(--dorado); color: #fff; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 999; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: #fff; border-radius: 20px; padding: 26px 22px; width: 100%; max-width: 400px; text-align: center; animation: popIn 0.22s ease; }
+        @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .m-icon   { font-size: 48px; margin-bottom: 8px; }
+        .m-titulo { font-size: 17px; font-weight: 800; margin-bottom: 5px; color: var(--azul2); }
+        .m-sub    { font-size: 12px; color: #777; margin-bottom: 14px; }
+        .m-datos  { background: var(--gris); border-radius: 10px; padding: 12px; margin-bottom: 14px; text-align: left; }
+        .m-datos div { padding: 4px 0; border-bottom: 1px solid var(--borde); font-size: 12px; }
+        .m-datos div:last-child { border: none; }
+        .m-key { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; display: block; }
+        .m-val { font-weight: 700; color: #111; }
+
+        .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--azul2); color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 12px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 9999; border: 1px solid var(--dorado); white-space: nowrap; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .empty { text-align: center; padding: 40px 20px; color: #7a9cc8; }
+        .empty .e-icon { font-size: 36px; margin-bottom: 10px; }
+
+        .sp { padding: 14px; }
+
+        .scanner-overlay { position:fixed; inset:0; background:#000; z-index:1000; display:none; flex-direction:column; }
+        .scanner-overlay.show { display:flex; }
+        .scanner-header { background:linear-gradient(135deg,#050d1a,#0d2248); border-bottom:2px solid var(--dorado); padding:12px 16px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+        .scanner-header img { width:36px; height:36px; border-radius:50%; border:1.5px solid var(--dorado); }
+        .scanner-title { font-size:13px; font-weight:800; color:var(--dorado); text-transform:uppercase; letter-spacing:0.5px; }
+        .scanner-sub   { font-size:10px; color:#7a9cc8; }
+        #scanner-viewport { flex:1; position:relative; overflow:hidden; background:#000; }
+        #reader { width:100%; height:100%; }
+        .scan-frame { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:10; }
+        .scan-box { width:220px; height:220px; position:relative; }
+        .scan-box::before,.scan-box::after { content:""; position:absolute; width:40px; height:40px; border-color:var(--dorado); border-style:solid; }
+        .scan-box::before { top:0; left:0; border-width:3px 0 0 3px; }
+        .scan-box::after  { bottom:0; right:0; border-width:0 3px 3px 0; }
+        .scan-corner-tr { position:absolute; top:0; right:0; width:40px; height:40px; border:3px solid var(--dorado); border-left:0; border-bottom:0; }
+        .scan-corner-bl { position:absolute; bottom:0; left:0; width:40px; height:40px; border:3px solid var(--dorado); border-right:0; border-top:0; }
+        .scan-line { position:absolute; left:10px; right:10px; height:2px; background:linear-gradient(90deg,transparent,var(--dorado),transparent); animation:scanAnim 2s linear infinite; top:10px; }
+        @keyframes scanAnim { 0%{top:10px} 100%{top:200px} }
+        .scanner-hint { position:absolute; bottom:0; left:0; right:0; background:rgba(5,13,26,0.92); padding:14px; text-align:center; z-index:11; }
+        .scanner-hint p { font-size:12px; color:#a0c0e8; margin-bottom:4px; }
+        .scanner-result-box { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(5,13,26,0.96); display:none; align-items:center; justify-content:center; flex-direction:column; z-index:20; padding:24px; }
+        .scanner-result-box.show { display:flex; }
+        .sr-icon  { font-size:52px; margin-bottom:10px; }
+        .sr-folio { font-family:"Courier New",monospace; font-size:16px; font-weight:bold; color:var(--dorado); margin-bottom:6px; }
+        .sr-sub   { font-size:12px; color:#7a9cc8; margin-bottom:20px; text-align:center; }
+        .scanner-footer { background:#060e1c; border-top:1px solid rgba(200,168,75,0.25); padding:12px 16px; display:flex; gap:10px; flex-shrink:0; padding-bottom:calc(12px + var(--safe-bottom)); }
+
+        #print-area { display: none; }
+        @media print {
+            body > *          { display: none !important; }
+            #print-area       { display: block !important; }
+            body              { background: #fff !important; }
+            .print-status     { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; border: 2px solid #000 !important; }
+            #print-area table th { background: #eee !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            @page { size: letter portrait; margin: 14mm 14mm 14mm 20mm; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <!-- HEADER -->
+    <div class="app-header">
+        <img id="logo-header" src="" alt="AGA">
+        <div class="h-titulo">
+            <div class="inst">Academia de Guerra Aérea</div>
+            <div class="sub">Poseidon's Seal · FACH</div>
+        </div>
+        <div class="h-right">
+            <div class="h-label">Folio</div>
+            <div class="h-folio" id="folio-show">—</div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="nav-tabs">
+        <div class="nav-tab activo" id="tab-form"    onclick="cambiarTab('form')">📋 Vale</div>
+        <div class="nav-tab"        id="tab-history" onclick="cambiarTab('history')">📚 Historial</div>
+        <div class="nav-tab"        id="tab-buscar"  onclick="cambiarTab('buscar')">🔍 Buscar</div>
+    </div>
+
+    <!-- SCREEN: FORMULARIO -->
+    <div id="screen-form" class="screen" style="display:flex;flex-direction:column;overflow:hidden;">
+
+        <div class="steps-bar">
+            <div class="steps-track">
+                <div class="step-item activo" id="si-1"><div class="step-circle">1</div><div class="step-label">Datos</div></div>
+                <div class="step-item"         id="si-2"><div class="step-circle">2</div><div class="step-label">Ítems</div></div>
+                <div class="step-item"         id="si-3"><div class="step-circle">3</div><div class="step-label">Firmas</div></div>
+                <div class="step-item"         id="si-4"><div class="step-circle">4</div><div class="step-label">Resumen</div></div>
+            </div>
+        </div>
+
+        <div class="steps-content">
+
+            <!-- PASO 1 -->
+            <div class="step-panel activo" id="panel-1">
+                <div class="card">
+                    <div class="card-title">📋 Identificación</div>
+                    <div class="campo-row">
+                        <div class="campo-group">
+                            <label class="campo-label">N° Folio</label>
+                            <input type="text" class="campo-input" id="folio-input" readonly>
+                        </div>
+                        <div class="campo-group">
+                            <label class="campo-label">Fecha</label>
+                            <input type="text" class="campo-input" id="fecha-input" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">👤 Quien Entrega</div>
+                    <div class="campo-group">
+                        <label class="campo-label">Grado y Nombre *</label>
+                        <input type="text" class="campo-input" id="entrega" placeholder="Ej: Cap. Juan Pérez González">
+                    </div>
+                    <div class="campo-group">
+                        <label class="campo-label">Unidad / Sección</label>
+                        <input type="text" class="campo-input" id="unidad-entrega" placeholder="Ej: Escuadrilla de Material">
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">👤 Quien Recibe</div>
+                    <div class="campo-group">
+                        <label class="campo-label">Grado y Nombre *</label>
+                        <input type="text" class="campo-input" id="recibe" placeholder="Ej: Tte. María Soto Araya">
+                    </div>
+                    <div class="campo-group">
+                        <label class="campo-label">Unidad / Sección</label>
+                        <input type="text" class="campo-input" id="unidad-recibe" placeholder="Ej: Dirección de Educación">
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">📍 Contexto</div>
+                    <div class="campo-group">
+                        <label class="campo-label">Lugar de entrega</label>
+                        <input type="text" class="campo-input" id="lugar" placeholder="Ej: Bodega central, terreno...">
+                    </div>
+                    <div class="campo-group">
+                        <label class="campo-label">Observaciones</label>
+                        <textarea class="campo-input" id="obs" placeholder="Notas adicionales..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 2 -->
+            <div class="step-panel" id="panel-2">
+                <div class="card">
+                    <div class="card-title">📦 Bienes / Materiales</div>
+                    <div id="lista-items"></div>
+                    <button class="btn-agregar" onclick="agregarItem()">＋ Agregar ítem</button>
+                </div>
+            </div>
+
+            <!-- PASO 3 -->
+            <div class="step-panel" id="panel-3">
+                <div class="card">
+                    <div class="card-title">✍️ Firmas Digitales</div>
+                    <div class="firma-block">
+                        <div class="firma-titulo">Firma — Quien Entrega</div>
+                        <div class="firma-nombre" id="nombre-entrega-firma"></div>
+                        <div class="sig-wrap" id="wrap-entrega"><canvas class="sig-canvas" id="sig-entrega"></canvas></div>
+                        <button class="btn-borrar" onclick="limpiarFirmaCanvas('sig-entrega','entrega')">🗑 Borrar firma</button>
+                    </div>
+                    <div class="firma-block">
+                        <div class="firma-titulo">Firma — Quien Recibe</div>
+                        <div class="firma-nombre" id="nombre-recibe-firma"></div>
+                        <div class="sig-wrap" id="wrap-recibe"><canvas class="sig-canvas" id="sig-recibe"></canvas></div>
+                        <button class="btn-borrar" onclick="limpiarFirmaCanvas('sig-recibe','recibe')">🗑 Borrar firma</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 4 -->
+            <div class="step-panel" id="panel-4">
+                <div id="status-form" class="status-box s-emision">ESTADO: EN EMISIÓN</div>
+                <div class="card" style="padding:0;overflow:hidden;">
+                    <div class="r-header">
+                        <img id="logo-resumen" src="" alt="AGA">
+                        <div>
+                            <div style="font-size:10px;color:var(--dorado);font-weight:800;text-transform:uppercase;letter-spacing:0.5px;">Poseidon's Seal</div>
+                            <div style="font-size:8px;color:#a0b8d8;">Academia de Guerra Aérea · FACH</div>
+                        </div>
+                    </div>
+                    <div style="padding:12px 14px;">
+                        <div class="r-fila"><span class="r-key">Folio</span>   <span class="r-val" id="r-folio">—</span></div>
+                        <div class="r-fila"><span class="r-key">Fecha</span>   <span class="r-val" id="r-fecha">—</span></div>
+                        <div class="r-fila"><span class="r-key">Entrega</span> <span class="r-val" id="r-entrega">—</span></div>
+                        <div class="r-fila"><span class="r-key">Recibe</span>  <span class="r-val" id="r-recibe">—</span></div>
+                        <div class="r-fila"><span class="r-key">Lugar</span>   <span class="r-val" id="r-lugar">—</span></div>
+                        <div class="r-fila"><span class="r-key">Ítems</span>   <span class="r-val" id="r-items">—</span></div>
+                    </div>
+                </div>
+                <div style="margin-top:8px;">
+                    <button class="btn btn-dorado"  id="btn-guardar"       onclick="guardarVale()">💾 GUARDAR Y REGISTRAR</button>
+                    <button class="btn btn-azul"    id="btn-imprimir"      style="display:none" onclick="imprimirVale()">🖨️ IMPRIMIR / PDF</button>
+                    <button class="btn btn-naranja" id="btn-devolucion"    style="display:none" onclick="registrarDevolucion()">↩️ REGISTRAR DEVOLUCIÓN</button>
+                    <button class="btn btn-verde"   id="btn-cerrar"        style="display:none" onclick="cerrarVale()">✅ CERRAR VALE</button>
+                    <button class="btn btn-outline" id="btn-volver-emision" onclick="irAPasoDirecto(3)">← VOLVER ATRÁS</button>
+                    <button class="btn btn-nuevo"   id="btn-nuevo"         style="display:none" onclick="nuevoVale()">+ NUEVO PROCEDIMIENTO</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-bar-pasos" id="nav-bar-pasos">
+            <button class="btn-nav btn-atras"     id="btn-atras"     disabled onclick="irPaso(-1)">← Atrás</button>
+            <button class="btn-nav btn-siguiente" id="btn-siguiente"          onclick="irPaso(1)">Siguiente →</button>
+        </div>
+    </div>
+
+    <!-- SCREEN: HISTORIAL -->
+    <div id="screen-history" class="screen sp" style="display:none;">
+        <div class="filter-bar">
+            <button class="f-btn activo" id="f-todos"      onclick="filtrarHistorial('todos')">Todos</button>
+            <button class="f-btn"         id="f-registrado" onclick="filtrarHistorial('registrado')">Registrado</button>
+            <button class="f-btn"         id="f-devolucion" onclick="filtrarHistorial('devolucion')">Devolución</button>
+            <button class="f-btn"         id="f-cerrado"    onclick="filtrarHistorial('cerrado')">Cerrados</button>
+        </div>
+        <div id="lista-historial"></div>
+    </div>
+
+    <!-- SCREEN: BUSCAR -->
+    <div id="screen-buscar" class="screen sp" style="display:none;">
+        <div class="card">
+            <div class="card-title">🔍 Buscar Vale</div>
+            <div class="campo-group">
+                <label class="campo-label">Folio o nombre</label>
+                <input type="text" class="campo-input" id="input-busqueda" placeholder="AGA-2026-... o nombre...">
+            </div>
+            <button class="btn btn-azul" onclick="buscarVale()">BUSCAR</button>
+            <button class="btn btn-dorado" style="margin-top:6px;" onclick="abrirEscaner()">📷 ESCANEAR QR CON CÁMARA</button>
+        </div>
+        <div id="resultado-busqueda"></div>
+    </div>
+
+</div><!-- /app -->
+
+<!-- OVERLAY ESCÁNER QR -->
+<div class="scanner-overlay" id="scanner-overlay">
+    <div class="scanner-header">
+        <img id="scanner-logo" src="" alt="AGA">
+        <div>
+            <div class="scanner-title">Escáner QR</div>
+            <div class="scanner-sub">Apunta la cámara al código QR del vale impreso</div>
+        </div>
+    </div>
+    <div id="scanner-viewport">
+        <div id="reader"></div>
+        <div class="scan-frame">
+            <div class="scan-box">
+                <div class="scan-corner-tr"></div>
+                <div class="scan-corner-bl"></div>
+                <div class="scan-line"></div>
+            </div>
+        </div>
+        <div class="scanner-result-box" id="scanner-result">
+            <div class="sr-icon">✅</div>
+            <div class="sr-folio" id="sr-folio-text"></div>
+            <div class="sr-sub" id="sr-sub-text">Folio detectado — ¿Cargar registro?</div>
+            <button class="btn btn-dorado" style="margin-bottom:8px;" onclick="confirmarEscaneo()">📋 CARGAR REGISTRO</button>
+            <button class="btn btn-outline" onclick="reanudarEscaner()">↩ Escanear otro</button>
+        </div>
+    </div>
+    <div class="scanner-hint">
+        <p>📋 Busca el código QR en la esquina inferior del vale impreso</p>
+    </div>
+    <div class="scanner-footer">
+        <button class="btn-nav btn-atras" style="flex:1;" onclick="cerrarEscaner()">✕ Cerrar escáner</button>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-confirm">
+    <div class="modal-box">
+        <div class="m-icon"   id="m-icon"></div>
+        <div class="m-titulo" id="m-titulo"></div>
+        <div class="m-sub"    id="m-sub"></div>
+        <div class="m-datos"  id="m-datos"></div>
+        <button class="btn btn-azul" id="m-btn" onclick="cerrarModal()"></button>
+    </div>
+</div>
+
+<!-- ÁREA DE IMPRESIÓN -->
+<div id="print-area">
+    <div style="font-family:Arial,sans-serif;font-size:11px;color:#000;max-width:680px;">
+        <!-- MEMBRETE ESTÁNDAR AGA -->
+        <div style="margin-bottom:10px;">
+          <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:400;line-height:1.6;text-align:left">FUERZA AÉREA DE CHILE</div>
+          <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:400;line-height:1.6;text-align:center;max-width:220px">DIVISIÓN DE EDUCACIÓN</div>
+          <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:400;line-height:1.6;text-align:center;max-width:220px;text-decoration:underline">ACADEMIA DE GUERRA AÉREA</div>
+        </div>
+        <div id="p-status" class="print-status" style="text-align:center;font-weight:bold;padding:7px;margin-bottom:10px;border-radius:5px;font-size:11px;text-transform:uppercase;letter-spacing:1px;"></div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:10px;border:1px solid #ccc;">
+            <tr>
+                <td style="padding:4px 8px;background:#f0f0f0;font-weight:bold;color:#555;font-size:9px;text-transform:uppercase;width:18%;">Entrega</td>
+                <td style="padding:4px 8px;font-size:10px;" id="p-entrega-nombre"></td>
+                <td style="padding:4px 8px;background:#f0f0f0;font-weight:bold;color:#555;font-size:9px;text-transform:uppercase;width:18%;">Unidad</td>
+                <td style="padding:4px 8px;font-size:10px;" id="p-entrega-unidad"></td>
+            </tr>
+            <tr>
+                <td style="padding:4px 8px;background:#f0f0f0;font-weight:bold;color:#555;font-size:9px;text-transform:uppercase;">Recibe</td>
+                <td style="padding:4px 8px;font-size:10px;" id="p-recibe-nombre"></td>
+                <td style="padding:4px 8px;background:#f0f0f0;font-weight:bold;color:#555;font-size:9px;text-transform:uppercase;">Unidad</td>
+                <td style="padding:4px 8px;font-size:10px;" id="p-recibe-unidad"></td>
+            </tr>
+            <tr id="p-lugar-row">
+                <td style="padding:4px 8px;background:#f0f0f0;font-weight:bold;color:#555;font-size:9px;text-transform:uppercase;">Lugar</td>
+                <td style="padding:4px 8px;font-size:10px;" id="p-lugar" colspan="3"></td>
+            </tr>
+            <tr id="p-obs-row">
+                <td style="padding:4px 8px;background:#f0f0f0;font-weight:bold;color:#555;font-size:9px;text-transform:uppercase;">Obs.</td>
+                <td style="padding:4px 8px;font-size:10px;" id="p-obs" colspan="3"></td>
+            </tr>
+        </table>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:18px;">
+            <thead>
+                <tr>
+                    <th style="border:1px solid #ccc;padding:5px;background:#eee;text-align:center;font-size:9px;width:6%">N°</th>
+                    <th style="border:1px solid #ccc;padding:5px;background:#eee;font-size:9px;width:62%">Descripción del Bien / Material</th>
+                    <th style="border:1px solid #ccc;padding:5px;background:#eee;text-align:center;font-size:9px;width:10%">Cant.</th>
+                    <th style="border:1px solid #ccc;padding:5px;background:#eee;text-align:center;font-size:9px;width:22%">Unidad</th>
+                </tr>
+            </thead>
+            <tbody id="p-items-tbody"></tbody>
+        </table>
+        <table style="width:100%;border-collapse:collapse;">
+            <tr>
+                <td style="width:50%;text-align:center;padding:0 8px;font-size:10px;vertical-align:bottom;">
+                    <img id="p-sig-entrega" src="" style="height:48px;display:block;margin:0 auto 4px;max-width:170px;">
+                    <div style="border-top:1px solid #000;padding-top:3px;"></div>
+                    <div id="p-firma-entrega" style="font-weight:bold;margin-top:2px;font-size:10px;"></div>
+                    <div style="color:#777;font-size:9px;">Firma — Quien Entrega</div>
+                </td>
+                <td style="width:50%;text-align:center;padding:0 8px;font-size:10px;vertical-align:bottom;">
+                    <img id="p-sig-recibe" src="" style="height:48px;display:block;margin:0 auto 4px;max-width:170px;">
+                    <div style="border-top:1px solid #000;padding-top:3px;"></div>
+                    <div id="p-firma-recibe" style="font-weight:bold;margin-top:2px;font-size:10px;"></div>
+                    <div style="color:#777;font-size:9px;">Firma — Quien Recibe</div>
+                </td>
+            </tr>
+        </table>
+        <div style="margin-top:12px;padding-top:6px;border-top:1px dashed #ccc;font-size:7px;color:#bbb;text-align:center;">
+            Sistema Poseidon's Seal · Academia de Guerra Aérea · Fuerza Aérea de Chile · v2.2.0
+        </div>
+    </div>
+</div>
+
+<div id="qr-temp" style="position:absolute;left:-9999px;top:-9999px;width:80px;height:80px;"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════
+// MIG-003 — Generar icono via canvas (sin icono.png externo)
+// ════════════════════════════════════════════════════════════════════════
+var ICONO_DATA = (function() {
+    var c = document.createElement('canvas');
+    c.width = c.height = 128;
+    var ctx = c.getContext('2d');
+    ctx.fillStyle = '#0a1628';
+    ctx.fillRect(0, 0, 128, 128);
+    ctx.strokeStyle = '#c8a84b';
+    ctx.lineWidth = 5;
+    ctx.strokeRect(5, 5, 118, 118);
+    ctx.font = '70px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🔱', 64, 60);
+    ctx.fillStyle = '#c8a84b';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('AGA', 64, 110);
+    return c.toDataURL('image/png');
+})();
+
+// Asignar icono a todos los elementos img y links
+document.getElementById('logo-header').src   = ICONO_DATA;
+document.getElementById('logo-resumen').src  = ICONO_DATA;
+document.getElementById('p-logo').src        = ICONO_DATA;
+document.getElementById('scanner-logo').src  = ICONO_DATA;
+document.getElementById('apple-icon-poseidon').href = ICONO_DATA;
+document.getElementById('favicon-poseidon').href    = ICONO_DATA;
+
+// ════════════════════════════════════════════════════════════════════════
+// SISTEMA POSEIDON'S SEAL v2.2.0
+// MIG-004 — QR_BASE_URL actualizado a scorpion-tail
+// ════════════════════════════════════════════════════════════════════════
+const QR_BASE_URL = "https://vgarcesb-cpu.github.io/scorpion-tail/poseidon.html";
+const DB_NAME     = "PoseidonSeal_v1";
+const STORE_NAME  = "vales";
+
+let db;
+let pasoActual    = 1;
+let items         = [];
+let sigEntregaURL = "";
+let sigRecibeURL  = "";
+let folio         = "";
+let modoEdicion   = false;
+let filtroActual  = "todos";
+
+// ── INDEXED DB ──────────────────────────────────────────────────────────
+const dbReq = indexedDB.open(DB_NAME, 1);
+
+dbReq.onupgradeneeded = (e) => {
+    const d = e.target.result;
+    if (!d.objectStoreNames.contains(STORE_NAME)) {
+        const store = d.createObjectStore(STORE_NAME, { keyPath: "id" });
+        store.createIndex("estado",  "estado",  { unique: false });
+        store.createIndex("entrega", "entrega", { unique: false });
+        store.createIndex("recibe",  "recibe",  { unique: false });
+    }
+};
+
+dbReq.onsuccess = (e) => {
+    db = e.target.result;
+    const params     = new URLSearchParams(window.location.search);
+    const folioParam = params.get("folio");
+    if (folioParam) {
+        cargarValePorQR(folioParam);
+    } else {
+        nuevoVale();
+    }
+};
+
+dbReq.onerror = () => {
+    mostrarToast("⚠️ Error al abrir base de datos. Verifica permisos del navegador.");
+};
+
+// ── CANVAS ──────────────────────────────────────────────────────────────
+function initCanvas(canvasId) {
+    const sc   = document.getElementById(canvasId);
+    const wrap = sc ? sc.parentElement : null;
+    if (!sc || !wrap) return;
+    const w = wrap.offsetWidth  || 300;
+    const h = wrap.offsetHeight || 130;
+    const clone = sc.cloneNode(false);
+    clone.width  = w;
+    clone.height = h;
+    wrap.replaceChild(clone, sc);
+    const ctx = clone.getContext("2d");
+    ctx.strokeStyle = "#0a1628";
+    ctx.lineWidth   = 2.5;
+    ctx.lineCap     = "round";
+    ctx.lineJoin    = "round";
+    let drawing = false;
+    function getPos(e) {
+        const r = clone.getBoundingClientRect();
+        const t = e.touches ? e.touches[0] : e;
+        return { x: t.clientX - r.left, y: t.clientY - r.top };
+    }
+    clone.addEventListener("mousedown",  (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
+    clone.addEventListener("mousemove",  (e) => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+    clone.addEventListener("mouseup",    () => drawing = false);
+    clone.addEventListener("mouseleave", () => drawing = false);
+    clone.addEventListener("touchstart", (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }, { passive: false });
+    clone.addEventListener("touchmove",  (e) => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: false });
+    clone.addEventListener("touchend",   () => drawing = false);
+    return clone;
+}
+
+window.addEventListener("resize", () => {
+    setTimeout(() => { if (pasoActual === 3) redibujarFirmasEnCanvas(); }, 200);
+});
+screen.orientation && screen.orientation.addEventListener("change", () => {
+    setTimeout(() => { if (pasoActual === 3) redibujarFirmasEnCanvas(); }, 350);
+});
+
+function redibujarFirmasEnCanvas() {
+    initCanvas("sig-entrega");
+    initCanvas("sig-recibe");
+    if (sigEntregaURL) {
+        const img = new Image();
+        img.onload = () => { const sc = document.getElementById("sig-entrega"); if (sc) sc.getContext("2d").drawImage(img, 0, 0, sc.width, sc.height); };
+        img.src = sigEntregaURL;
+    }
+    if (sigRecibeURL) {
+        const img = new Image();
+        img.onload = () => { const sc = document.getElementById("sig-recibe"); if (sc) sc.getContext("2d").drawImage(img, 0, 0, sc.width, sc.height); };
+        img.src = sigRecibeURL;
+    }
+}
+
+function limpiarFirmaCanvas(canvasId, canal) {
+    const sc = document.getElementById(canvasId);
+    if (sc) sc.getContext("2d").clearRect(0, 0, sc.width, sc.height);
+    if (canal === "entrega") sigEntregaURL = "";
+    if (canal === "recibe")  sigRecibeURL  = "";
+}
+
+function capturarFirma(canvasId) {
+    const sc = document.getElementById(canvasId);
+    if (!sc) return "";
+    const tmp = document.createElement("canvas");
+    tmp.width  = sc.width;
+    tmp.height = sc.height;
+    const ctx  = tmp.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, tmp.width, tmp.height);
+    ctx.drawImage(sc, 0, 0, tmp.width, tmp.height);
+    return tmp.toDataURL("image/jpeg", 0.65);
+}
+
+// ── ÍTEMS ───────────────────────────────────────────────────────────────
+function agregarItem() {
+    items.push({ id: Date.now() + Math.random(), cant: 1, desc: "", un: "UN" });
+    renderItems();
+}
+function eliminarItem(id) {
+    if (items.length <= 1) { mostrarToast("⚠️ Debe haber al menos un ítem"); return; }
+    items = items.filter(i => i.id !== id);
+    renderItems();
+}
+function getItem(id) { return items.find(i => i.id === id); }
+
+function renderItems() {
+    const lista = document.getElementById("lista-items");
+    lista.innerHTML = "";
+    items.forEach((it, idx) => {
+        const d = document.createElement("div");
+        d.className = "item-wrap";
+        d.innerHTML = `
+            <div class="item-num">Ítem ${idx + 1}</div>
+            <button class="btn-del-item" onclick="eliminarItem(${it.id})">×</button>
+            <div class="campo-group">
+                <label class="campo-label">Descripción del bien / material</label>
+                <input type="text" class="campo-input" value="${it.desc||''}" placeholder="Ej: Computador portátil Dell Latitude"
+                    oninput="getItem(${it.id}).desc = this.value">
+            </div>
+            <div class="item-fila">
+                <div class="campo-group">
+                    <label class="campo-label">Cantidad</label>
+                    <input type="number" class="campo-input" value="${it.cant}" min="1"
+                        onchange="getItem(${it.id}).cant = parseInt(this.value)||1">
+                </div>
+                <div class="campo-group">
+                    <label class="campo-label">Unidad</label>
+                    <input type="text" class="campo-input" value="${it.un}" placeholder="UN"
+                        onchange="getItem(${it.id}).un = this.value||'UN'">
+                </div>
+            </div>`;
+        lista.appendChild(d);
+    });
+}
+
+// ── NAVEGACIÓN ──────────────────────────────────────────────────────────
+function irPaso(dir) {
+    if (dir === 1 && !validarPaso()) return;
+    const sig = pasoActual + dir;
+    if (sig < 1 || sig > 4) return;
+    document.querySelectorAll(".step-panel").forEach(p => p.classList.remove("activo"));
+    document.querySelectorAll(".step-item").forEach(s => s.classList.remove("activo"));
+    for (let i = 1; i < sig; i++) document.getElementById("si-" + i).classList.add("completo");
+    if (dir === -1) document.getElementById("si-" + sig).classList.remove("completo");
+    pasoActual = sig;
+    document.getElementById("panel-" + pasoActual).classList.add("activo");
+    document.getElementById("si-"   + pasoActual).classList.add("activo");
+    document.getElementById("btn-atras").disabled = (pasoActual === 1);
+    const btnSig = document.getElementById("btn-siguiente");
+    const navBar = document.getElementById("nav-bar-pasos");
+    if (pasoActual === 3) {
+        setTimeout(() => { redibujarFirmasEnCanvas(); }, 150);
+        document.getElementById("nombre-entrega-firma").textContent = document.getElementById("entrega").value || "";
+        document.getElementById("nombre-recibe-firma").textContent  = document.getElementById("recibe").value  || "";
+    }
+    if (pasoActual === 4) {
+        navBar.style.display = "none";
+        actualizarResumen();
+    } else {
+        navBar.style.display = "flex";
+        btnSig.textContent   = pasoActual === 3 ? "Ver Resumen →" : "Siguiente →";
+        btnSig.className     = "btn-nav btn-siguiente" + (pasoActual === 3 ? " dorado" : "");
+    }
+}
+
+function validarPaso() {
+    if (pasoActual === 1) {
+        if (!document.getElementById("entrega").value.trim()) { mostrarToast("⚠️ Ingresa quien entrega"); return false; }
+        if (!document.getElementById("recibe").value.trim())  { mostrarToast("⚠️ Ingresa quien recibe");  return false; }
+    }
+    if (pasoActual === 2) {
+        if (!items.some(i => i.desc.trim())) { mostrarToast("⚠️ Agrega al menos un ítem con descripción"); return false; }
+    }
+    if (pasoActual === 3) {
+        const firmaVacia = (canvasId, urlGuardada) => {
+            if (urlGuardada) return false;
+            const sc = document.getElementById(canvasId);
+            if (!sc || sc.width === 0) return true;
+            const datos = sc.getContext("2d").getImageData(0, 0, sc.width, sc.height).data;
+            for (let i = 3; i < datos.length; i += 4) { if (datos[i] > 10) return false; }
+            return true;
+        };
+        if (firmaVacia("sig-entrega", sigEntregaURL)) { mostrarToast("⚠️ La firma de quien ENTREGA es obligatoria"); return false; }
+        if (firmaVacia("sig-recibe",  sigRecibeURL))  { mostrarToast("⚠️ La firma de quien RECIBE es obligatoria");  return false; }
+    }
+    return true;
+}
+
+// ── RESUMEN ──────────────────────────────────────────────────────────────
+function actualizarResumen() {
+    const nItems = items.filter(i => i.desc.trim()).length;
+    document.getElementById("r-folio").textContent   = folio;
+    document.getElementById("r-fecha").textContent   = document.getElementById("fecha-input").value;
+    document.getElementById("r-entrega").textContent = document.getElementById("entrega").value || "—";
+    document.getElementById("r-recibe").textContent  = document.getElementById("recibe").value  || "—";
+    document.getElementById("r-lugar").textContent   = document.getElementById("lugar").value   || "—";
+    document.getElementById("r-items").textContent   = nItems + " ítem(s)";
+}
+
+function setStatusUI(estado) {
+    const sb  = document.getElementById("status-form");
+    const mapa = {
+        emision:    { cls: "s-emision",    txt: "ESTADO: EN EMISIÓN" },
+        registrado: { cls: "s-registrado", txt: "ESTADO: REGISTRADO" },
+        devolucion: { cls: "s-devolucion", txt: "ESTADO: EN DEVOLUCIÓN" },
+        cerrado:    { cls: "s-cerrado",    txt: "ESTADO: CERRADO" }
+    };
+    const m = mapa[estado] || mapa.emision;
+    sb.className   = "status-box " + m.cls;
+    sb.textContent = m.txt;
+    const btnG  = document.getElementById("btn-guardar");
+    const btnI  = document.getElementById("btn-imprimir");
+    const btnD  = document.getElementById("btn-devolucion");
+    const btnC  = document.getElementById("btn-cerrar");
+    const btnVO = document.getElementById("btn-volver-emision");
+    const btnN  = document.getElementById("btn-nuevo");
+    btnG.style.display  = estado === "emision"    ? "block" : "none";
+    btnVO.style.display = estado === "emision"    ? "block" : "none";
+    btnI.style.display  = estado !== "emision"    ? "block" : "none";
+    btnD.style.display  = estado === "registrado" ? "block" : "none";
+    btnC.style.display  = estado === "devolucion" ? "block" : "none";
+    btnN.style.display  = (estado === "registrado" || estado === "devolucion" || estado === "cerrado") ? "block" : "none";
+}
+
+// ── GUARDAR ──────────────────────────────────────────────────────────────
+function guardarVale() {
+    if (!db) { mostrarToast("⚠️ Base de datos no lista, intenta de nuevo"); return; }
+    const entrega = document.getElementById("entrega").value.trim();
+    const recibe  = document.getElementById("recibe").value.trim();
+    if (!entrega || !recibe) { mostrarToast("⚠️ Faltan datos obligatorios"); return; }
+    sigEntregaURL = capturarFirma("sig-entrega");
+    sigRecibeURL  = capturarFirma("sig-recibe");
+    const vale = {
+        id:            folio,
+        fecha:         document.getElementById("fecha-input").value,
+        fechaTs:       Date.now(),
+        entrega,
+        unidadEntrega: document.getElementById("unidad-entrega").value.trim(),
+        recibe,
+        unidadRecibe:  document.getElementById("unidad-recibe").value.trim(),
+        lugar:         document.getElementById("lugar").value.trim(),
+        obs:           document.getElementById("obs").value.trim(),
+        items:         items.filter(i => i.desc.trim()),
+        firmaEntrega:  sigEntregaURL,
+        firmaRecibe:   sigRecibeURL,
+        estado:        "registrado",
+        historial: [{ fecha: new Date().toLocaleString("es-CL"), accion: modoEdicion ? "Vale actualizado" : "Vale creado — bien registrado" }]
+    };
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    tx.objectStore(STORE_NAME).put(vale);
+    tx.oncomplete = () => {
+        modoEdicion = true;
+        setStatusUI("registrado");
+        mostrarModal("📋", "Vale Registrado", "Bien en custodia — registrado correctamente.", vale, () => imprimirVale());
+    };
+    tx.onerror = (e) => mostrarToast("⚠️ Error al guardar: " + e.target.error);
+}
+
+// ── REGISTRAR DEVOLUCIÓN ─────────────────────────────────────────────────
+function registrarDevolucion() {
+    if (!db) { mostrarToast("⚠️ Base de datos no lista"); return; }
+    const tx    = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    const req   = store.get(folio);
+    req.onsuccess = () => {
+        const data = req.result;
+        if (!data) { mostrarToast("⚠️ Registro no encontrado en base de datos"); return; }
+        data.estado = "devolucion";
+        data.historial.push({ fecha: new Date().toLocaleString("es-CL"), accion: "Devolución iniciada" });
+        store.put(data);
+        tx.oncomplete = () => {
+            setStatusUI("devolucion");
+            mostrarModal("↩️", "Devolución Registrada", "El proceso de devolución ha comenzado.", data, () => imprimirVale());
+        };
+    };
+    tx.onerror = (e) => mostrarToast("⚠️ Error al registrar devolución: " + e.target.error);
+}
+
+// ── CERRAR VALE ──────────────────────────────────────────────────────────
+function cerrarVale() {
+    if (!db) { mostrarToast("⚠️ Base de datos no lista"); return; }
+    const tx    = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    const req   = store.get(folio);
+    req.onsuccess = () => {
+        const data = req.result;
+        if (!data) { mostrarToast("⚠️ Registro no encontrado en base de datos"); return; }
+        data.estado      = "cerrado";
+        data.fechaCierre = new Date().toLocaleString("es-CL");
+        data.historial.push({ fecha: new Date().toLocaleString("es-CL"), accion: "Vale cerrado — bien devuelto y verificado" });
+        store.put(data);
+        tx.oncomplete = () => {
+            setStatusUI("cerrado");
+            mostrarModal("✅", "Vale Cerrado", "BMI fue devuelto — Vale archivado.", data, () => imprimirVale());
+        };
+    };
+    tx.onerror = (e) => mostrarToast("⚠️ Error al cerrar vale: " + e.target.error);
+}
+
+// ── IMPRIMIR / PDF ───────────────────────────────────────────────────────
+function imprimirVale() {
+    const sb = document.getElementById("status-form");
+    document.getElementById("p-folio").textContent          = folio;
+    document.getElementById("p-fecha").textContent          = document.getElementById("fecha-input").value;
+    document.getElementById("p-entrega-nombre").textContent = document.getElementById("entrega").value;
+    document.getElementById("p-entrega-unidad").textContent = document.getElementById("unidad-entrega").value;
+    document.getElementById("p-recibe-nombre").textContent  = document.getElementById("recibe").value;
+    document.getElementById("p-recibe-unidad").textContent  = document.getElementById("unidad-recibe").value;
+    document.getElementById("p-firma-entrega").textContent  = document.getElementById("entrega").value;
+    document.getElementById("p-firma-recibe").textContent   = document.getElementById("recibe").value;
+    const lugar = document.getElementById("lugar").value;
+    const obs   = document.getElementById("obs").value;
+    document.getElementById("p-lugar-row").style.display = lugar ? "" : "none";
+    document.getElementById("p-obs-row").style.display   = obs   ? "" : "none";
+    document.getElementById("p-lugar").textContent = lugar;
+    document.getElementById("p-obs").textContent   = obs;
+    const ps = document.getElementById("p-status");
+    ps.textContent = sb.textContent;
+    const colorMap = { "s-registrado":"#c0392b","s-devolucion":"#d4680e","s-cerrado":"#1a9e5c","s-emision":"#f0c30e" };
+    const textMap  = { "s-registrado":"#fff","s-devolucion":"#fff","s-cerrado":"#fff","s-emision":"#000" };
+    const cls = Array.from(sb.classList).find(c => c.startsWith("s-")) || "s-emision";
+    ps.style.backgroundColor = colorMap[cls] || "#f0c30e";
+    ps.style.color           = textMap[cls]  || "#000";
+    const tbody = document.getElementById("p-items-tbody");
+    tbody.innerHTML = "";
+    items.filter(i => i.desc.trim()).forEach((it, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td style="border:1px solid #ccc;padding:5px;text-align:center;font-size:10px;">${idx+1}</td>
+            <td style="border:1px solid #ccc;padding:5px;font-size:10px;">${it.desc}</td>
+            <td style="border:1px solid #ccc;padding:5px;text-align:center;font-size:10px;">${it.cant}</td>
+            <td style="border:1px solid #ccc;padding:5px;text-align:center;font-size:10px;">${it.un}</td>`;
+        tbody.appendChild(tr);
+    });
+    if (sigEntregaURL) document.getElementById("p-sig-entrega").src = sigEntregaURL;
+    if (sigRecibeURL)  document.getElementById("p-sig-recibe").src  = sigRecibeURL;
+    let _volvioDeImpresion = false;
+    window.onafterprint = () => {
+        if (_volvioDeImpresion) return;
+        _volvioDeImpresion = true;
+        window.onafterprint = null;
+    };
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => { if (!_volvioDeImpresion) { _volvioDeImpresion = true; window.onafterprint = null; } }, 5000);
+    }, 800);
+}
+
+// ── HISTORIAL ─────────────────────────────────────────────────────────────
+function cargarHistorial() {
+    if (!db) { mostrarToast("⚠️ Base de datos no lista"); return; }
+    const tx = db.transaction(STORE_NAME, "readonly");
+    tx.objectStore(STORE_NAME).getAll().onsuccess = (e) => {
+        let rs = (e.target.result || []).filter(r => filtroActual === "todos" || r.estado === filtroActual);
+        rs.sort((a, b) => (b.fechaTs || 0) - (a.fechaTs || 0));
+        renderHistorial(rs);
+    };
+    tx.onerror = (e) => mostrarToast("⚠️ Error al cargar historial: " + e.target.error);
+}
+
+function renderHistorial(rs) {
+    const lista = document.getElementById("lista-historial");
+    if (!rs.length) {
+        lista.innerHTML = `<div class="empty"><div class="e-icon">📋</div><div>No hay registros</div></div>`;
+        return;
+    }
+    lista.innerHTML = "";
+    rs.forEach(r => {
+        const d = document.createElement("div");
+        d.className = `h-item ${r.estado || ""}`;
+        const bcls = { registrado:"b-registrado", devolucion:"b-devolucion", cerrado:"b-cerrado" }[r.estado] || "b-emision";
+        const blbl = { registrado:"Registrado", devolucion:"En Devolución", cerrado:"Cerrado" }[r.estado] || "En Emisión";
+        d.innerHTML = `
+            <div class="h-folio">${r.id}</div>
+            <div class="h-names">${r.entrega||"—"} → ${r.recibe||"—"}</div>
+            <div class="h-meta">
+                <span>${r.fecha||""} · ${(r.items||[]).length} ítem(s)</span>
+                <span class="badge ${bcls}">${blbl}</span>
+            </div>`;
+        d.onclick = () => cargarValeEnFormulario(r);
+        lista.appendChild(d);
+    });
+}
+
+function filtrarHistorial(f) {
+    filtroActual = f;
+    document.querySelectorAll(".f-btn").forEach(b => b.classList.remove("activo"));
+    document.getElementById("f-" + f).classList.add("activo");
+    cargarHistorial();
+}
+
+// ── BUSCAR ───────────────────────────────────────────────────────────────
+function buscarVale() {
+    if (!db) { mostrarToast("⚠️ Base de datos no lista"); return; }
+    const q = document.getElementById("input-busqueda").value.trim().toLowerCase();
+    if (!q) { mostrarToast("⚠️ Ingresa un folio o nombre"); return; }
+    const tx = db.transaction(STORE_NAME, "readonly");
+    tx.objectStore(STORE_NAME).getAll().onsuccess = (e) => {
+        const rs = (e.target.result||[]).filter(r =>
+            r.id.toLowerCase().includes(q) ||
+            (r.entrega||"").toLowerCase().includes(q) ||
+            (r.recibe||"").toLowerCase().includes(q)
+        );
+        const div = document.getElementById("resultado-busqueda");
+        if (!rs.length) {
+            div.innerHTML = `<div class="empty"><div class="e-icon">🔍</div><div>Sin resultados para "${q}"</div></div>`;
+            return;
+        }
+        div.innerHTML = "";
+        rs.forEach(r => {
+            const d = document.createElement("div");
+            d.className = `h-item ${r.estado||""}`;
+            const bcls = { registrado:"b-registrado", devolucion:"b-devolucion", cerrado:"b-cerrado" }[r.estado] || "b-emision";
+            const blbl = { registrado:"Registrado", devolucion:"En Devolución", cerrado:"Cerrado" }[r.estado] || "En Emisión";
+            d.innerHTML = `
+                <div class="h-folio">${r.id}</div>
+                <div class="h-names">${r.entrega||"—"} → ${r.recibe||"—"}</div>
+                <div class="h-meta">
+                    <span>${r.fecha||""}</span>
+                    <span class="badge ${bcls}">${blbl}</span>
+                </div>`;
+            d.onclick = () => cargarValeEnFormulario(r);
+            div.appendChild(d);
+        });
+    };
+    tx.onerror = (e) => mostrarToast("⚠️ Error en búsqueda: " + e.target.error);
+}
+
+// ── CARGAR VALE EN FORMULARIO ─────────────────────────────────────────────
+function cargarValeEnFormulario(r) {
+    folio       = r.id;
+    modoEdicion = true;
+    document.getElementById("folio-input").value      = r.id;
+    document.getElementById("folio-show").textContent = r.id;
+    document.getElementById("fecha-input").value      = r.fecha || "";
+    document.getElementById("entrega").value          = r.entrega || "";
+    document.getElementById("unidad-entrega").value   = r.unidadEntrega || "";
+    document.getElementById("recibe").value           = r.recibe || "";
+    document.getElementById("unidad-recibe").value    = r.unidadRecibe || "";
+    document.getElementById("lugar").value            = r.lugar || "";
+    document.getElementById("obs").value              = r.obs || "";
+    items = (r.items||[]).map(i => ({ ...i, id: i.id || (Date.now() + Math.random()) }));
+    renderItems();
+    sigEntregaURL = r.firmaEntrega || "";
+    sigRecibeURL  = r.firmaRecibe  || "";
+    actualizarResumen();
+    const estadoMigrado = r.estado === "custodia" ? "registrado" : (r.estado || "emision");
+    setStatusUI(estadoMigrado);
+    cambiarTab("form");
+    setTimeout(() => irAPasoDirecto(4), 50);
+}
+
+// ── CARGAR POR QR ─────────────────────────────────────────────────────────
+function cargarValePorQR(folioParam) {
+    if (!db) { setTimeout(() => cargarValePorQR(folioParam), 300); return; }
+    const tx    = db.transaction(STORE_NAME, "readonly");
+    const store = tx.objectStore(STORE_NAME);
+    const req   = store.get(decodeURIComponent(folioParam));
+    req.onsuccess = () => {
+        if (req.result) {
+            cargarValeEnFormulario(req.result);
+            mostrarToast("📋 Vale cargado: " + folioParam);
+        } else {
+            nuevoVale();
+            mostrarToast("⚠️ Folio no encontrado — usa Importar DB para sincronizar");
+        }
+    };
+    tx.onerror = (e) => { nuevoVale(); mostrarToast("⚠️ Error IDB al cargar QR: " + e.target.error); };
+}
+
+// ── IR A PASO DIRECTO ─────────────────────────────────────────────────────
+function irAPasoDirecto(paso) {
+    document.querySelectorAll(".step-panel").forEach(p => p.classList.remove("activo"));
+    document.querySelectorAll(".step-item").forEach(s => s.classList.remove("activo", "completo"));
+    for (let i = 1; i < paso; i++) document.getElementById("si-" + i).classList.add("completo");
+    pasoActual = paso;
+    document.getElementById("panel-" + paso).classList.add("activo");
+    document.getElementById("si-"    + paso).classList.add("activo");
+    document.getElementById("nav-bar-pasos").style.display = paso === 4 ? "none" : "flex";
+    document.getElementById("btn-atras").disabled = (paso === 1);
+    if (paso === 3) {
+        document.getElementById("nombre-entrega-firma").textContent = document.getElementById("entrega").value || "";
+        document.getElementById("nombre-recibe-firma").textContent  = document.getElementById("recibe").value  || "";
+        setTimeout(() => { redibujarFirmasEnCanvas(); }, 150);
+    }
+}
+
+// ── NUEVO VALE ────────────────────────────────────────────────────────────
+function nuevoVale() {
+    folio = "AGA-" + new Date().getFullYear() + "-" + Date.now().toString().slice(-6);
+    modoEdicion = false;
+    document.getElementById("folio-input").value      = folio;
+    document.getElementById("folio-show").textContent = folio;
+    document.getElementById("fecha-input").value      = new Date().toLocaleDateString("es-CL");
+    ["entrega","unidad-entrega","recibe","unidad-recibe","lugar","obs"].forEach(id => {
+        document.getElementById(id).value = "";
+    });
+    document.getElementById("input-busqueda").value         = "";
+    document.getElementById("resultado-busqueda").innerHTML = "";
+    items         = [];
+    sigEntregaURL = "";
+    sigRecibeURL  = "";
+    agregarItem();
+    setStatusUI("emision");
+    irAPasoDirecto(1);
+    document.getElementById("nav-bar-pasos").style.display = "flex";
+    document.getElementById("btn-atras").disabled          = true;
+    document.getElementById("btn-siguiente").textContent   = "Siguiente →";
+    document.getElementById("btn-siguiente").className     = "btn-nav btn-siguiente";
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+function cambiarTab(tab) {
+    document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("activo"));
+    ["form","history","buscar"].forEach(s => {
+        document.getElementById("screen-" + s).style.display = "none";
+    });
+    document.getElementById("tab-" + tab).classList.add("activo");
+    if (tab === "form") {
+        document.getElementById("screen-form").style.display = "flex";
+    } else if (tab === "history") {
+        document.getElementById("screen-history").style.display = "block";
+        cargarHistorial();
+    } else {
+        document.getElementById("screen-buscar").style.display = "block";
+    }
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────
+let _modalCb = null;
+function mostrarModal(icon, titulo, sub, vale, cb) {
+    document.getElementById("m-icon").textContent   = icon;
+    document.getElementById("m-titulo").textContent = titulo;
+    document.getElementById("m-sub").textContent    = sub;
+    document.getElementById("m-datos").innerHTML    = `
+        <div><span class="m-key">Folio</span>   <span class="m-val">${vale.id}</span></div>
+        <div><span class="m-key">Entrega</span> <span class="m-val">${vale.entrega||"—"}</span></div>
+        <div><span class="m-key">Recibe</span>  <span class="m-val">${vale.recibe||"—"}</span></div>
+        <div><span class="m-key">Ítems</span>   <span class="m-val">${(vale.items||[]).length} ítem(s)</span></div>`;
+    document.getElementById("m-btn").textContent = cb ? "📄 Imprimir PDF" : "Entendido";
+    _modalCb = cb;
+    document.getElementById("modal-confirm").classList.add("show");
+}
+function cerrarModal() {
+    document.getElementById("modal-confirm").classList.remove("show");
+    if (_modalCb) { _modalCb(); _modalCb = null; }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+function mostrarToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+// ── ESCÁNER QR ────────────────────────────────────────────────────────────
+let html5QrCode    = null;
+let folioEscaneado = "";
+
+function abrirEscaner() {
+    document.getElementById("scanner-overlay").classList.add("show");
+    document.getElementById("scanner-result").classList.remove("show");
+    folioEscaneado = "";
+    if (typeof Html5Qrcode === "undefined") {
+        mostrarToast("⚠️ Librería QR no disponible — necesitas internet");
+        cerrarEscaner();
+        return;
+    }
+    html5QrCode = new Html5Qrcode("reader");
+    setTimeout(() => {
+        html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+            (decodedText) => onQRDetectado(decodedText),
+            (err) => {}
+        ).catch(err => {
+            mostrarToast("⚠️ No se pudo acceder a la cámara. Verifica permisos.");
+            cerrarEscaner();
+        });
+    }, 300);
+}
+
+function onQRDetectado(texto) {
+    let folioDet = texto;
+    try {
+        const url   = new URL(texto);
+        const param = url.searchParams.get("folio");
+        if (param) folioDet = param;
+    } catch(e) {}
+    folioEscaneado = folioDet;
+    if (html5QrCode) html5QrCode.pause(true);
+    document.getElementById("sr-folio-text").textContent = folioEscaneado;
+    document.getElementById("sr-sub-text").textContent   =
+        folioEscaneado.startsWith("AGA-")
+            ? "Folio AGA detectado — ¿Cargar registro?"
+            : "Código detectado — ¿Buscar en base de datos?";
+    document.getElementById("scanner-result").classList.add("show");
+}
+
+function confirmarEscaneo() {
+    cerrarEscaner();
+    if (!db) { mostrarToast("⚠️ Base de datos no lista"); return; }
+    const tx    = db.transaction(STORE_NAME, "readonly");
+    const store = tx.objectStore(STORE_NAME);
+    const req   = store.get(folioEscaneado);
+    req.onsuccess = () => {
+        if (!req.result) {
+            mostrarToast("⚠️ Folio no encontrado — ¿Importaste el backup del otro dispositivo?");
+            cambiarTab("buscar");
+            document.getElementById("input-busqueda").value = folioEscaneado;
+            return;
+        }
+        cargarValeEnFormulario(req.result);
+        mostrarToast("📋 Vale cargado: " + folioEscaneado);
+    };
+    req.onerror = () => mostrarToast("⚠️ Error al buscar en base de datos");
+}
+
+function reanudarEscaner() {
+    document.getElementById("scanner-result").classList.remove("show");
+    folioEscaneado = "";
+    if (html5QrCode) html5QrCode.resume();
+}
+
+function cerrarEscaner() {
+    document.getElementById("scanner-overlay").classList.remove("show");
+    if (html5QrCode) {
+        html5QrCode.stop().catch(() => {});
+        html5QrCode = null;
+    }
+    const reader = document.getElementById("reader");
+    if (reader) reader.innerHTML = "";
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// MIG-001 — MANIFEST INLINE (sin manifest.json externo)
+// ════════════════════════════════════════════════════════════════════════
+(function() {
+    var m = {
+        name: "Poseidon's Seal — AGA",
+        short_name: "Poseidon's Seal",
+        description: "Trazabilidad de bienes y materiales — Academia de Guerra Aérea FACH",
+        start_url: "/scorpion-tail/poseidon.html",
+        display: "standalone",
+        background_color: "#0a1628",
+        theme_color: "#0a1628",
+        orientation: "portrait-primary",
+        icons: [{ src: ICONO_DATA, sizes: "128x128", type: "image/png" }]
+    };
+    var b = new Blob([JSON.stringify(m)], { type: "application/json" });
+    document.getElementById("poseidon-manifest").href = URL.createObjectURL(b);
+})();
+
+// ════════════════════════════════════════════════════════════════════════
+// MIG-002 — SERVICE WORKER INLINE (sin sw.js externo)
+// ════════════════════════════════════════════════════════════════════════
+if ("serviceWorker" in navigator) {
+    var swCode = [
+        "const CACHE='aga-poseidon-v1';",
+        "self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add('.')).then(()=>self.skipWaiting()));});",
+        "self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});",
+        "self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{var rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));return res;}).catch(()=>caches.match(e.request))));});"
+    ].join('\n');
+    var swBlob = new Blob([swCode], { type: "application/javascript" });
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob), { scope: "./" })
+        .catch(function(e) { console.warn("[SW Poseidon]", e); });
+}
+</script>
+</body>
+</html>
