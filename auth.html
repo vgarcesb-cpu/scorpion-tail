@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scorpion Tail — Autenticando...</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#0a1628;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px}
+.logo{font-size:48px}
+.titulo{font-size:20px;font-weight:700;color:#C8A951}
+.sub{font-size:13px;color:rgba(255,255,255,.5)}
+.spinner{width:36px;height:36px;border:3px solid rgba(200,169,81,.2);border-top:3px solid #C8A951;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ok{font-size:36px}
+.err{color:#E53935;font-size:13px;text-align:center;max-width:320px}
+</style>
+</head>
+<body>
+<div class="logo">🦂</div>
+<div class="titulo">Scorpion Tail · AGA</div>
+<div class="spinner" id="spinner"></div>
+<div class="sub" id="msg">Procesando autenticación...</div>
+<div class="err" id="err"></div>
+
+<script>
+(function(){
+  // Leer parámetros de la URL
+  var params = new URLSearchParams(window.location.search);
+  var code  = params.get('code');
+  var error = params.get('error');
+  var state = params.get('state');
+
+  var CLIENT_ID = '865991409359-s6dnib021q5kg9b3fbmcfktv1j1fsno0.apps.googleusercontent.com';
+  var REDIRECT  = window.location.origin + '/auth.html';
+
+  if(error){
+    document.getElementById('spinner').style.display='none';
+    document.getElementById('msg').textContent='Autenticación cancelada';
+    document.getElementById('err').textContent='Error: '+error;
+    setTimeout(function(){ window.location.href = '/scorpion-tail/portal/index.html'; }, 2500);
+    return;
+  }
+
+  if(!code){
+    document.getElementById('msg').textContent='Sin código de autorización';
+    return;
+  }
+
+  // Recuperar code_verifier guardado antes del redirect
+  var verifier = sessionStorage.getItem('st_cv');
+  if(!verifier){
+    document.getElementById('err').textContent='Error: sesión expirada. Intente nuevamente.';
+    document.getElementById('spinner').style.display='none';
+    return;
+  }
+
+  // Intercambiar code por token
+  document.getElementById('msg').textContent='Obteniendo acceso a Google Drive...';
+
+  fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({
+      code:          code,
+      client_id:     CLIENT_ID,
+      redirect_uri:  REDIRECT,
+      code_verifier: verifier,
+      grant_type:    'authorization_code'
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(data.error){
+      document.getElementById('spinner').style.display='none';
+      document.getElementById('msg').textContent='Error de autenticación';
+      document.getElementById('err').textContent=data.error_description||data.error;
+      return;
+    }
+    // Guardar token
+    var expiry = Date.now() + (data.expires_in - 60) * 1000;
+    localStorage.setItem('st_gtoken', data.access_token);
+    localStorage.setItem('st_gexpiry', expiry);
+    if(data.refresh_token){
+      localStorage.setItem('st_grefresh', data.refresh_token);
+    }
+    sessionStorage.removeItem('st_cv');
+
+    // Éxito
+    document.getElementById('spinner').style.display='none';
+    document.getElementById('msg').textContent='';
+    document.querySelector('.logo').textContent='✅';
+    document.querySelector('.sub').textContent='';
+
+    var msgEl=document.createElement('div');
+    msgEl.style.cssText='font-size:14px;color:#C8A951;font-weight:700';
+    msgEl.textContent='Google Drive conectado';
+    document.body.appendChild(msgEl);
+
+    var subEl=document.createElement('div');
+    subEl.style.cssText='font-size:12px;color:rgba(255,255,255,.4);margin-top:4px';
+    subEl.textContent='Volviendo a Scorpion Tail...';
+    document.body.appendChild(subEl);
+
+    // Volver al portal
+    var returnUrl = sessionStorage.getItem('st_return') || '/scorpion-tail/portal/index.html';
+    sessionStorage.removeItem('st_return');
+    setTimeout(function(){ window.location.href = returnUrl; }, 1500);
+  })
+  .catch(function(e){
+    document.getElementById('spinner').style.display='none';
+    document.getElementById('msg').textContent='Error de red';
+    document.getElementById('err').textContent=e.message;
+  });
+})();
+</script>
+</body>
+</html>
