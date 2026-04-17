@@ -8,7 +8,7 @@
 
 var STDrive = (function(){
 
-  var CLIENT_ID = '865991409359-s6dnib021q5kg9b3fbmcfktv1j1fsno0.apps.googleusercontent.com';
+  var CLIENT_ID = '865991409359-pjqdqiuhio5gicq4j4sbresqa7i32g56.apps.googleusercontent.com';
   var SCOPES    = 'https://www.googleapis.com/auth/drive.file';
   var REDIRECT  = 'https://vgarcesb-cpu.github.io/auth.html';
   var FOLDER_NAME = 'ScorpionTail';
@@ -41,15 +41,22 @@ var STDrive = (function(){
 
   function login(returnUrl){
     sessionStorage.setItem('st_return', returnUrl || window.location.href);
-    var url = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-      new URLSearchParams({
-        client_id:     CLIENT_ID,
-        redirect_uri:  REDIRECT,
-        response_type: 'token',
-        scope:         SCOPES,
-        prompt:        'consent'
-      });
-    window.location.href = url;
+    var verifier = randomB64(64);
+    sessionStorage.setItem('st_cv', verifier);
+    sha256B64(verifier).then(function(challenge){
+      var url = 'https://accounts.google.com/o/oauth2/v2/auth?' +
+        new URLSearchParams({
+          client_id:             CLIENT_ID,
+          redirect_uri:          REDIRECT,
+          response_type:         'code',
+          scope:                 SCOPES,
+          code_challenge:        challenge,
+          code_challenge_method: 'S256',
+          access_type:           'offline',
+          prompt:                'consent'
+        });
+      window.location.href = url;
+    });
   }
 
   function logout(){
