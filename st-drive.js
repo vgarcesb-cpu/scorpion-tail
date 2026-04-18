@@ -304,11 +304,10 @@ var STDrive = (function(){
         if (typeof onComplete === 'function') onComplete(validos, null);
         return validos;
       })
-      .catch(function(e) {
         mostrarIndicador('error');
+        alert('SYNC-001 error: ' + e.message);
         console.warn('[STDrive] descargar error:', e.message);
-        if (typeof onComplete === 'function') onComplete(null, e);
-        throw e;
+         throw e;
       });
   }
 
