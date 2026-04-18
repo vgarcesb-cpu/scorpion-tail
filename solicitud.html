@@ -84,24 +84,11 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
 .btn-nuevo { display: block; width: 100%; padding: 13px; background: linear-gradient(135deg,var(--dorado),var(--dorado2)); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 8px; }
 .toast { position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: #333; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* FIX-014 — fondo blanco en impresión, anula position:fixed */
 #print-area { display: none; }
 @media print {
-  body {
-    background: #ffffff !important;
-    position: static !important;
-    width: auto !important;
-    overflow: visible !important;
-  }
+  body { background: #ffffff !important; position: static !important; width: auto !important; overflow: visible !important; }
   body > .app, .toast { display: none !important; }
-  #print-area {
-    display: block !important;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    color: #000;
-    background: #ffffff !important;
-  }
+  #print-area { display: block !important; padding: 0; font-family: Arial, sans-serif; color: #000; background: #ffffff !important; }
   @page { size: letter portrait; margin: 10mm 20mm 15mm 20mm; }
   table { border-collapse: collapse !important; }
   th, td { border: 1px solid #ccc !important; }
@@ -209,7 +196,6 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
 </div>
 <div class="toast" id="toast"></div>
 <div id="print-area">
-  <!-- ENCABEZADO UNIVERSAL AGA -->
   <div style="margin-bottom:12px;display:inline-block;padding-left:5px">
     <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center">FUERZA AÉREA DE CHILE</div>
     <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center">DIVISIÓN DE EDUCACIÓN</div>
@@ -254,13 +240,20 @@ body { background: var(--azul); font-family: -apple-system, BlinkMacSystemFont, 
 var db, pasoActual=1, items=[], editIndex=null, solicitudes=[], sigDataURL='';
 var IDB_NAME='AGA_DB_SOLICITUDES', IDB_VERSION=1, STORE_SOL='solicitudes', STORE_CFG='config';
 
-// ─── DRIVE: botón y conexión ─────────────────────────────────────────────────
+// ─── DRIVE ────────────────────────────────────────────────────────────────────
 function actualizarBtnDrive(){
   var btn=document.getElementById('btn-drive');if(!btn)return;
   if(typeof STDrive!=='undefined'&&STDrive.isConnected()){
-    btn.textContent='☁️ Drive';btn.style.borderColor='rgba(200,168,75,.8)';btn.style.color='#C8A951';
+    btn.textContent='☁️ Drive';
+    btn.style.borderColor='rgba(200,168,75,.8)';
+    btn.style.color='#C8A951';
+    // SYNC-001: si llegamos aquí con Drive conectado (ej. después de auth redirect),
+    // disparar sincronización automáticamente
+    setTimeout(sincronizarDesdeDrive, 800);
   } else {
-    btn.textContent='☁️ Conectar';btn.style.borderColor='rgba(255,255,255,.2)';btn.style.color='rgba(255,255,255,.4)';
+    btn.textContent='☁️ Conectar';
+    btn.style.borderColor='rgba(255,255,255,.2)';
+    btn.style.color='rgba(255,255,255,.4)';
   }
 }
 function toggleDrive(){
@@ -272,86 +265,52 @@ function toggleDrive(){
   }
 }
 
-// ─── SYNC-001: Bajada automática desde Drive al abrir la app ─────────────────
-// Se ejecuta 1.2 s después de que IDB está listo, sin bloquear el arranque.
-// Lógica: solo importa registros que NO existen localmente.
-// Si el mismo folio existe en ambos lados, gana el más reciente (campo ts).
+// ─── SYNC-001: Bajada desde Drive ─────────────────────────────────────────────
 function sincronizarDesdeDrive(){
   if(typeof STDrive==='undefined'||!STDrive.isConnected())return;
-  if(!db)return; // FIX-002
-
-  console.log('[SYNC-001] Iniciando descarga desde Drive...');
+  if(!db)return;
 
   STDrive.descargar('solicitud','ADQ-',function(registros,err){
-    if(err){console.warn('[SYNC-001] Error Drive:',err.message);return;}
-    if(!registros||!registros.length){console.log('[SYNC-001] Sin registros en Drive.');return;}
+    if(err||!registros||!registros.length)return;
 
     var importados=0;
     var pendientes=registros.length;
 
-    // Cuando todos los tx terminen, recarga memoria + UI si hubo cambios
     function finalizarSiListo(){
       pendientes--;
       if(pendientes>0)return;
       if(importados>0){
-        // Recarga el array solicitudes desde IDB y refresca el historial
         cargarTodasSolicitudes(function(){
           renderHistorial();
           mostrarToast('📥 Drive: '+importados+' registro(s) importado(s)');
-          console.log('[SYNC-001] Importados:',importados,'registros.');
         });
       }
     }
 
     registros.forEach(function(item){
       var data=item.data;
-
-      // FIX-003: validar estructura mínima (keyPath es 'id')
-      if(!data||typeof data!=='object'||!data.id){
-        console.warn('[SYNC-001] Registro inválido:',item.filename);
-        finalizarSiListo();
-        return;
-      }
+      if(!data||typeof data!=='object'||!data.id){finalizarSiListo();return;}
 
       var tx=db.transaction([STORE_SOL],'readwrite');
       var store=tx.objectStore(STORE_SOL);
-
-      // Verificar si ya existe localmente por keyPath 'id'
       var req=store.get(data.id);
 
       req.onsuccess=function(e){
         var existente=e.target.result;
         if(!existente){
-          // No existe en este dispositivo → importar
-          store.put(data);
-          importados++;
+          store.put(data);importados++;
         } else {
-          // Ya existe: importar solo si Drive es más reciente (campo ts)
-          var driveTs=data.ts||0;
-          var localTs=existente.ts||0;
-          if(driveTs>localTs){
-            store.put(data);
-            importados++;
-          }
+          if((data.ts||0)>(existente.ts||0)){store.put(data);importados++;}
         }
       };
-
-      req.onerror=function(e){
-        console.warn('[SYNC-001] IDB get error:',e.target.errorCode);
-      };
-
+      req.onerror=function(){};
       tx.oncomplete=finalizarSiListo;
-
-      tx.onerror=function(e){
-        console.warn('[SYNC-001] IDB tx error:',e.target.errorCode);
-        finalizarSiListo(); // no dejar el contador colgado
-      };
+      tx.onerror=function(){finalizarSiListo();};
     });
   });
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
-// ─── IDB: apertura ───────────────────────────────────────────────────────────
+// ─── IDB ──────────────────────────────────────────────────────────────────────
 var idbReq=indexedDB.open(IDB_NAME,IDB_VERSION);
 idbReq.onerror=function(){alert('Error al abrir la base de datos.');};
 idbReq.onupgradeneeded=function(e){
@@ -363,12 +322,11 @@ idbReq.onsuccess=function(e){
   db=e.target.result;
   cargarTodasSolicitudes(function(){
     init();
-    // SYNC-001: descarga diferida para no bloquear el render inicial
+    // SYNC-001: primera descarga al abrir (solo si Drive está conectado)
     setTimeout(sincronizarDesdeDrive,1200);
   });
 };
 
-// ─── IDB: helpers ────────────────────────────────────────────────────────────
 function cargarTodasSolicitudes(cb){
   if(!db){cb();return;}
   var tx=db.transaction(STORE_SOL,'readonly');
@@ -395,7 +353,7 @@ function setFolio(n,cb){
   tx.oncomplete=function(){if(cb)cb();};
 }
 
-// ─── Utilidades ──────────────────────────────────────────────────────────────
+// ─── Utilidades ───────────────────────────────────────────────────────────────
 function escHTML(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function folioStr(n){return String(n).padStart(4,'0');}
 function fmtN(n){return n>0?Math.round(n).toLocaleString('es-CL'):'—';}
@@ -419,11 +377,7 @@ function init(){
 }
 function resetContador(){
   if(!confirm('¿Resetear el contador de folios a 0001?'))return;
-  setFolio(0,function(){
-    document.getElementById('folio-num').value='0001';
-    actualizarFolioHeader();
-    mostrarToast('✓ Contador reseteado a 0001');
-  });
+  setFolio(0,function(){document.getElementById('folio-num').value='0001';actualizarFolioHeader();mostrarToast('✓ Contador reseteado a 0001');});
 }
 
 // ─── Items ────────────────────────────────────────────────────────────────────
@@ -460,7 +414,7 @@ function renderItems(){
   document.getElementById('tot-total').textContent=fmtN(t.total);
 }
 
-// ─── Validación y navegación por pasos ───────────────────────────────────────
+// ─── Navegación ───────────────────────────────────────────────────────────────
 function validarPaso(n){
   if(n===1){
     var anio=document.getElementById('folio-anio').value.trim();
@@ -492,19 +446,12 @@ function irPaso(n){
   pasoActual=n;
   document.getElementById('btn-atras').disabled=(n===1);
   var btnSig=document.getElementById('btn-siguiente');
-  if(n===3){
-    btnSig.textContent='+ Nuevo';
-    btnSig.className='btn-nav btn-siguiente dorado';
-    btnSig.onclick=function(){nuevoFormulario();};
-  } else {
-    btnSig.textContent='Siguiente →';
-    btnSig.className='btn-nav btn-siguiente';
-    btnSig.onclick=function(){irPaso(pasoActual+1);};
-  }
+  if(n===3){btnSig.textContent='+ Nuevo';btnSig.className='btn-nav btn-siguiente dorado';btnSig.onclick=function(){nuevoFormulario();};}
+  else{btnSig.textContent='Siguiente →';btnSig.className='btn-nav btn-siguiente';btnSig.onclick=function(){irPaso(pasoActual+1);};}
   actualizarFolioHeader();
 }
 
-// ─── Canvas firma ─────────────────────────────────────────────────────────────
+// ─── Canvas ───────────────────────────────────────────────────────────────────
 function ajustarCanvas(){
   var sc=document.getElementById('sig-canvas');if(!sc)return;
   var wrap=document.getElementById('sig-wrap');
@@ -529,8 +476,7 @@ window.addEventListener('resize',function(){setTimeout(ajustarCanvas,200);});
 screen.orientation&&screen.orientation.addEventListener('change',function(){setTimeout(ajustarCanvas,350);});
 function restaurarFirma(){
   var sc=document.getElementById('sig-canvas');if(!sc||!sigDataURL)return;
-  ajustarCanvas();
-  var img=new Image();img.onload=function(){sc.getContext('2d').drawImage(img,0,0,sc.width,sc.height);};img.src=sigDataURL;
+  ajustarCanvas();var img=new Image();img.onload=function(){sc.getContext('2d').drawImage(img,0,0,sc.width,sc.height);};img.src=sigDataURL;
 }
 function limpiarFirma(){var sc=document.getElementById('sig-canvas');if(sc)sc.getContext('2d').clearRect(0,0,sc.width,sc.height);sigDataURL='';}
 function capturarFirma(){
@@ -540,34 +486,18 @@ function capturarFirma(){
   return tmp.toDataURL('image/jpeg',0.7);
 }
 
-// ─── Resumen (paso 3) ─────────────────────────────────────────────────────────
+// ─── Resumen ──────────────────────────────────────────────────────────────────
 function actualizarResumen(){
-  var t=calcTotals();
-  var anio=document.getElementById('folio-anio').value;
-  var num=document.getElementById('folio-num').value;
-  document.getElementById('resumen-datos').innerHTML=[
-    ['Folio','ADQ-'+anio+'-'+num],
-    ['Fecha',fmtFecha(document.getElementById('fecha').value)],
-    ['Escuadrilla',document.getElementById('escuadrilla').value],
-    ['Cdte.',document.getElementById('cdte').value||'—'],
-    ['Observaciones',document.getElementById('observaciones').value||'—']
-  ].map(function(r){return'<div class="resumen-fila"><span class="r-key">'+r[0]+'</span><span class="r-val">'+r[1]+'</span></div>';}).join('');
-  document.getElementById('resumen-items').innerHTML='<div style="font-size:11px;font-weight:700;color:var(--azul2);margin:8px 0 4px">Ítems</div>'+
-    items.filter(function(it){return it.descripcion;}).map(function(it,i){
-      return'<div class="resumen-item-row"><span>'+(i+1)+'. '+it.cant+' '+it.unidad+' — '+it.descripcion+'</span><span>$'+Math.round(calcSub(it)).toLocaleString('es-CL')+'</span></div>';
-    }).join('');
-  document.getElementById('r-sub').textContent=fmtN(t.sub);
-  document.getElementById('r-iva').textContent=fmtN(t.iva);
-  document.getElementById('r-total').textContent=fmtN(t.total);
+  var t=calcTotals();var anio=document.getElementById('folio-anio').value;var num=document.getElementById('folio-num').value;
+  document.getElementById('resumen-datos').innerHTML=[['Folio','ADQ-'+anio+'-'+num],['Fecha',fmtFecha(document.getElementById('fecha').value)],['Escuadrilla',document.getElementById('escuadrilla').value],['Cdte.',document.getElementById('cdte').value||'—'],['Observaciones',document.getElementById('observaciones').value||'—']].map(function(r){return'<div class="resumen-fila"><span class="r-key">'+r[0]+'</span><span class="r-val">'+r[1]+'</span></div>';}).join('');
+  document.getElementById('resumen-items').innerHTML='<div style="font-size:11px;font-weight:700;color:var(--azul2);margin:8px 0 4px">Ítems</div>'+items.filter(function(it){return it.descripcion;}).map(function(it,i){return'<div class="resumen-item-row"><span>'+(i+1)+'. '+it.cant+' '+it.unidad+' — '+it.descripcion+'</span><span>$'+Math.round(calcSub(it)).toLocaleString('es-CL')+'</span></div>';}).join('');
+  document.getElementById('r-sub').textContent=fmtN(t.sub);document.getElementById('r-iva').textContent=fmtN(t.iva);document.getElementById('r-total').textContent=fmtN(t.total);
 }
 
 // ─── Historial ────────────────────────────────────────────────────────────────
 function renderHistorial(){
   var lista=document.getElementById('hist-lista');
-  if(solicitudes.length===0){
-    lista.innerHTML='<div style="text-align:center;color:#aaa;padding:20px;font-size:13px">No hay solicitudes guardadas aún.</div>';
-    return;
-  }
+  if(solicitudes.length===0){lista.innerHTML='<div style="text-align:center;color:#aaa;padding:20px;font-size:13px">No hay solicitudes guardadas aún.</div>';return;}
   lista.innerHTML=solicitudes.map(function(h){
     return'<div class="hist-item-app" onclick="cargarHistorial(\''+h.id+'\')">'+
       '<div style="display:flex;justify-content:space-between;align-items:center"><span class="hist-folio">'+h.id+'</span><span style="color:#888;font-size:11px">'+fmtFecha(h.fecha)+'</span></div>'+
@@ -583,45 +513,24 @@ function guardarHistorial(){
   var anio=document.getElementById('folio-anio').value||new Date().getFullYear().toString();
   var num=document.getElementById('folio-num').value||'0001';
   var folioId='ADQ-'+anio+'-'+num;
-  var rec={
-    id:folioId,folioAnio:anio,folioNum:num,
-    fecha:document.getElementById('fecha').value||new Date().toISOString().slice(0,10),
-    escuadrilla:document.getElementById('escuadrilla').value||'',
-    cdte:document.getElementById('cdte').value||'',
-    observaciones:document.getElementById('observaciones').value||'',
-    firmaNombre:document.getElementById('firma-nombre').value||'',
-    firmaGrado:document.getElementById('firma-grado').value||'',
-    firmaCargo:document.getElementById('firma-cargo').value||'',
-    firmaImg:capturarFirma(),
-    items:items.map(function(it){return Object.assign({},it);}),
-    total:t.total,
-    ts:Date.now()
-  };
+  var rec={id:folioId,folioAnio:anio,folioNum:num,fecha:document.getElementById('fecha').value||new Date().toISOString().slice(0,10),escuadrilla:document.getElementById('escuadrilla').value||'',cdte:document.getElementById('cdte').value||'',observaciones:document.getElementById('observaciones').value||'',firmaNombre:document.getElementById('firma-nombre').value||'',firmaGrado:document.getElementById('firma-grado').value||'',firmaCargo:document.getElementById('firma-cargo').value||'',firmaImg:capturarFirma(),items:items.map(function(it){return Object.assign({},it);}),total:t.total,ts:Date.now()};
   var tx=db.transaction(STORE_SOL,'readwrite');
   tx.onerror=function(e){alert('Error al guardar: '+e.target.error);};
   tx.objectStore(STORE_SOL).put(rec);
   tx.oncomplete=function(){
     var idx=solicitudes.findIndex(function(s){return s.id===folioId;});
     if(idx>=0){solicitudes[idx]=rec;}else{solicitudes.unshift(rec);}
-    editIndex=null;
-    mostrarToast('✓ Guardado: '+folioId);
-    // Subir a Drive si está conectado
-    if(typeof STDrive!=='undefined'&&STDrive.isConnected()){
-      STDrive.guardar('solicitud',folioId,rec).catch(function(){});
-    }
+    editIndex=null;mostrarToast('✓ Guardado: '+folioId);
+    if(typeof STDrive!=='undefined'&&STDrive.isConnected()){STDrive.guardar('solicitud',folioId,rec).catch(function(){});}
     setFolio(parseInt(num)||1,function(){
       setTimeout(function(){
-        sigDataURL='';
-        getFolio(function(actual){
+        sigDataURL='';getFolio(function(actual){
           document.getElementById('folio-num').value=folioStr(actual+1);
           document.getElementById('folio-anio').value=new Date().getFullYear();
           document.getElementById('fecha').value=new Date().toISOString().slice(0,10);
           document.getElementById('escuadrilla').value='Bandada Instalaciones';
-          document.getElementById('cdte').value='';
-          document.getElementById('observaciones').value='';
-          document.getElementById('firma-nombre').value='';
-          document.getElementById('firma-grado').value='';
-          document.getElementById('firma-cargo').value='';
+          document.getElementById('cdte').value='';document.getElementById('observaciones').value='';
+          document.getElementById('firma-nombre').value='';document.getElementById('firma-grado').value='';document.getElementById('firma-cargo').value='';
           items=[];agregarItem();actualizarFolioHeader();irPaso(1);
         });
       },1000);
@@ -632,19 +541,12 @@ function cargarHistorial(id){
   var h=solicitudes.find(function(s){return s.id===id;});
   if(!h)return alert('Registro no encontrado.');
   editIndex=id;
-  document.getElementById('folio-anio').value=h.folioAnio;
-  document.getElementById('folio-num').value=h.folioNum;
-  document.getElementById('fecha').value=h.fecha;
-  document.getElementById('escuadrilla').value=h.escuadrilla;
-  document.getElementById('cdte').value=h.cdte||'';
-  document.getElementById('observaciones').value=h.observaciones||'';
-  document.getElementById('firma-nombre').value=h.firmaNombre||'';
-  document.getElementById('firma-grado').value=h.firmaGrado||'';
-  document.getElementById('firma-cargo').value=h.firmaCargo||'';
-  sigDataURL=h.firmaImg||'';
-  items=h.items.map(function(it){return Object.assign({},it);});
-  renderItems();volverDeHistorial();actualizarFolioHeader();irPaso(1);
-  mostrarToast('Solicitud '+h.id+' cargada');
+  document.getElementById('folio-anio').value=h.folioAnio;document.getElementById('folio-num').value=h.folioNum;
+  document.getElementById('fecha').value=h.fecha;document.getElementById('escuadrilla').value=h.escuadrilla;
+  document.getElementById('cdte').value=h.cdte||'';document.getElementById('observaciones').value=h.observaciones||'';
+  document.getElementById('firma-nombre').value=h.firmaNombre||'';document.getElementById('firma-grado').value=h.firmaGrado||'';document.getElementById('firma-cargo').value=h.firmaCargo||'';
+  sigDataURL=h.firmaImg||'';items=h.items.map(function(it){return Object.assign({},it);});
+  renderItems();volverDeHistorial();actualizarFolioHeader();irPaso(1);mostrarToast('Solicitud '+h.id+' cargada');
 }
 function eliminarHistorial(id){
   if(!db)return alert('Base de datos no lista.');
@@ -652,54 +554,34 @@ function eliminarHistorial(id){
   var tx=db.transaction(STORE_SOL,'readwrite');
   tx.onerror=function(e){alert('Error al eliminar: '+e.target.error);};
   tx.objectStore(STORE_SOL).delete(id);
-  tx.oncomplete=function(){
-    solicitudes=solicitudes.filter(function(s){return s.id!==id;});
-    renderHistorial();mostrarToast('✓ Solicitud eliminada');
-  };
+  tx.oncomplete=function(){solicitudes=solicitudes.filter(function(s){return s.id!==id;});renderHistorial();mostrarToast('✓ Solicitud eliminada');};
 }
 function verHistorial(){
   document.querySelectorAll('.step-panel').forEach(function(p){p.classList.remove('activo');});
-  document.getElementById('panel-hist').classList.add('activo');
-  renderHistorial();
+  document.getElementById('panel-hist').classList.add('activo');renderHistorial();
   document.getElementById('nav-bar').classList.add('oculta');
   var b=document.getElementById('btn-volver-hist');
-  if(!b){
-    var nb=document.createElement('div');
-    nb.style.cssText='padding:10px 16px;background:linear-gradient(90deg,#071429,#0d2550);border-top:1px solid rgba(200,168,75,0.3)';
-    nb.innerHTML='<button id="btn-volver-hist" class="btn-nav btn-atras" style="width:100%" onclick="volverDeHistorial()">← Volver al formulario</button>';
-    document.querySelector('.app').appendChild(nb);
-  }
+  if(!b){var nb=document.createElement('div');nb.style.cssText='padding:10px 16px;background:linear-gradient(90deg,#071429,#0d2550);border-top:1px solid rgba(200,168,75,0.3)';nb.innerHTML='<button id="btn-volver-hist" class="btn-nav btn-atras" style="width:100%" onclick="volverDeHistorial()">← Volver al formulario</button>';document.querySelector('.app').appendChild(nb);}
 }
 function volverDeHistorial(){
-  var extra=document.getElementById('btn-volver-hist');
-  if(extra&&extra.parentNode)extra.parentNode.remove();
-  document.getElementById('nav-bar').classList.remove('oculta');
-  irPaso(pasoActual);
+  var extra=document.getElementById('btn-volver-hist');if(extra&&extra.parentNode)extra.parentNode.remove();
+  document.getElementById('nav-bar').classList.remove('oculta');irPaso(pasoActual);
 }
-function getNextFolioNum(){
-  var max=0;solicitudes.forEach(function(s){var n=parseInt(s.folioNum)||0;if(n>max)max=n;});return max;
-}
+function getNextFolioNum(){var max=0;solicitudes.forEach(function(s){var n=parseInt(s.folioNum)||0;if(n>max)max=n;});return max;}
 function nuevoFormulario(){
   editIndex=null;sigDataURL='';
   var sc=document.getElementById('sig-canvas');if(sc)sc.getContext('2d').clearRect(0,0,sc.width,sc.height);
   var next=getNextFolioNum()+1;
-  document.getElementById('folio-num').value=folioStr(next);
-  document.getElementById('folio-anio').value=new Date().getFullYear();
-  document.getElementById('fecha').value=new Date().toISOString().slice(0,10);
-  document.getElementById('escuadrilla').value='Bandada Instalaciones';
-  document.getElementById('cdte').value='';
-  document.getElementById('observaciones').value='';
-  document.getElementById('firma-nombre').value='';
-  document.getElementById('firma-grado').value='';
-  document.getElementById('firma-cargo').value='';
+  document.getElementById('folio-num').value=folioStr(next);document.getElementById('folio-anio').value=new Date().getFullYear();
+  document.getElementById('fecha').value=new Date().toISOString().slice(0,10);document.getElementById('escuadrilla').value='Bandada Instalaciones';
+  document.getElementById('cdte').value='';document.getElementById('observaciones').value='';
+  document.getElementById('firma-nombre').value='';document.getElementById('firma-grado').value='';document.getElementById('firma-cargo').value='';
   items=[];agregarItem();actualizarFolioHeader();irPaso(1);
 }
 
-// ─── Imprimir PDF ─────────────────────────────────────────────────────────────
+// ─── PDF ──────────────────────────────────────────────────────────────────────
 function imprimirPDF(){
-  var t=calcTotals();
-  var anio=document.getElementById('folio-anio').value;
-  var num=document.getElementById('folio-num').value;
+  var t=calcTotals();var anio=document.getElementById('folio-anio').value;var num=document.getElementById('folio-num').value;
   document.getElementById('p-folio').textContent='ADQ-'+anio+'-'+num;
   document.getElementById('p-fecha').textContent=fmtFecha(document.getElementById('fecha').value);
   document.getElementById('p-escuadrilla').textContent=document.getElementById('escuadrilla').value;
@@ -711,42 +593,29 @@ function imprimirPDF(){
   document.getElementById('p-firma-nombre').textContent=document.getElementById('firma-nombre').value.toUpperCase();
   document.getElementById('p-firma-grado').textContent=document.getElementById('firma-grado').value;
   document.getElementById('p-firma-cargo').textContent=document.getElementById('firma-cargo').value;
-  var sigImg=document.getElementById('p-sig-img');
-  var url=capturarFirma();
+  var sigImg=document.getElementById('p-sig-img');var url=capturarFirma();
   if(url){sigImg.src=url;sigImg.style.display='block';}else{sigImg.style.display='none';}
   var tbody=document.getElementById('p-items');tbody.innerHTML='';
   items.filter(function(it){return it.descripcion;}).forEach(function(it){
-    var tr=document.createElement('tr');
-    var sub=calcSub(it);
+    var tr=document.createElement('tr');var sub=calcSub(it);
     [it.cant,it.unidad,it.descripcion,'$ '+Math.round(it.pUnitario).toLocaleString('es-CL'),'$ '+Math.round(sub).toLocaleString('es-CL')].forEach(function(txt,ci){
-      var td=document.createElement('td');
-      td.style.cssText='border:1px solid #ccc;padding:4px 8px;font-size:12px'+(ci>2?';text-align:right':'');
-      td.textContent=txt;tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
+      var td=document.createElement('td');td.style.cssText='border:1px solid #ccc;padding:4px 8px;font-size:12px'+(ci>2?';text-align:right':'');td.textContent=txt;tr.appendChild(td);
+    });tbody.appendChild(tr);
   });
   setTimeout(function(){window.print();},800);
 }
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
-function mostrarToast(msg){
-  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  setTimeout(function(){t.classList.remove('show');},2500);
-}
+function mostrarToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
 
-// ─── PWA: manifest + SW inline ───────────────────────────────────────────────
+// ─── PWA ──────────────────────────────────────────────────────────────────────
 (function(){
   var m={name:'Solicitud Adquisición — AGA',short_name:'Solicitud AGA',start_url:'/scorpion-tail/solicitud.html',display:'standalone',background_color:'#0d1f3c',theme_color:'#0d1f3c',orientation:'portrait-primary',icons:[]};
   var b=new Blob([JSON.stringify(m)],{type:'application/json'});
   document.getElementById('sol-manifest').href=URL.createObjectURL(b);
 })();
 if('serviceWorker'in navigator){
-  var swCode=[
-    "const CACHE='aga-solicitud-v2';",
-    "self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add('.')).then(()=>self.skipWaiting()));});",
-    "self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});",
-    "self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{var rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));return res;}).catch(()=>caches.match(e.request))));});"
-  ].join('\n');
+  var swCode=["const CACHE='aga-solicitud-v3';","self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add('.')).then(()=>self.skipWaiting()));});","self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});","self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{var rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));return res;}).catch(()=>caches.match(e.request))));});"].join('\n');
   var swBlob=new Blob([swCode],{type:'application/javascript'});
   navigator.serviceWorker.register(URL.createObjectURL(swBlob),{scope:'./'}).catch(function(e){console.warn('[SW]',e);});
 }
