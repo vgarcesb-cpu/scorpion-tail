@@ -209,18 +209,18 @@ var STDrive = (function(){
 
     mostrarIndicador('syncing');
 
-    return getOrCreateFolder(FOLDER_NAME)
-      .then(function(rootId) {
-        var q = "mimeType='application/json' and trashed=false and '" + rootId + "' in ancestors";
-        if (filtroPrefijo) {
-          q += " and name contains '" + filtroPrefijo.replace(/'/g, "\\'") + "'";
-        }
-        var params = 'q=' + encodeURIComponent(q) +
-                     '&fields=files(id%2Cname%2CmodifiedTime)' +
-                     '&pageSize=200' +
-                     '&orderBy=name';
-        return apiCall('https://www.googleapis.com/drive/v3/files?' + params);
-      })
+    // Con scope drive.file solo vemos archivos creados por esta app.
+    // Buscamos por nombre sin necesitar folder ID ni ancestors.
+    var q = "mimeType='application/json' and trashed=false";
+    if (filtroPrefijo) {
+      q += " and name contains '" + filtroPrefijo.replace(/'/g, "\\'") + "'";
+    }
+    var params = 'q=' + encodeURIComponent(q) +
+                 '&fields=' + encodeURIComponent('files(id,name,modifiedTime)') +
+                 '&pageSize=200' +
+                 '&orderBy=name';
+    return apiCall('https://www.googleapis.com/drive/v3/files?' + params)
+      .then(function(res) { return res; })
       .then(function(res) {
         var files = res.files || [];
         if (!files.length) {
