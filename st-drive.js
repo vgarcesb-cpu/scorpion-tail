@@ -215,10 +215,11 @@ var STDrive = (function(){
         if (filtroPrefijo) {
           q += " and name contains '" + filtroPrefijo.replace(/'/g, "\\'") + "'";
         }
-        return apiCall(
-          'https://www.googleapis.com/drive/v3/files?' +
-          new URLSearchParams({q:q, fields:'files(id,name,modifiedTime)', pageSize:'200', orderBy:'name'})
-        );
+        var params = 'q=' + encodeURIComponent(q) +
+                     '&fields=files(id%2Cname%2CmodifiedTime)' +
+                     '&pageSize=200' +
+                     '&orderBy=name';
+        return apiCall('https://www.googleapis.com/drive/v3/files?' + params);
       })
       .then(function(res) {
         var files = res.files || [];
