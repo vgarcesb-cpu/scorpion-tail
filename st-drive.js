@@ -214,7 +214,12 @@ var STDrive = (function(){
     var params = 'q=' + encodeURIComponent(q) +
                  '&pageSize=200' +
                  '&fields=' + encodeURIComponent('files(id,name,modifiedTime)');
-    return apiCall('https://www.googleapis.com/drive/v3/files?' + params)
+    var urlFinal = 'https://www.googleapis.com/drive/v3/files?' + params;
+    return apiCall(urlFinal)
+      .catch(function(e) {
+        // DEBUG: mostrar el error junto con el query enviado
+        throw new Error(e.message + ' | q=' + q);
+      })
       .then(function(res) {
         // Filtrado de nombre en JavaScript, no en la query de Drive
         if (filtroPrefijo && res.files) {
