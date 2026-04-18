@@ -245,6 +245,7 @@ var STDrive = (function(){
 
     // Paso 1: Obtener ID de la carpeta raíz ScorpionTail
     return getOrCreateFolder(FOLDER_NAME)
+      .catch(function(e){ alert('getFolder error: ' + e.message); throw e; })
       .then(function(rootId) {
         // Búsqueda recursiva de JSON dentro de ScorpionTail/
         // 'rootId' in ancestors → busca en TODAS las subcarpetas (YYYY/MM/modulo/)
