@@ -3,14 +3,12 @@
  * Proyecto: Scorpion Tail · AGA · FACH · Toti's®
  *
  * API pública:
- *   STDrive.isConnected()                         → bool
- *   STDrive.login(returnUrl)                      → void
- *   STDrive.logout()                              → void
- *   STDrive.guardar(modulo, id, data)             → Promise  (SUBIDA)
- *   STDrive.descargar(modulo, filtroPrefijo, cb)  → Promise  (SYNC-001 BAJADA)
- *   STDrive.mostrarIndicador(estado)              → void
- *
- * Uso: <script src="st-drive.js"></script>
+ *   STDrive.isConnected()
+ *   STDrive.login(returnUrl)
+ *   STDrive.logout()
+ *   STDrive.guardar(modulo, id, data)   → Promise (SUBIDA)
+ *   STDrive.descargar(modulo, prefix, cb) → Promise (SYNC-001 BAJADA)
+ *   STDrive.mostrarIndicador(estado)
  */
 
 var STDrive = (function(){
@@ -35,14 +33,14 @@ var STDrive = (function(){
     var arr = new Uint8Array(len);
     crypto.getRandomValues(arr);
     return btoa(String.fromCharCode.apply(null, arr))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+      .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
   }
 
   function sha256B64(plain) {
     return crypto.subtle.digest('SHA-256', new TextEncoder().encode(plain))
       .then(function(buf) {
         return btoa(String.fromCharCode.apply(null, new Uint8Array(buf)))
-          .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+          .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
       });
   }
 
@@ -81,7 +79,7 @@ var STDrive = (function(){
     opts.headers['Authorization'] = 'Bearer ' + token;
     return fetch(url, opts).then(function(r) {
       if (!r.ok) return r.json().then(function(e) {
-        throw new Error((e.error && e.error.message) || String(r.status));
+        throw new Error((e.error && e.error.message) || ('HTTP ' + r.status));
       });
       return r.status === 204 ? {} : r.json();
     });
@@ -96,12 +94,12 @@ var STDrive = (function(){
     ).then(function(res) {
       if (res.files && res.files.length > 0) return res.files[0].id;
       return apiCall('https://www.googleapis.com/drive/v3/files', {
-        method: 'POST',
+        method:  'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          name: name,
+        body:    JSON.stringify({
+          name:     name,
           mimeType: 'application/vnd.google-apps.folder',
-          parents: parentId ? [parentId] : []
+          parents:  parentId ? [parentId] : []
         })
       }).then(function(f) { return f.id; });
     });
@@ -122,9 +120,8 @@ var STDrive = (function(){
   function uploadJSON(filename, data, modulo) {
     return getModuleFolder(modulo).then(function(folderId) {
       var content = JSON.stringify(data, null, 2);
-      var blob = new Blob([content], {type: 'application/json'});
-
-      var q = "name='" + filename + "' and '" + folderId + "' in parents and trashed=false";
+      var blob    = new Blob([content], {type: 'application/json'});
+      var q       = "name='" + filename + "' and '" + folderId + "' in parents and trashed=false";
       return apiCall(
         'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id)'
       ).then(function(res) {
@@ -132,7 +129,7 @@ var STDrive = (function(){
         var meta = {name: filename, mimeType: 'application/json'};
         if (!res.files || res.files.length === 0) {
           meta.parents = [folderId];
-          form.append('metadata', new Blob([JSON.stringify(meta)], {type: 'application/json'}));
+          form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
           form.append('file', blob);
           return apiCall(
             'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
@@ -141,7 +138,7 @@ var STDrive = (function(){
         } else {
           var fileId = res.files[0].id;
           var f = new FormData();
-          f.append('metadata', new Blob([JSON.stringify({name: filename})], {type: 'application/json'}));
+          f.append('metadata', new Blob([JSON.stringify({name:filename})], {type:'application/json'}));
           f.append('file', blob);
           return apiCall(
             'https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=multipart',
@@ -153,86 +150,55 @@ var STDrive = (function(){
   }
 
   // ─── INDICADOR VISUAL ────────────────────────────────────────────────────────
-  function mostrarIndicador(estado) {
+  // El error se muestra con el mensaje completo y dura 10 segundos en pantalla
+  function mostrarIndicador(estado, detalle) {
     var el = document.getElementById('st-sync-indicator');
     if (!el) {
       el = document.createElement('div');
       el.id = 'st-sync-indicator';
       el.style.cssText =
         'position:fixed;bottom:60px;right:14px;background:#0a1628;color:#C8A951;' +
-        'font-size:11px;font-weight:700;padding:5px 10px;border-radius:20px;' +
-        'display:flex;align-items:center;gap:5px;z-index:9998;' +
-        'box-shadow:0 2px 8px rgba(0,0,0,.3);transition:opacity .3s;font-family:Arial,sans-serif';
+        'font-size:11px;font-weight:700;padding:6px 10px;border-radius:20px;' +
+        'display:flex;align-items:flex-start;gap:5px;z-index:9998;' +
+        'box-shadow:0 2px 8px rgba(0,0,0,.4);transition:opacity .3s;' +
+        'font-family:Arial,sans-serif;max-width:280px;line-height:1.4;';
       document.body.appendChild(el);
     }
     if (!document.getElementById('st-sync-style')) {
       var s = document.createElement('style');
-      s.id = 'st-sync-style';
+      s.id  = 'st-sync-style';
       s.textContent = '@keyframes st-spin{to{transform:rotate(360deg)}}';
       document.head.appendChild(s);
     }
-    var iconos = {
-      syncing: '<span style="display:inline-block;animation:st-spin .8s linear infinite">🔄</span>',
-      ok:      '✅',
-      error:   '❌'
-    };
-    var textos = {
-      syncing: 'Sincronizando...',
-      ok:      'Drive sincronizado',
-      error:   'Error sync Drive'
-    };
-    el.innerHTML = iconos[estado] + ' ' + textos[estado];
+    var icono = estado === 'syncing'
+      ? '<span style="display:inline-block;animation:st-spin .8s linear infinite;flex-shrink:0">🔄</span>'
+      : estado === 'ok' ? '✅' : '❌';
+    var texto = estado === 'syncing' ? 'Sincronizando...'
+      : estado === 'ok'      ? 'Drive sincronizado'
+      : detalle              ? detalle
+      : 'Error sync Drive';
+    el.innerHTML = icono + ' <span>' + texto + '</span>';
     el.style.opacity = '1';
+    // Errores: 10 seg; OK: 3 seg
     if (estado !== 'syncing') {
-      setTimeout(function() { el.style.opacity = '0'; }, 3000);
+      setTimeout(function() { el.style.opacity = '0'; }, estado === 'error' ? 10000 : 3000);
     }
   }
 
-  // ─── API PÚBLICA — SUBIDA ─────────────────────────────────────────────────────
-  /**
-   * Guardar registro en Drive automáticamente (SUBIDA)
-   * @param {string} modulo  — 'solicitud' | 'poseidon' | 'vale' | 'nls'
-   * @param {string} id      — identificador del registro (ej: 'ADQ-2026-0001')
-   * @param {object} data    — objeto con los datos a respaldar
-   */
+  // ─── GUARDAR (SUBIDA) ─────────────────────────────────────────────────────────
   function guardar(modulo, id, data) {
     if (!isConnected()) return Promise.resolve({skip: true});
     mostrarIndicador('syncing');
     var filename = id.replace(/[^a-zA-Z0-9\-_]/g, '_') + '.json';
     return uploadJSON(filename, data, modulo)
-      .then(function(res) {
-        mostrarIndicador('ok');
-        return res;
-      })
-      .catch(function(e) {
-        mostrarIndicador('error');
-        console.warn('[STDrive] guardar error:', e.message);
-        throw e;
-      });
+      .then(function(res) { mostrarIndicador('ok'); return res; })
+      .catch(function(e)  { mostrarIndicador('error', 'Subida: ' + e.message); throw e; });
   }
 
-  // ─── SYNC-001: BAJADA DESDE DRIVE ────────────────────────────────────────────
-  /**
-   * Descargar JSONs del módulo desde Drive (BAJADA)
-   *
-   * Uso básico:
-   *   STDrive.descargar('solicitud', 'ADQ-', function(items, err) { ... });
-   *
-   * Uso sin filtro de nombre (descarga todos los JSON del módulo):
-   *   STDrive.descargar('solicitud', function(items, err) { ... });
-   *
-   * Cada item en el array tiene:
-   *   { filename, modifiedTime, driveMs, data }
-   *   donde data es el objeto JSON parseado listo para insertar en IDB.
-   *
-   * @param {string}   modulo        — nombre del módulo (para crear/encontrar carpeta raíz)
-   * @param {string}   [filtroPrefijo] — prefijo del nombre de archivo (ej: 'ADQ-')
-   * @param {Function} onComplete    — callback(items[], error)
-   */
+  // ─── SYNC-001: DESCARGAR (BAJADA) ────────────────────────────────────────────
   function descargar(modulo, filtroPrefijo, onComplete) {
-    // Sobrecarga: si filtroPrefijo es función, no hay filtro de nombre
     if (typeof filtroPrefijo === 'function') {
-      onComplete = filtroPrefijo;
+      onComplete    = filtroPrefijo;
       filtroPrefijo = null;
     }
 
@@ -243,60 +209,31 @@ var STDrive = (function(){
 
     mostrarIndicador('syncing');
 
-    // Paso 1: Obtener ID de la carpeta raíz ScorpionTail
     return getOrCreateFolder(FOLDER_NAME)
-      .catch(function(e){ alert('getFolder error: ' + e.message); throw e; })
       .then(function(rootId) {
-        // Búsqueda recursiva de JSON dentro de ScorpionTail/
-        // 'rootId' in ancestors → busca en TODAS las subcarpetas (YYYY/MM/modulo/)
-        var q = "mimeType='application/json'" +
-                " and trashed=false" +
-                " and '" + rootId + "' in ancestors";
-
+        var q = "mimeType='application/json' and trashed=false and '" + rootId + "' in ancestors";
         if (filtroPrefijo) {
-          // Filtrar solo archivos cuyo nombre empieza con el prefijo del módulo
-          // Ej: 'ADQ-' encuentra ADQ-2026-0001.json, ADQ-2025-0042.json, etc.
           q += " and name contains '" + filtroPrefijo.replace(/'/g, "\\'") + "'";
         }
-
         return apiCall(
           'https://www.googleapis.com/drive/v3/files?' +
-          new URLSearchParams({
-            q:        q,
-            fields:   'files(id,name,modifiedTime)',
-            pageSize: '200',
-            orderBy:  'name'
-          })
+          new URLSearchParams({q:q, fields:'files(id,name,modifiedTime)', pageSize:'200', orderBy:'name'})
         );
       })
       .then(function(res) {
         var files = res.files || [];
-
         if (!files.length) {
           mostrarIndicador('ok');
           if (typeof onComplete === 'function') onComplete([], null);
           return [];
         }
-
-        // Paso 2: Descargar contenido de cada archivo en paralelo
-        // apiCall con ?alt=media devuelve el contenido del archivo.
-        // Como los archivos son JSON, r.json() los parsea correctamente.
         return Promise.all(files.map(function(file) {
-          return apiCall(
-            'https://www.googleapis.com/drive/v3/files/' + file.id + '?alt=media'
-          )
-          .then(function(data) {
-            return {
-              filename:     file.name,
-              modifiedTime: file.modifiedTime,
-              driveMs:      new Date(file.modifiedTime).getTime(),
-              data:         data   // objeto JS parseado, listo para IDB
-            };
-          })
-          .catch(function(e) {
-            console.warn('[STDrive] error descargando ' + file.name + ':', e.message);
-            return null; // filtrado después
-          });
+          return apiCall('https://www.googleapis.com/drive/v3/files/' + file.id + '?alt=media')
+            .then(function(data) {
+              return {filename:file.name, modifiedTime:file.modifiedTime,
+                      driveMs:new Date(file.modifiedTime).getTime(), data:data};
+            })
+            .catch(function() { return null; });
         }));
       })
       .then(function(results) {
@@ -305,10 +242,11 @@ var STDrive = (function(){
         if (typeof onComplete === 'function') onComplete(validos, null);
         return validos;
       })
-        mostrarIndicador('error');
-        alert('SYNC-001 error: ' + e.message);
-        console.warn('[STDrive] descargar error:', e.message);
-         throw e;
+      .catch(function(e) {
+        // Muestra el mensaje de error completo en pantalla por 10 segundos
+        mostrarIndicador('error', e.message);
+        if (typeof onComplete === 'function') onComplete(null, e);
+        throw e;
       });
   }
 
@@ -318,7 +256,7 @@ var STDrive = (function(){
     login:            login,
     logout:           logout,
     guardar:          guardar,
-    descargar:        descargar,        // ← SYNC-001 NUEVO
+    descargar:        descargar,
     mostrarIndicador: mostrarIndicador
   };
 
