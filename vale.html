@@ -9,18 +9,7 @@
 <link rel="manifest" id="vale-manifest">
 <link rel="apple-touch-icon" id="apple-icon-vale">
 <title>Vale de Entrega – AGA</title>
-<!--
-╔══════════════════════════════════════════════════════════════════╗
-║     VALE DE ENTREGA — Scorpion Tail · scorpion-tail             ║
-║     Migrado desde: VALE_ENTREGA (repo independiente)            ║
-║                                                                  ║
-║  MIG-001 │ Manifest inline (sin manifest.json externo)          ║
-║  MIG-002 │ SW inline (sin sw.js externo)                        ║
-║  MIG-003 │ Logo generado por canvas (sin base64 externo)        ║
-║  MIG-004 │ position:fixed + min-height:0 para S25               ║
-║  MIG-005 │ Fondo blanco en impresión PDF                        ║
-╚══════════════════════════════════════════════════════════════════╝
--->
+<script src="st-drive.js"></script>
 <style>
 :root {
   --azul: #0d1f3c;
@@ -31,155 +20,150 @@
   --gris: #f4f6f9;
   --borde: #dde3ed;
   --verde: #2ecc71;
+  --rojo: #e74c3c;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 20px);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; overflow: hidden; }
-/* MIG-004 — position fixed para S25 */
-body { font-family: "Segoe UI", system-ui, sans-serif; font-size: 14px; background: var(--azul); color: #000; position: fixed; width: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--azul);
+  color: #000;
+  position: fixed;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+}
+.app { display: flex; flex-direction: column; height: 100dvh; padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); }
 
-.app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
-
-/* HEADER */
+/* ─── HEADER ─── */
 .app-header {
-  background: linear-gradient(90deg, #071429 0%, #0d2550 60%, #071429 100%);
-  border-bottom: 2px solid var(--dorado);
-  padding: calc(var(--safe-top) + 10px) 16px 10px;
-  display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(135deg, #071429 0%, #0d2550 100%);
+  padding: 10px 16px 8px;
+  border-bottom: 1px solid rgba(200,168,75,0.3);
   flex-shrink: 0;
 }
-.app-header img { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--dorado); }
-.app-header .titulo { flex: 1; }
-.app-header .titulo .inst { font-size: 11px; font-weight: 700; color: var(--dorado); letter-spacing: 1px; text-transform: uppercase; }
-.app-header .titulo .sub { font-size: 9px; color: #a0b8d8; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 1px; }
-.app-header .folio-mini { text-align: right; }
-.app-header .folio-mini span { font-size: 9px; color: #a0b8d8; text-transform: uppercase; display: block; }
-.app-header .folio-mini .folio-val { font-family: "Courier New", monospace; font-size: 11px; font-weight: bold; color: var(--dorado); }
+.header-top { display: flex; align-items: center; justify-content: space-between; }
+.header-logo .inst { font-size: 8px; color: rgba(200,168,75,0.7); text-transform: uppercase; letter-spacing: 1px; }
+.header-logo .titulo { font-size: 13px; font-weight: 700; color: var(--dorado); text-transform: uppercase; letter-spacing: 0.5px; }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.header-folio { font-size: 10px; color: rgba(255,255,255,0.5); text-align: right; }
+.folio-badge { font-size: 13px; font-weight: 700; color: var(--dorado); display: block; }
 
-/* STEPS BAR */
-.steps-bar { background: var(--azul2); padding: 10px 16px 0; flex-shrink: 0; }
-.steps-track { display: flex; align-items: flex-start; justify-content: space-between; position: relative; }
-.steps-track::before { content: ""; position: absolute; top: 14px; left: 14px; right: 14px; height: 2px; background: #3a5a8a; z-index: 0; }
-.step-item { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; position: relative; z-index: 1; }
-.step-circle { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; background: #3a5a8a; color: #7a9cc8; border: 2px solid #3a5a8a; transition: all 0.3s; }
-.step-item.activo .step-circle { background: var(--dorado); color: #fff; border-color: var(--dorado); box-shadow: 0 0 10px rgba(200,168,75,0.5); }
-.step-item.completo .step-circle { background: var(--verde); color: #fff; border-color: var(--verde); }
-.step-label { font-size: 8px; color: #7a9cc8; text-transform: uppercase; letter-spacing: 0.3px; text-align: center; line-height: 1.2; padding-bottom: 6px; }
+/* ─── STEPS BAR ─── */
+.steps-bar { display: flex; align-items: center; padding: 8px 16px; background: #071429; border-bottom: 1px solid rgba(200,168,75,0.2); flex-shrink: 0; gap: 0; }
+.step-item { display: flex; align-items: center; flex: 1; }
+.step-circle { width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(200,168,75,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); flex-shrink: 0; transition: all 0.2s; }
+.step-label { font-size: 9px; color: rgba(255,255,255,0.4); margin-left: 5px; text-transform: uppercase; letter-spacing: 0.3px; }
+.step-line { flex: 1; height: 1px; background: rgba(200,168,75,0.2); margin: 0 6px; }
+.step-item.activo .step-circle { border-color: var(--dorado); color: var(--dorado); background: rgba(200,168,75,0.1); }
 .step-item.activo .step-label { color: var(--dorado); }
+.step-item.completo .step-circle { border-color: var(--verde); color: var(--verde); background: rgba(46,204,113,0.1); }
 .step-item.completo .step-label { color: var(--verde); }
 
-/* CONTENT — MIG-004 min-height:0 */
-.steps-content { flex: 1; min-height: 0; overflow: hidden; position: relative; }
-.step-panel { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; opacity: 0; pointer-events: none; }
-.step-panel.activo { opacity: 1; pointer-events: all; }
+/* ─── CONTENT ─── */
+.steps-content { flex: 1; min-height: 0; overflow: hidden; position: relative; background: var(--gris); }
+.step-panel { position: absolute; inset: 0; overflow-y: auto; padding: 12px; display: none; -webkit-overflow-scrolling: touch; }
+.step-panel.activo { display: block; }
 
-/* CARDS */
-.card { background: var(--blanco); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
-.card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--azul2); border-bottom: 2px solid var(--dorado); padding-bottom: 8px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+/* ─── CARDS ─── */
+.card { background: var(--blanco); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--borde); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.card-title { font-size: 11px; font-weight: 700; color: var(--azul2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--borde); display: flex; align-items: center; gap: 6px; }
 
-/* CAMPOS */
-.campo-group { margin-bottom: 12px; }
-.campo-label { font-size: 11px; font-weight: 600; color: #555; margin-bottom: 5px; display: block; }
-.campo-input { width: 100%; padding: 11px 13px; border: 1.5px solid var(--borde); border-radius: 8px; font-size: 15px; font-family: inherit; color: #000; background: var(--gris); transition: all 0.2s; outline: none; -webkit-appearance: none; }
-.campo-input:focus { border-color: var(--azul2); background: #fff; box-shadow: 0 0 0 3px rgba(26,58,110,0.1); }
-textarea.campo-input { min-height: 70px; resize: vertical; }
-.campo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+/* ─── CAMPOS ─── */
+.campo-label { display: block; font-size: 10px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
+.campo-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--borde); border-radius: 8px; font-size: 13px; font-family: inherit; background: var(--gris); color: var(--azul); transition: border-color 0.15s; -webkit-appearance: none; }
+.campo-input:focus { outline: none; border-color: var(--azul2); background: #fff; }
+.campo-group { margin-bottom: 10px; }
+.campo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+textarea.campo-input { resize: none; min-height: 60px; }
 
-/* MATERIALES */
-.material-item { background: var(--gris); border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1.5px solid var(--borde); position: relative; }
-.material-item .item-num { font-size: 10px; font-weight: 700; color: var(--azul2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-.btn-eliminar-item { position: absolute; top: 10px; right: 10px; background: #fee; border: 1px solid #fcc; color: #c0392b; border-radius: 50%; width: 26px; height: 26px; font-size: 16px; cursor: pointer; line-height: 1; padding: 0; }
-.item-fila { display: grid; grid-template-columns: 1fr 80px; gap: 8px; }
-.btn-agregar { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--azul2), var(--azul)); color: #fff; border: 2px dashed rgba(200,168,75,0.4); border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+/* ─── ITEMS ─── */
+.item-card { background: var(--gris); border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1.5px solid var(--borde); position: relative; }
+.item-num { font-size: 10px; font-weight: 700; color: var(--azul2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.btn-eliminar-item { position: absolute; top: 10px; right: 10px; background: #fee; border: 1px solid #fcc; color: var(--rojo); border-radius: 50%; width: 26px; height: 26px; font-size: 16px; cursor: pointer; line-height: 1; padding: 0; font-family: inherit; }
+.item-fila3 { display: grid; grid-template-columns: 70px 80px 1fr; gap: 8px; }
+.btn-agregar { width: 100%; padding: 10px; border: 2px dashed var(--borde); background: transparent; border-radius: 8px; color: var(--azul2); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
 
-/* FIRMAS */
-.firma-block { margin-bottom: 20px; }
-.firma-titulo { font-size: 13px; font-weight: bold; color: var(--azul2); margin-bottom: 4px; text-align: center; }
-.firma-nombre { font-size: 12px; color: #666; text-align: center; margin-bottom: 8px; font-style: italic; }
-.sig-canvas { border: 2px solid var(--azul2); border-radius: 10px; display: block; background: #fff; touch-action: none; width: 100%; height: 130px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+/* ─── FIRMAS ─── */
+.firma-block { margin-bottom: 18px; }
+.firma-titulo { font-size: 12px; font-weight: 700; color: var(--azul2); text-align: center; margin-bottom: 3px; }
+.firma-nombre { font-size: 11px; color: #888; text-align: center; margin-bottom: 6px; font-style: italic; }
+#sig-entrega, #sig-recibe { border: 2px solid var(--azul2); border-radius: 10px; display: block; background: #fff; touch-action: none; width: 100%; height: 130px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .btn-borrar-firma { width: 100%; padding: 8px; margin-top: 6px; background: #eee; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; color: #555; }
 
-/* RESUMEN */
-.resumen-card { background: var(--blanco); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.15); margin-bottom: 16px; }
-.resumen-header { background: linear-gradient(90deg, var(--azul), var(--azul2)); padding: 14px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--dorado); }
-.resumen-header img { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--dorado); }
-.resumen-header .r-inst { font-size: 10px; color: var(--dorado); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-.resumen-header .r-sub { font-size: 9px; color: #a0b8d8; }
-.resumen-body { padding: 14px 16px; }
-.resumen-fila { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--gris); font-size: 12px; }
-.resumen-fila .r-key { color: #777; }
-.resumen-fila .r-val { font-weight: 600; color: #000; text-align: right; max-width: 60%; }
+/* ─── RESUMEN ─── */
+.resumen-fila { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--borde); font-size: 12px; }
+.r-key { color: #888; font-weight: 600; }
+.r-val { color: var(--azul); font-weight: 500; text-align: right; max-width: 60%; }
+.resumen-item-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 11px; color: #555; border-bottom: 1px dashed var(--borde); }
 
-/* CONFIRMADO */
-.confirm-box { text-align: center; padding: 20px; }
-.confirm-icon { font-size: 56px; margin-bottom: 10px; }
-.confirm-txt { font-size: 16px; font-weight: 700; color: var(--azul2); margin-bottom: 6px; }
-.confirm-sub { font-size: 12px; color: #777; margin-bottom: 20px; }
+/* ─── HISTORIAL ─── */
+.hist-item-app { background: var(--blanco); border: 1px solid var(--borde); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: box-shadow 0.15s; }
+.hist-item-app:active { box-shadow: 0 0 0 2px var(--dorado); }
+.hist-folio { font-size: 13px; font-weight: 700; color: var(--azul2); }
+.hist-det { font-size: 11px; color: #888; margin-top: 3px; }
+.hist-obs { font-size: 11px; color: #aaa; margin-top: 2px; font-style: italic; }
+.btn-eliminar-hist { margin-top: 8px; padding: 5px 12px; background: #fee; border: 1px solid #fcc; color: var(--rojo); border-radius: 6px; font-size: 11px; cursor: pointer; font-family: inherit; }
 
-/* BOTONES */
-.btn-pdf { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--dorado), var(--dorado2)); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 20px rgba(200,168,75,0.4); display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
-.btn-nuevo { width: 100%; padding: 12px; background: rgba(255,255,255,0.08); color: #a0b8d8; border: 1.5px solid rgba(255,255,255,0.15); border-radius: 10px; font-size: 14px; cursor: pointer; font-family: inherit; }
-
-/* NAV BAR */
-.nav-bar { background: linear-gradient(90deg, #071429, #0d2550); border-top: 1px solid rgba(200,168,75,0.3); padding: 10px 16px; padding-bottom: calc(10px + var(--safe-bottom)); display: flex; gap: 10px; flex-shrink: 0; }
-.btn-nav { flex: 1; padding: 13px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
-.btn-atras { background: rgba(255,255,255,0.08); color: #a0b8d8; border: 1.5px solid rgba(255,255,255,0.12); }
-.btn-siguiente { background: linear-gradient(135deg, var(--azul2), #0d2550); color: #fff; border: 1.5px solid rgba(200,168,75,0.4); }
-.btn-siguiente.dorado { background: linear-gradient(135deg, var(--dorado), var(--dorado2)); border-color: var(--dorado); }
-.btn-nav:disabled { opacity: 0.3; pointer-events: none; }
+/* ─── NAV BAR ─── */
+.nav-bar { display: flex; gap: 8px; padding: 10px 16px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(90deg,#071429,#0d2550); border-top: 1px solid rgba(200,168,75,0.3); flex-shrink: 0; }
 .nav-bar.oculta { display: none; }
+.btn-nav { flex: 1; padding: 11px 8px; border-radius: 10px; border: 1px solid rgba(200,168,75,0.25); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.btn-nav:disabled { opacity: 0.35; }
+.btn-siguiente { background: var(--azul2); border-color: var(--azul2); color: #fff; }
+.btn-siguiente.dorado { background: linear-gradient(135deg,var(--dorado),var(--dorado2)); border-color: var(--dorado); color: #fff; }
+.btn-nav:active { transform: scale(0.97); }
 
-/* TOAST */
-.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--azul2); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; border: 1px solid var(--dorado); white-space: nowrap; }
+/* ─── BOTONES PASO 4 ─── */
+.btn-pdf { display: block; width: 100%; padding: 13px; background: var(--azul); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 8px; }
+.btn-nuevo { display: block; width: 100%; padding: 13px; background: linear-gradient(135deg,var(--dorado),var(--dorado2)); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 8px; }
+
+/* ─── TOAST ─── */
+.toast { position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: #333; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* MIG-005 — PRINT fondo blanco */
+/* ─── PRINT ─── */
 #print-area { display: none; }
 @media print {
-  body {
-    background: #ffffff !important;
-    position: static !important;
-    width: auto !important;
-    overflow: visible !important;
-  }
-  body > * { display: none !important; }
-  #print-area {
-    display: block !important;
-    background: #ffffff !important;
-  }
-  body { background: #fff !important; }
-  #print-area, #print-area * { color: #000 !important; background: transparent !important; }
-  #print-area table th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  @page { size: letter portrait; margin: 15mm 15mm 15mm 30mm; }
+  body { background: #ffffff !important; position: static !important; width: auto !important; overflow: visible !important; }
+  body > .app, .toast { display: none !important; }
+  #print-area { display: block !important; padding: 0; font-family: Arial, sans-serif; color: #000; background: #ffffff !important; }
+  @page { size: letter portrait; margin: 10mm 20mm 15mm 20mm; }
+  table { border-collapse: collapse !important; }
+  th, td { border: 1px solid #ccc !important; }
 }
 </style>
 </head>
 <body>
-
 <div class="app">
 
   <!-- HEADER -->
   <div class="app-header">
-    <img id="logo-header" src="" alt="AGA">
-    <div class="titulo">
-      <div class="inst">Fuerza Aérea de Chile</div>
-      <div class="sub">División de Educación · Academia de Guerra Aérea</div>
-    </div>
-    <div class="folio-mini">
-      <span>N° Folio</span>
-      <div class="folio-val" id="folio-show">—</div>
+    <div class="header-top">
+      <div class="header-logo">
+        <span class="inst">Academia de Guerra Aérea · FACH</span>
+        <span class="titulo">Vale de Entrega</span>
+      </div>
+      <div class="header-right">
+        <button id="btn-drive" onclick="toggleDrive()" style="background:none;border:1px solid rgba(200,168,75,.4);border-radius:14px;color:#C8A951;font-size:10px;font-weight:700;padding:3px 9px;cursor:pointer;font-family:Arial,sans-serif" title="Google Drive Sync"></button>
+        <div class="header-folio">
+          <span class="folio-badge" id="folio-show">VE-…</span>
+          Folio
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- STEPS BAR -->
   <div class="steps-bar">
-    <div class="steps-track">
-      <div class="step-item activo" id="si-1"><div class="step-circle">1</div><div class="step-label">Datos</div></div>
-      <div class="step-item" id="si-2"><div class="step-circle">2</div><div class="step-label">Materiales</div></div>
-      <div class="step-item" id="si-3"><div class="step-circle">3</div><div class="step-label">Firmas</div></div>
-      <div class="step-item" id="si-4"><div class="step-circle">4</div><div class="step-label">PDF</div></div>
-    </div>
+    <div class="step-item activo" id="si-1"><div class="step-circle">1</div><span class="step-label">Datos</span></div>
+    <div class="step-line"></div>
+    <div class="step-item" id="si-2"><div class="step-circle">2</div><span class="step-label">Materiales</span></div>
+    <div class="step-line"></div>
+    <div class="step-item" id="si-3"><div class="step-circle">3</div><span class="step-label">Firmas</span></div>
+    <div class="step-line"></div>
+    <div class="step-item" id="si-4"><div class="step-circle">4</div><span class="step-label">PDF</span></div>
   </div>
 
   <!-- CONTENIDO -->
@@ -189,30 +173,17 @@ textarea.campo-input { min-height: 70px; resize: vertical; }
     <div class="step-panel activo" id="panel-1">
       <div class="card">
         <div class="card-title">📋 Datos del Vale</div>
-        <div class="campo-group">
-          <label class="campo-label">Quien entrega *</label>
-          <input type="text" class="campo-input" id="entrega" placeholder="Nombre / Grado">
+        <div class="campo-row">
+          <div class="campo-group"><label class="campo-label">Año</label><input class="campo-input" type="text" id="folio-anio" maxlength="4" inputmode="numeric" placeholder="2026"></div>
+          <div class="campo-group"><label class="campo-label">N° Folio</label><input class="campo-input" type="text" id="folio-num" readonly></div>
         </div>
-        <div class="campo-group">
-          <label class="campo-label">Unidad de origen (entrega)</label>
-          <input type="text" class="campo-input" id="unidad-entrega" placeholder="Ej: Escuadrilla de Material">
-        </div>
-        <div class="campo-group">
-          <label class="campo-label">Quien recibe *</label>
-          <input type="text" class="campo-input" id="recibe" placeholder="Nombre / Grado">
-        </div>
-        <div class="campo-group">
-          <label class="campo-label">Unidad de origen (recibe)</label>
-          <input type="text" class="campo-input" id="unidad-recibe" placeholder="Ej: Dirección de Educación">
-        </div>
-        <div class="campo-group">
-          <label class="campo-label">Lugar de entrega</label>
-          <input type="text" class="campo-input" id="lugar" placeholder="Ej: Bodega central, terreno...">
-        </div>
-        <div class="campo-group">
-          <label class="campo-label">Observaciones</label>
-          <textarea class="campo-input" id="obs" placeholder="Opcional..."></textarea>
-        </div>
+        <div class="campo-group"><label class="campo-label">Fecha</label><input class="campo-input" type="date" id="fecha"></div>
+        <div class="campo-group"><label class="campo-label">Quien entrega *</label><input class="campo-input" type="text" id="entrega" placeholder="Nombre / Grado"></div>
+        <div class="campo-group"><label class="campo-label">Unidad origen (entrega)</label><input class="campo-input" type="text" id="unidad-entrega" placeholder="Ej: Escuadrilla de Material"></div>
+        <div class="campo-group"><label class="campo-label">Quien recibe *</label><input class="campo-input" type="text" id="recibe" placeholder="Nombre / Grado"></div>
+        <div class="campo-group"><label class="campo-label">Unidad origen (recibe)</label><input class="campo-input" type="text" id="unidad-recibe" placeholder="Ej: Dirección de Educación"></div>
+        <div class="campo-group"><label class="campo-label">Lugar de entrega</label><input class="campo-input" type="text" id="lugar" placeholder="Ej: Bodega central"></div>
+        <div class="campo-group"><label class="campo-label">Observaciones</label><textarea class="campo-input" id="obs" placeholder="Opcional..."></textarea></div>
       </div>
     </div>
 
@@ -220,8 +191,8 @@ textarea.campo-input { min-height: 70px; resize: vertical; }
     <div class="step-panel" id="panel-2">
       <div class="card">
         <div class="card-title">📦 Materiales a Entregar</div>
-        <div id="lista-items"></div>
-        <button class="btn-agregar" id="btn-agregar-item">＋ Agregar material</button>
+        <div id="items-container"></div>
+        <button class="btn-agregar" onclick="agregarItem()">+ Agregar material</button>
       </div>
     </div>
 
@@ -232,42 +203,34 @@ textarea.campo-input { min-height: 70px; resize: vertical; }
         <div class="firma-block">
           <div class="firma-titulo">Firma — Quien entrega</div>
           <div class="firma-nombre" id="nombre-entrega-firma"></div>
-          <canvas class="sig-canvas" id="sig-entrega"></canvas>
-          <button class="btn-borrar-firma" id="btn-clear-entrega">🗑 Borrar firma</button>
+          <div id="wrap-entrega" style="width:100%"><canvas id="sig-entrega"></canvas></div>
+          <button class="btn-borrar-firma" onclick="limpiarFirma('sig-entrega','entrega')">🗑 Borrar firma</button>
         </div>
         <div class="firma-block">
           <div class="firma-titulo">Firma — Quien recibe</div>
           <div class="firma-nombre" id="nombre-recibe-firma"></div>
-          <canvas class="sig-canvas" id="sig-recibe"></canvas>
-          <button class="btn-borrar-firma" id="btn-clear-recibe">🗑 Borrar firma</button>
+          <div id="wrap-recibe" style="width:100%"><canvas id="sig-recibe"></canvas></div>
+          <button class="btn-borrar-firma" onclick="limpiarFirma('sig-recibe','recibe')">🗑 Borrar firma</button>
         </div>
       </div>
     </div>
 
     <!-- PASO 4: PDF -->
     <div class="step-panel" id="panel-4">
-      <div class="resumen-card">
-        <div class="resumen-header">
-          <img id="logo-resumen" src="" alt="AGA">
-          <div>
-            <div class="r-inst">Vale de Entrega</div>
-            <div class="r-sub">Academia de Guerra Aérea — FACH</div>
-          </div>
-        </div>
-        <div class="resumen-body">
-          <div class="resumen-fila"><span class="r-key">Folio</span><span class="r-val" id="r-folio">—</span></div>
-          <div class="resumen-fila"><span class="r-key">Entrega</span><span class="r-val" id="r-entrega">—</span></div>
-          <div class="resumen-fila"><span class="r-key">Recibe</span><span class="r-val" id="r-recibe">—</span></div>
-          <div class="resumen-fila"><span class="r-key">Lugar</span><span class="r-val" id="r-lugar">—</span></div>
-          <div class="resumen-fila"><span class="r-key">N° ítems</span><span class="r-val" id="r-items">—</span></div>
-        </div>
+      <div class="card">
+        <div class="card-title">📄 Resumen</div>
+        <div id="resumen-datos"></div>
+        <div id="resumen-items" style="margin-top:10px"></div>
       </div>
-      <div class="card confirm-box">
-        <div class="confirm-icon">✅</div>
-        <div class="confirm-txt">Listo para imprimir</div>
-        <div class="confirm-sub">Revisa los datos y genera el PDF</div>
-        <button class="btn-pdf" id="btn-pdf">🖨️ Imprimir / Guardar PDF</button>
-        <button class="btn-nuevo" id="btn-nuevo">+ Nuevo vale</button>
+      <button class="btn-pdf" onclick="imprimirPDF()">🖨️ Guardar / Imprimir PDF</button>
+      <button class="btn-nuevo" onclick="guardarHistorial()">💾 Guardar en historial</button>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="step-panel" id="panel-hist">
+      <div class="card">
+        <div class="card-title">📁 Historial de Vales</div>
+        <div id="hist-lista"></div>
       </div>
     </div>
 
@@ -275,419 +238,608 @@ textarea.campo-input { min-height: 70px; resize: vertical; }
 
   <!-- NAV BAR -->
   <div class="nav-bar" id="nav-bar">
-    <button class="btn-nav btn-atras" id="btn-atras" disabled>← Atrás</button>
-    <button class="btn-nav btn-siguiente" id="btn-siguiente">Siguiente →</button>
+    <button class="btn-nav btn-atras" id="btn-atras" onclick="irPaso(pasoActual-1)" disabled>← Atrás</button>
+    <button class="btn-nav btn-atras" onclick="verHistorial()" style="flex:0.6;font-size:12px">📁 Historial</button>
+    <button class="btn-nav btn-atras" onclick="resetContador()" style="flex:0.5;font-size:11px;color:#c8a84b;border-color:rgba(200,168,75,0.3)">↺ Reset</button>
+    <button class="btn-nav btn-siguiente" id="btn-siguiente" onclick="irPaso(pasoActual+1)">Siguiente →</button>
   </div>
 
-</div>
-
-<!-- ÁREA DE IMPRESIÓN -->
-<div id="print-area">
-  <div style="font-family:Arial,sans-serif;font-size:11px;color:#000;">
-    <div style="display:flex;align-items:flex-start;border-bottom:1px solid #000;padding-bottom:8px;margin-bottom:12px;">
-      <!-- ENCABEZADO UNIVERSAL AGA -->
-      <div style="margin-bottom:12px;display:inline-block;padding-left:5px">
-        <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center">FUERZA AÉREA DE CHILE</div>
-        <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center">DIVISIÓN DE EDUCACIÓN</div>
-        <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center;text-decoration:underline">ACADEMIA DE GUERRA AÉREA</div>
-      </div>
-      <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:400;line-height:16px;color:#000;text-align:center;text-decoration:underline;margin-bottom:14px">COMPROBANTE DE ENTREGA</div>
-      <div style="flex:1;text-align:center;padding:0 10px;">
-        <div style="font-size:12px;font-weight:bold;text-transform:uppercase;text-decoration:underline;">COMPROBANTE DE ENTREGA</div>
-        <div style="font-size:10px;font-family:monospace;color:#444;margin-top:3px;" id="p-folio"></div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-bottom:10px;" id="p-info"></div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
-      <thead><tr>
-        <th style="border:1px solid #000;padding:4px;background:#f0f0f0;text-align:center;font-size:10px;width:10%">Cant.</th>
-        <th style="border:1px solid #000;padding:4px;background:#f0f0f0;font-size:10px;width:65%">Descripción</th>
-        <th style="border:1px solid #000;padding:4px;background:#f0f0f0;text-align:center;font-size:10px;width:25%">Unidad</th>
-      </tr></thead>
-      <tbody id="p-items"></tbody>
-    </table>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:24px;">
-      <div style="text-align:center;font-size:10px;">
-        <img id="p-sig-entrega" src="" style="height:45px;display:block;margin:0 auto 4px;max-width:160px;">
-        <div style="border-top:1px solid #000;padding-top:3px;margin-bottom:2px;"></div>
-        <div id="p-entrega" style="font-weight:bold;"></div>
-        <div style="color:#666;">Quien entrega</div>
-      </div>
-      <div style="text-align:center;font-size:10px;">
-        <img id="p-sig-recibe" src="" style="height:45px;display:block;margin:0 auto 4px;max-width:160px;">
-        <div style="border-top:1px solid #000;padding-top:3px;margin-bottom:2px;"></div>
-        <div id="p-recibe" style="font-weight:bold;"></div>
-        <div style="color:#666;">Quien recibe</div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<!-- ÁREA DE IMPRESIÓN -->
+<div id="print-area">
+  <div style="margin-bottom:12px;display:inline-block;padding-left:5px">
+    <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center">FUERZA AÉREA DE CHILE</div>
+    <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center">DIVISIÓN DE EDUCACIÓN</div>
+    <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center;text-decoration:underline">ACADEMIA DE GUERRA AÉREA</div>
+  </div>
+  <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:400;line-height:16px;color:#000;text-align:center;text-decoration:underline;margin-bottom:14px">COMPROBANTE DE ENTREGA DE MATERIALES</div>
+  <div style="display:flex;justify-content:space-between;margin-top:16px;margin-bottom:10px;font-size:12px">
+    <span>Folio: <strong id="p-folio"></strong></span>
+    <span>Fecha: <span id="p-fecha"></span></span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;font-size:12px">
+    <div><div style="color:#666;font-size:10px">Quien entrega</div><div id="p-entrega" style="font-weight:600"></div><div id="p-unidad-entrega" style="font-size:10px;color:#555"></div></div>
+    <div><div style="color:#666;font-size:10px">Quien recibe</div><div id="p-recibe" style="font-weight:600"></div><div id="p-unidad-recibe" style="font-size:10px;color:#555"></div></div>
+  </div>
+  <div style="font-size:12px;margin-bottom:10px"><span style="color:#666">Lugar: </span><span id="p-lugar"></span></div>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px">
+    <thead><tr>
+      <th style="border:1px solid #ccc;padding:5px 8px;text-align:center;font-weight:600;background:#f0f0f0;width:10%">Cant.</th>
+      <th style="border:1px solid #ccc;padding:5px 8px;text-align:left;font-weight:600;background:#f0f0f0">Descripción Material</th>
+      <th style="border:1px solid #ccc;padding:5px 8px;text-align:center;font-weight:600;background:#f0f0f0;width:15%">Unidad</th>
+    </tr></thead>
+    <tbody id="p-items"></tbody>
+  </table>
+  <div style="font-size:12px;margin-bottom:20px"><span style="color:#666">Observaciones: </span><span id="p-obs"></span></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:30px;text-align:center;font-size:11px">
+    <div>
+      <img id="p-sig-entrega" src="" style="display:none;max-width:180px;height:55px;object-fit:contain;margin-bottom:4px">
+      <div style="width:100%;border-top:1px solid #000;margin-bottom:4px"></div>
+      <div id="p-firma-entrega" style="font-weight:700"></div>
+      <div style="color:#666">Quien entrega</div>
+    </div>
+    <div>
+      <img id="p-sig-recibe" src="" style="display:none;max-width:180px;height:55px;object-fit:contain;margin-bottom:4px">
+      <div style="width:100%;border-top:1px solid #000;margin-bottom:4px"></div>
+      <div id="p-firma-recibe" style="font-weight:700"></div>
+      <div style="color:#666">Quien recibe</div>
+    </div>
+  </div>
+</div>
+
 <script>
-// ═══════════════════════════════════════════════════════
-// MIG-003 — Icono generado por canvas (sin base64 externo)
-// ═══════════════════════════════════════════════════════
-var LOGO = (function() {
-  var c = document.createElement('canvas');
-  c.width = c.height = 128;
-  var ctx = c.getContext('2d');
-  ctx.fillStyle = '#0d1f3c';
-  ctx.fillRect(0, 0, 128, 128);
-  ctx.strokeStyle = '#c8a84b';
-  ctx.lineWidth = 5;
-  ctx.strokeRect(5, 5, 118, 118);
-  ctx.font = '60px serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('🧾', 64, 56);
-  ctx.fillStyle = '#c8a84b';
-  ctx.font = 'bold 14px sans-serif';
-  ctx.fillText('AGA', 64, 108);
-  return c.toDataURL('image/png');
-})();
+// ═══════════════════════════════════════════════════════════════════
+// VARIABLES GLOBALES
+// ═══════════════════════════════════════════════════════════════════
+var db, pasoActual=1, items=[], vales=[], editIndex=null;
+var sigEntregaURL='', sigRecibeURL='';
+var IDB_NAME='AGA_DB_VALES', IDB_VERSION=1, STORE_VALES='vales', STORE_CFG='config';
 
-var folio = "VE-" + new Date().getFullYear() + "-" + (Math.floor(Math.random()*9000)+1000);
-var pasoActual = 1;
-var items = [];
-var sigEntregaURL = "";
-var sigRecibeURL = "";
-
-window.addEventListener("load", function() {
-  document.getElementById("logo-header").src  = LOGO;
-  document.getElementById("logo-resumen").src = LOGO;
-  document.getElementById("folio-show").textContent = folio;
-
-  agregarItem();
-
-  document.getElementById("btn-atras").addEventListener("click", function() { irPaso(-1); });
-  document.getElementById("btn-siguiente").addEventListener("click", function() { irPaso(1); });
-  document.getElementById("btn-agregar-item").addEventListener("click", agregarItem);
-  document.getElementById("btn-clear-entrega").addEventListener("click", function() { limpiarFirma("sig-entrega"); });
-  document.getElementById("btn-clear-recibe").addEventListener("click", function() { limpiarFirma("sig-recibe"); });
-  document.getElementById("btn-pdf").addEventListener("click", imprimirPDF);
-  document.getElementById("btn-nuevo").addEventListener("click", nuevoVale);
-});
-
-// ═══════════════════════════════════════════════════════
-// NAVEGACIÓN
-// ═══════════════════════════════════════════════════════
-function irPaso(dir) {
-  if (dir === 1 && !validarPaso()) return;
-  var sig = pasoActual + dir;
-  if (sig < 1 || sig > 4) return;
-
-  document.querySelectorAll(".step-panel").forEach(function(p) { p.classList.remove("activo"); });
-  document.querySelectorAll(".step-item").forEach(function(s) { s.classList.remove("activo"); });
-
-  for (var i = 1; i < sig; i++) {
-    document.getElementById("si-" + i).classList.add("completo");
-  }
-  if (dir === -1) document.getElementById("si-" + sig).classList.remove("completo");
-
-  pasoActual = sig;
-  document.getElementById("panel-" + pasoActual).classList.add("activo");
-  document.getElementById("si-" + pasoActual).classList.add("activo");
-  document.getElementById("btn-atras").disabled = (pasoActual === 1);
-
-  var btnSig = document.getElementById("btn-siguiente");
-  var navBar = document.getElementById("nav-bar");
-
-  if (pasoActual === 3) {
-    setTimeout(function() {
-      initCanvas("sig-entrega");
-      initCanvas("sig-recibe");
-    }, 150);
-    document.getElementById("nombre-entrega-firma").textContent = document.getElementById("entrega").value || "";
-    document.getElementById("nombre-recibe-firma").textContent  = document.getElementById("recibe").value  || "";
-  }
-
-  if (pasoActual === 4) {
-    navBar.classList.add("oculta");
-    actualizarResumen();
+// ═══════════════════════════════════════════════════════════════════
+// DRIVE
+// ═══════════════════════════════════════════════════════════════════
+function actualizarBtnDrive(){
+  var btn=document.getElementById('btn-drive'); if(!btn) return;
+  if(typeof STDrive!=='undefined'&&STDrive.isConnected()){
+    btn.textContent='☁️ Drive';
+    btn.style.borderColor='rgba(200,168,75,.8)';
+    btn.style.color='#C8A951';
+    setTimeout(sincronizarDesdeDrive, 800);
   } else {
-    navBar.classList.remove("oculta");
-    btnSig.textContent = pasoActual === 3 ? "Ver Resumen →" : "Siguiente →";
-    btnSig.className = "btn-nav btn-siguiente" + (pasoActual === 3 ? " dorado" : "");
+    btn.textContent='☁️ Conectar';
+    btn.style.borderColor='rgba(255,255,255,.2)';
+    btn.style.color='rgba(255,255,255,.4)';
+  }
+}
+function toggleDrive(){
+  if(typeof STDrive==='undefined'){mostrarToast('⚠️ Módulo Drive no cargado');return;}
+  if(STDrive.isConnected()){
+    if(confirm('Desconectar Google Drive?')){STDrive.logout();actualizarBtnDrive();mostrarToast('Drive desconectado');}
+  } else {
+    STDrive.login(window.location.href);
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// VALIDACIÓN
-// ═══════════════════════════════════════════════════════
-function validarPaso() {
-  if (pasoActual === 1) {
-    if (!document.getElementById("entrega").value.trim()) { mostrarToast("⚠️ Ingresa quien entrega"); return false; }
-    if (!document.getElementById("recibe").value.trim())  { mostrarToast("⚠️ Ingresa quien recibe");  return false; }
+// ─── SYNC: Bajada desde Drive ─────────────────────────────────────
+function sincronizarDesdeDrive(){
+  if(typeof STDrive==='undefined'||!STDrive.isConnected()) return;
+  if(!db) return;
+  STDrive.descargar('vale','VE-',function(registros,err){
+    if(err||!registros||!registros.length) return;
+    var importados=0;
+    var pendientes=registros.length;
+    function finalizarSiListo(){
+      pendientes--;
+      if(pendientes>0) return;
+      if(importados>0){
+        cargarTodosVales(function(){
+          renderHistorial();
+          mostrarToast('📥 Drive: '+importados+' registro(s) importado(s)');
+        });
+      }
+    }
+    registros.forEach(function(item){
+      var data=item.data;
+      if(!data||typeof data!=='object'||!data.id){finalizarSiListo();return;}
+      var tx=db.transaction([STORE_VALES],'readwrite');
+      var store=tx.objectStore(STORE_VALES);
+      var req=store.get(data.id);
+      req.onsuccess=function(e){
+        var existente=e.target.result;
+        if(!existente){store.put(data);importados++;}
+        else if((data.ts||0)>(existente.ts||0)){store.put(data);importados++;}
+      };
+      req.onerror=function(){};
+      tx.oncomplete=finalizarSiListo;
+      tx.onerror=function(){finalizarSiListo();};
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FIX-001 — IndexedDB con onerror
+// ═══════════════════════════════════════════════════════════════════
+var idbReq=indexedDB.open(IDB_NAME,IDB_VERSION);
+idbReq.onerror=function(e){ alert('Error al abrir la base de datos: '+e.target.errorCode); };
+idbReq.onupgradeneeded=function(e){
+  var d=e.target.result;
+  if(!d.objectStoreNames.contains(STORE_VALES)) d.createObjectStore(STORE_VALES,{keyPath:'id'});
+  if(!d.objectStoreNames.contains(STORE_CFG))   d.createObjectStore(STORE_CFG,{keyPath:'key'});
+};
+idbReq.onsuccess=function(e){
+  db=e.target.result;
+  cargarTodosVales(function(){
+    init();
+    setTimeout(sincronizarDesdeDrive, 1200);
+  });
+};
+
+function cargarTodosVales(cb){
+  // FIX-002 — guard !db
+  if(!db){cb();return;}
+  var tx=db.transaction(STORE_VALES,'readonly');
+  tx.onerror=function(e){alert('Error IDB: '+e.target.error);};
+  tx.objectStore(STORE_VALES).getAll().onsuccess=function(e){
+    vales=e.target.result||[];
+    vales.sort(function(a,b){return(b.ts||0)-(a.ts||0);});
+    cb();
+  };
+}
+
+function getFolio(cb){
+  if(!db){cb(0);return;}
+  var tx=db.transaction(STORE_CFG,'readonly');
+  tx.onerror=function(){cb(0);};
+  tx.objectStore(STORE_CFG).get('folio').onsuccess=function(e){
+    var r=e.target.result; cb(r?(parseInt(r.value)||0):0);
+  };
+}
+function setFolio(n,cb){
+  if(!db){if(cb)cb();return;}
+  var tx=db.transaction(STORE_CFG,'readwrite');
+  tx.onerror=function(e){alert('Error IDB config: '+e.target.error);};
+  tx.objectStore(STORE_CFG).put({key:'folio',value:String(n)});
+  tx.oncomplete=function(){if(cb)cb();};
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// UTILIDADES
+// ═══════════════════════════════════════════════════════════════════
+function escHTML(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function folioStr(n){return String(n).padStart(4,'0');}
+function fmtFecha(f){if(!f)return '';var p=f.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:f;}
+function actualizarFolioHeader(){
+  var anio=document.getElementById('folio-anio').value||new Date().getFullYear();
+  var num=document.getElementById('folio-num').value||'????';
+  document.getElementById('folio-show').textContent='VE-'+anio+'-'+num;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+function init(){
+  getFolio(function(actual){
+    document.getElementById('folio-num').value=folioStr(actual+1);
+    document.getElementById('folio-anio').value=new Date().getFullYear();
+    document.getElementById('fecha').value=new Date().toISOString().slice(0,10);
+    actualizarFolioHeader();
+    agregarItem();
+    actualizarBtnDrive();
+  });
+}
+
+function resetContador(){
+  if(!confirm('¿Resetear el contador de folios a 0001?')) return;
+  setFolio(0,function(){document.getElementById('folio-num').value='0001';actualizarFolioHeader();mostrarToast('✓ Contador reseteado a 0001');});
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ITEMS
+// ═══════════════════════════════════════════════════════════════════
+function agregarItem(){ items.push({cant:1,unidad:'UN',descripcion:''}); renderItems(); }
+function eliminarItem(i){ if(items.length>1){items.splice(i,1);renderItems();} }
+function updItem(i,k,v){ items[i][k]=v; renderItems(); }
+
+function renderItems(){
+  document.getElementById('items-container').innerHTML=items.map(function(it,i){
+    return '<div class="item-card"><div class="item-num">Ítem '+(i+1)+'</div>'+
+      (items.length>1?'<button class="btn-eliminar-item" onclick="eliminarItem('+i+')">×</button>':'')+
+      '<div class="item-fila3">'+
+        '<div><label class="campo-label" style="font-size:10px">Cant.</label><input class="campo-input" style="padding:8px" type="number" min="1" value="'+escHTML(String(it.cant))+'" onchange="updItem('+i+',\'cant\',parseFloat(this.value)||1)"></div>'+
+        '<div><label class="campo-label" style="font-size:10px">Unidad</label><select class="campo-input" style="padding:8px" onchange="updItem('+i+',\'unidad\',this.value)">'+
+          ['UN','KG','MT','LT','CJ','PAQ','GL'].map(function(u){return'<option'+(it.unidad===u?' selected':'')+'>'+u+'</option>';}).join('')+
+        '</select></div>'+
+        '<div><label class="campo-label" style="font-size:10px">Descripción</label><input class="campo-input" style="padding:8px" type="text" placeholder="Descripción material" value="'+escHTML(it.descripcion)+'" onchange="updItem('+i+',\'descripcion\',this.value)"></div>'+
+      '</div></div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// NAVEGACIÓN — FIX-009
+// ═══════════════════════════════════════════════════════════════════
+function validarPaso(n){
+  if(n===1){
+    if(!document.getElementById('folio-anio').value.trim()||document.getElementById('folio-anio').value.trim().length!==4){mostrarToast('⚠️ Ingresa el año (4 dígitos)');return false;}
+    if(!document.getElementById('fecha').value.trim()){mostrarToast('⚠️ Selecciona una fecha');return false;}
+    if(!document.getElementById('entrega').value.trim()){mostrarToast('⚠️ Ingresa quien entrega');return false;}
+    if(!document.getElementById('recibe').value.trim()){mostrarToast('⚠️ Ingresa quien recibe');return false;}
   }
-  if (pasoActual === 2) {
-    var tieneItems = items.some(function(it) { return it.desc; });
-    if (!tieneItems) { mostrarToast("⚠️ Agrega al menos un material"); return false; }
+  if(n===2){
+    var tieneDesc=items.some(function(it){return it.descripcion.trim()!=='';});
+    if(!tieneDesc){mostrarToast('⚠️ Agrega al menos un ítem con descripción');return false;}
   }
   return true;
 }
 
-// ═══════════════════════════════════════════════════════
-// ÍTEMS
-// ═══════════════════════════════════════════════════════
-function agregarItem() {
-  items.push({ id: Date.now(), cant: 1, desc: "", un: "UN" });
-  renderItems();
-}
+function irPaso(n){
+  if(n<1||n>4) return;
+  if(n>pasoActual&&!validarPaso(pasoActual)) return;
 
-function eliminarItem(id) {
-  if (items.length <= 1) { mostrarToast("⚠️ Debe haber al menos un ítem"); return; }
-  items = items.filter(function(it) { return it.id !== id; });
-  renderItems();
-}
+  // Capturar firmas al salir del paso 3
+  if(pasoActual===3&&n!==3){
+    sigEntregaURL=capturarFirma('sig-entrega');
+    sigRecibeURL=capturarFirma('sig-recibe');
+  }
 
-function renderItems() {
-  var lista = document.getElementById("lista-items");
-  lista.innerHTML = "";
-  items.forEach(function(it, idx) {
-    var wrap = document.createElement("div");
-    wrap.className = "material-item";
+  // Al entrar al paso 4: actualizar resumen
+  if(n===4) actualizarResumen();
 
-    var num = document.createElement("div");
-    num.className = "item-num";
-    num.textContent = "Ítem " + (idx + 1);
-    wrap.appendChild(num);
-
-    var btnEl = document.createElement("button");
-    btnEl.className = "btn-eliminar-item";
-    btnEl.type = "button";
-    btnEl.textContent = "×";
-    (function(mid) { btnEl.addEventListener("click", function() { eliminarItem(mid); }); })(it.id);
-    wrap.appendChild(btnEl);
-
-    var gDesc = crearCampo("Descripción", "text", it.desc, "Ej: Silla oficina");
-    (function(mid) { gDesc.querySelector("input").addEventListener("input", function() { getItem(mid).desc = this.value; }); })(it.id);
-    wrap.appendChild(gDesc);
-
-    var fila = document.createElement("div");
-    fila.className = "item-fila";
-
-    var gCant = crearCampo("Cantidad", "number", it.cant, "1");
-    gCant.querySelector("input").min = "1";
-    (function(mid) { gCant.querySelector("input").addEventListener("change", function() { getItem(mid).cant = parseInt(this.value) || 1; }); })(it.id);
-
-    var gUn = crearCampo("Unidad", "text", it.un, "UN");
-    (function(mid) { gUn.querySelector("input").addEventListener("change", function() { getItem(mid).un = this.value || "UN"; }); })(it.id);
-
-    fila.appendChild(gCant);
-    fila.appendChild(gUn);
-    wrap.appendChild(fila);
-    lista.appendChild(wrap);
+  document.querySelectorAll('.step-panel').forEach(function(p){p.classList.remove('activo');});
+  ['si-1','si-2','si-3','si-4'].forEach(function(id,idx){
+    var el=document.getElementById(id);
+    el.classList.remove('activo','completo');
+    if(idx+1<n) el.classList.add('completo');
+    if(idx+1===n) el.classList.add('activo');
   });
-}
 
-function crearCampo(label, type, value, placeholder) {
-  var wrap = document.createElement("div");
-  wrap.className = "campo-group";
-  var lbl = document.createElement("label");
-  lbl.className = "campo-label";
-  lbl.textContent = label;
-  var inp = document.createElement("input");
-  inp.type = type;
-  inp.className = "campo-input";
-  inp.value = value;
-  inp.placeholder = placeholder;
-  wrap.appendChild(lbl);
-  wrap.appendChild(inp);
-  return wrap;
-}
+  document.getElementById('panel-'+n).classList.add('activo');
+  pasoActual=n;
+  document.getElementById('btn-atras').disabled=(n===1);
 
-function getItem(id) { return items.find(function(it) { return it.id === id; }); }
+  var btnSig=document.getElementById('btn-siguiente');
+  var navBar=document.getElementById('nav-bar');
 
-// ═══════════════════════════════════════════════════════
-// CANVAS FIRMAS
-// ═══════════════════════════════════════════════════════
-function initCanvas(canvasId) {
-  var sc = document.getElementById(canvasId);
-  if (!sc) return;
-  sc.width  = sc.offsetWidth || 300;
-  sc.height = 130;
-  var ctx = sc.getContext("2d");
-  ctx.strokeStyle = "#1a3a6e";
-  ctx.lineWidth   = 2.5;
-  ctx.lineCap     = "round";
-  ctx.lineJoin    = "round";
-  if (sc._siginit) return;
-  sc._siginit = true;
-  var drawing = false;
-  function getPos(e) {
-    var r = sc.getBoundingClientRect();
-    var t = e.touches ? e.touches[0] : e;
-    return { x: t.clientX - r.left, y: t.clientY - r.top };
+  if(n===4){
+    navBar.classList.add('oculta');
+  } else {
+    navBar.classList.remove('oculta');
+    if(n===3){
+      btnSig.textContent='Ver Resumen →';
+      btnSig.className='btn-nav btn-siguiente dorado';
+      // FIX-005 — setTimeout 150ms antes de initCanvas
+      setTimeout(function(){
+        ajustarCanvas('sig-entrega','wrap-entrega');
+        ajustarCanvas('sig-recibe','wrap-recibe');
+        initCanvas('sig-entrega');
+        initCanvas('sig-recibe');
+        if(sigEntregaURL) restaurarFirma('sig-entrega',sigEntregaURL);
+        if(sigRecibeURL)  restaurarFirma('sig-recibe',sigRecibeURL);
+      },150);
+      document.getElementById('nombre-entrega-firma').textContent=document.getElementById('entrega').value||'';
+      document.getElementById('nombre-recibe-firma').textContent=document.getElementById('recibe').value||'';
+    } else {
+      btnSig.textContent='Siguiente →';
+      btnSig.className='btn-nav btn-siguiente';
+    }
   }
-  sc.addEventListener("mousedown",  function(e) { drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); });
-  sc.addEventListener("mousemove",  function(e) { if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
-  sc.addEventListener("mouseup",    function() { drawing = false; });
-  sc.addEventListener("mouseleave", function() { drawing = false; });
-  sc.addEventListener("touchstart", function(e) { e.preventDefault(); drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); }, { passive: false });
-  sc.addEventListener("touchmove",  function(e) { e.preventDefault(); if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: false });
-  sc.addEventListener("touchend",   function() { drawing = false; });
+  actualizarFolioHeader();
 }
 
-window.addEventListener("resize",  function() { setTimeout(function() { if (pasoActual === 3) { initCanvas("sig-entrega"); initCanvas("sig-recibe"); } }, 200); });
-screen.orientation && screen.orientation.addEventListener("change", function() { setTimeout(function() { if (pasoActual === 3) { initCanvas("sig-entrega"); initCanvas("sig-recibe"); } }, 350); });
-
-function limpiarFirma(canvasId) {
-  var sc = document.getElementById(canvasId);
-  if (sc) sc.getContext("2d").clearRect(0, 0, sc.width, sc.height);
+// ═══════════════════════════════════════════════════════════════════
+// CANVAS — FIX-004, FIX-005, FIX-006, FIX-010
+// ═══════════════════════════════════════════════════════════════════
+function ajustarCanvas(canvasId, wrapId){
+  var sc=document.getElementById(canvasId);
+  var wrap=document.getElementById(wrapId);
+  if(!sc||!wrap) return;
+  var w=wrap.getBoundingClientRect().width;
+  if(w===0) return;
+  sc.width=w; sc.height=130;
+  var ctx=sc.getContext('2d');
+  ctx.strokeStyle='#1a3a6e'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
 }
 
-function capturarFirma(canvasId) {
-  var sc = document.getElementById(canvasId);
-  if (!sc) return "";
-  var temp = document.createElement("canvas");
-  temp.width = sc.width; temp.height = sc.height;
-  var ctx = temp.getContext("2d");
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, temp.width, temp.height);
-  ctx.drawImage(sc, 0, 0);
-  return temp.toDataURL("image/jpeg", 0.6);
+function initCanvas(canvasId){
+  var sc=document.getElementById(canvasId); if(!sc) return;
+  if(sc._siginit) return; sc._siginit=true;
+  var ctx=sc.getContext('2d');
+  var drawing=false;
+  function getPos(e){
+    var r=sc.getBoundingClientRect(),t=e.touches?e.touches[0]:e;
+    return{x:(t.clientX-r.left)*(sc.width/r.width),y:(t.clientY-r.top)*(sc.height/r.height)};
+  }
+  sc.addEventListener('mousedown',function(e){drawing=true;ctx.beginPath();var p=getPos(e);ctx.moveTo(p.x,p.y);});
+  sc.addEventListener('mousemove',function(e){if(!drawing)return;var p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+  sc.addEventListener('mouseup',function(){drawing=false;});
+  sc.addEventListener('mouseleave',function(){drawing=false;});
+  sc.addEventListener('touchstart',function(e){e.preventDefault();drawing=true;ctx.beginPath();var p=getPos(e);ctx.moveTo(p.x,p.y);},{passive:false});
+  sc.addEventListener('touchmove',function(e){e.preventDefault();if(!drawing)return;var p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();},{passive:false});
+  sc.addEventListener('touchend',function(){drawing=false;});
 }
 
-// ═══════════════════════════════════════════════════════
+// FIX-010 — Resize listener rotación S25
+window.addEventListener('resize',function(){setTimeout(function(){
+  if(pasoActual===3){
+    ajustarCanvas('sig-entrega','wrap-entrega');
+    ajustarCanvas('sig-recibe','wrap-recibe');
+  }
+},200);});
+screen.orientation&&screen.orientation.addEventListener('change',function(){setTimeout(function(){
+  if(pasoActual===3){
+    ajustarCanvas('sig-entrega','wrap-entrega');
+    ajustarCanvas('sig-recibe','wrap-recibe');
+  }
+},350);});
+
+// FIX-006 — drawImage con dimensiones explícitas
+function restaurarFirma(canvasId,dataURL){
+  var sc=document.getElementById(canvasId); if(!sc||!dataURL) return;
+  var img=new Image();
+  img.onload=function(){sc.getContext('2d').drawImage(img,0,0,sc.width,sc.height);};
+  img.src=dataURL;
+}
+
+function limpiarFirma(canvasId,tipo){
+  var sc=document.getElementById(canvasId);
+  if(sc) sc.getContext('2d').clearRect(0,0,sc.width,sc.height);
+  if(tipo==='entrega') sigEntregaURL='';
+  if(tipo==='recibe')  sigRecibeURL='';
+}
+
+function capturarFirma(canvasId){
+  var sc=document.getElementById(canvasId); if(!sc) return '';
+  var tmp=document.createElement('canvas'); tmp.width=sc.width; tmp.height=sc.height;
+  var ctx=tmp.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,tmp.width,tmp.height); ctx.drawImage(sc,0,0);
+  return tmp.toDataURL('image/jpeg',0.7);
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // RESUMEN
-// ═══════════════════════════════════════════════════════
-function actualizarResumen() {
-  var itemsConDesc = items.filter(function(it) { return it.desc; });
-  document.getElementById("r-folio").textContent   = folio;
-  document.getElementById("r-entrega").textContent = document.getElementById("entrega").value || "—";
-  document.getElementById("r-recibe").textContent  = document.getElementById("recibe").value  || "—";
-  document.getElementById("r-lugar").textContent   = document.getElementById("lugar").value   || "—";
-  document.getElementById("r-items").textContent   = itemsConDesc.length + " ítem(s)";
+// ═══════════════════════════════════════════════════════════════════
+function actualizarResumen(){
+  var anio=document.getElementById('folio-anio').value;
+  var num=document.getElementById('folio-num').value;
+  document.getElementById('resumen-datos').innerHTML=[
+    ['Folio','VE-'+anio+'-'+num],
+    ['Fecha',fmtFecha(document.getElementById('fecha').value)],
+    ['Entrega',document.getElementById('entrega').value||'—'],
+    ['Unidad entrega',document.getElementById('unidad-entrega').value||'—'],
+    ['Recibe',document.getElementById('recibe').value||'—'],
+    ['Unidad recibe',document.getElementById('unidad-recibe').value||'—'],
+    ['Lugar',document.getElementById('lugar').value||'—'],
+    ['Observaciones',document.getElementById('obs').value||'—']
+  ].map(function(r){return'<div class="resumen-fila"><span class="r-key">'+r[0]+'</span><span class="r-val">'+r[1]+'</span></div>';}).join('');
+
+  document.getElementById('resumen-items').innerHTML=
+    '<div style="font-size:11px;font-weight:700;color:var(--azul2);margin:8px 0 4px">Materiales</div>'+
+    items.filter(function(it){return it.descripcion;}).map(function(it,i){
+      return'<div class="resumen-item-row"><span>'+(i+1)+'. '+it.cant+' '+it.unidad+' — '+it.descripcion+'</span></div>';
+    }).join('');
 }
 
-// ═══════════════════════════════════════════════════════
-// IMPRIMIR — FIX-005: 800ms para S25
-// ═══════════════════════════════════════════════════════
-function imprimirPDF() {
-  sigEntregaURL = capturarFirma("sig-entrega");
-  sigRecibeURL  = capturarFirma("sig-recibe");
+// ═══════════════════════════════════════════════════════════════════
+// HISTORIAL
+// ═══════════════════════════════════════════════════════════════════
+function renderHistorial(){
+  var lista=document.getElementById('hist-lista');
+  if(vales.length===0){lista.innerHTML='<div style="text-align:center;color:#aaa;padding:20px;font-size:13px">No hay vales guardados aún.</div>';return;}
+  lista.innerHTML=vales.map(function(h){
+    return'<div class="hist-item-app" onclick="cargarHistorial(\''+h.id+'\')">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center"><span class="hist-folio">'+h.id+'</span><span style="color:#888;font-size:11px">'+fmtFecha(h.fecha)+'</span></div>'+
+      '<div class="hist-det">'+h.entrega+' → '+h.recibe+' · '+h.items.length+' ítem(s)</div>'+
+      (h.obs?'<div class="hist-obs">'+h.obs+'</div>':'')+
+      '<button class="btn-eliminar-hist" onclick="event.stopPropagation();eliminarHistorial(\''+h.id+'\')">Eliminar</button>'+
+    '</div>';
+  }).join('');
+}
 
-  var entrega      = document.getElementById("entrega").value.trim();
-  var recibe       = document.getElementById("recibe").value.trim();
-  var lugar        = document.getElementById("lugar").value.trim();
-  var obs          = document.getElementById("obs").value.trim();
-  var unidadEntrega = document.getElementById("unidad-entrega").value.trim();
-  var unidadRecibe  = document.getElementById("unidad-recibe").value.trim();
-  var fecha = new Date().toLocaleDateString("es-CL");
+function guardarHistorial(){
+  // FIX-002 — guard !db
+  if(!db) return alert('Base de datos no lista.');
+  var anio=document.getElementById('folio-anio').value||new Date().getFullYear().toString();
+  var num=document.getElementById('folio-num').value||'0001';
+  var folioId='VE-'+anio+'-'+num;
 
-  document.getElementById("p-folio").textContent = folio + " — " + fecha;
+  // Capturar firmas antes de guardar
+  sigEntregaURL=capturarFirma('sig-entrega')||sigEntregaURL;
+  sigRecibeURL=capturarFirma('sig-recibe')||sigRecibeURL;
 
-  var pInfo = document.getElementById("p-info");
-  pInfo.innerHTML = "";
-  function addInfo(label, value, fullWidth) {
-    if (!value) return;
-    var div = document.createElement("div");
-    div.style.fontSize = "10px";
-    if (fullWidth) div.style.gridColumn = "1/-1";
-    var lbl = document.createElement("div");
-    lbl.style.color = "#666"; lbl.style.fontSize = "9px"; lbl.textContent = label;
-    var val = document.createElement("div");
-    val.textContent = value;
-    div.appendChild(lbl); div.appendChild(val);
-    pInfo.appendChild(div);
+  var rec={
+    id:folioId, folioAnio:anio, folioNum:num,
+    fecha:document.getElementById('fecha').value||new Date().toISOString().slice(0,10),
+    entrega:document.getElementById('entrega').value||'',
+    unidadEntrega:document.getElementById('unidad-entrega').value||'',
+    recibe:document.getElementById('recibe').value||'',
+    unidadRecibe:document.getElementById('unidad-recibe').value||'',
+    lugar:document.getElementById('lugar').value||'',
+    obs:document.getElementById('obs').value||'',
+    sigEntrega:sigEntregaURL,
+    sigRecibe:sigRecibeURL,
+    items:items.map(function(it){return Object.assign({},it);}),
+    ts:Date.now()
+  };
+
+  var tx=db.transaction(STORE_VALES,'readwrite');
+  tx.onerror=function(e){alert('Error al guardar: '+e.target.error);};
+  tx.objectStore(STORE_VALES).put(rec);
+  tx.oncomplete=function(){
+    var idx=vales.findIndex(function(s){return s.id===folioId;});
+    if(idx>=0){vales[idx]=rec;}else{vales.unshift(rec);}
+    editIndex=null;
+    mostrarToast('✓ Guardado: '+folioId);
+    // Subir a Drive
+    if(typeof STDrive!=='undefined'&&STDrive.isConnected()){
+      STDrive.guardar('vale',folioId,rec).catch(function(){});
+    }
+    setFolio(parseInt(num)||1,function(){
+      setTimeout(function(){
+        sigEntregaURL=''; sigRecibeURL='';
+        getFolio(function(actual){
+          // FIX-008 — Limpiar TODOS los campos
+          document.getElementById('folio-num').value=folioStr(actual+1);
+          document.getElementById('folio-anio').value=new Date().getFullYear();
+          document.getElementById('fecha').value=new Date().toISOString().slice(0,10);
+          document.getElementById('entrega').value='';
+          document.getElementById('unidad-entrega').value='';
+          document.getElementById('recibe').value='';
+          document.getElementById('unidad-recibe').value='';
+          document.getElementById('lugar').value='';
+          document.getElementById('obs').value='';
+          items=[]; agregarItem();
+          actualizarFolioHeader(); irPaso(1);
+        });
+      },1000);
+    });
+  };
+}
+
+function cargarHistorial(id){
+  // FIX-003 — null-check
+  var h=vales.find(function(s){return s.id===id;});
+  if(!h) return alert('Registro no encontrado.');
+  editIndex=id;
+  document.getElementById('folio-anio').value=h.folioAnio;
+  document.getElementById('folio-num').value=h.folioNum;
+  document.getElementById('fecha').value=h.fecha;
+  document.getElementById('entrega').value=h.entrega||'';
+  document.getElementById('unidad-entrega').value=h.unidadEntrega||'';
+  document.getElementById('recibe').value=h.recibe||'';
+  document.getElementById('unidad-recibe').value=h.unidadRecibe||'';
+  document.getElementById('lugar').value=h.lugar||'';
+  document.getElementById('obs').value=h.obs||'';
+  sigEntregaURL=h.sigEntrega||'';
+  sigRecibeURL=h.sigRecibe||'';
+  items=h.items.map(function(it){return Object.assign({},it);});
+  renderItems(); volverDeHistorial(); actualizarFolioHeader(); irPaso(1);
+  mostrarToast('Vale '+h.id+' cargado');
+}
+
+function eliminarHistorial(id){
+  if(!db) return alert('Base de datos no lista.');
+  if(!confirm('¿Eliminar el vale '+id+'?')) return;
+  var tx=db.transaction(STORE_VALES,'readwrite');
+  tx.onerror=function(e){alert('Error al eliminar: '+e.target.error);};
+  tx.objectStore(STORE_VALES).delete(id);
+  tx.oncomplete=function(){
+    vales=vales.filter(function(s){return s.id!==id;});
+    renderHistorial();
+    mostrarToast('✓ Vale eliminado');
+  };
+}
+
+function verHistorial(){
+  document.querySelectorAll('.step-panel').forEach(function(p){p.classList.remove('activo');});
+  document.getElementById('panel-hist').classList.add('activo');
+  renderHistorial();
+  document.getElementById('nav-bar').classList.add('oculta');
+  var b=document.getElementById('btn-volver-hist');
+  if(!b){
+    var nb=document.createElement('div');
+    nb.style.cssText='padding:10px 16px;background:linear-gradient(90deg,#071429,#0d2550);border-top:1px solid rgba(200,168,75,0.3)';
+    nb.innerHTML='<button id="btn-volver-hist" class="btn-nav btn-atras" style="width:100%" onclick="volverDeHistorial()">← Volver al formulario</button>';
+    document.querySelector('.app').appendChild(nb);
   }
-  addInfo("Quien entrega", entrega, false);
-  addInfo("Unidad origen (entrega)", unidadEntrega, false);
-  addInfo("Quien recibe", recibe, false);
-  addInfo("Unidad origen (recibe)", unidadRecibe, false);
-  addInfo("Lugar", lugar, true);
-  addInfo("Observaciones", obs, true);
+}
 
-  var tbody = document.getElementById("p-items");
-  tbody.innerHTML = "";
-  items.filter(function(it) { return it.desc; }).forEach(function(it) {
-    var tr = document.createElement("tr");
-    [it.cant, it.desc, it.un].forEach(function(txt, ci) {
-      var td = document.createElement("td");
-      td.style.cssText = "border:1px solid #000;padding:4px;font-size:10px" + (ci !== 1 ? ";text-align:center" : "");
-      td.textContent = txt;
-      tr.appendChild(td);
+function volverDeHistorial(){
+  var extra=document.getElementById('btn-volver-hist');
+  if(extra&&extra.parentNode) extra.parentNode.remove();
+  document.getElementById('nav-bar').classList.remove('oculta');
+  irPaso(pasoActual);
+}
+
+function getNextFolioNum(){
+  var max=0;
+  vales.forEach(function(s){var n=parseInt(s.folioNum)||0;if(n>max)max=n;});
+  return max;
+}
+
+function nuevoFormulario(){
+  editIndex=null; sigEntregaURL=''; sigRecibeURL='';
+  var sc1=document.getElementById('sig-entrega'); if(sc1) sc1.getContext('2d').clearRect(0,0,sc1.width,sc1.height);
+  var sc2=document.getElementById('sig-recibe');  if(sc2) sc2.getContext('2d').clearRect(0,0,sc2.width,sc2.height);
+  var next=getNextFolioNum()+1;
+  document.getElementById('folio-num').value=folioStr(next);
+  document.getElementById('folio-anio').value=new Date().getFullYear();
+  document.getElementById('fecha').value=new Date().toISOString().slice(0,10);
+  document.getElementById('entrega').value='';
+  document.getElementById('unidad-entrega').value='';
+  document.getElementById('recibe').value='';
+  document.getElementById('unidad-recibe').value='';
+  document.getElementById('lugar').value='';
+  document.getElementById('obs').value='';
+  items=[]; agregarItem(); actualizarFolioHeader(); irPaso(1);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PDF — setTimeout 800ms para S25
+// ═══════════════════════════════════════════════════════════════════
+function imprimirPDF(){
+  var anio=document.getElementById('folio-anio').value;
+  var num=document.getElementById('folio-num').value;
+  sigEntregaURL=capturarFirma('sig-entrega')||sigEntregaURL;
+  sigRecibeURL=capturarFirma('sig-recibe')||sigRecibeURL;
+
+  document.getElementById('p-folio').textContent='VE-'+anio+'-'+num;
+  document.getElementById('p-fecha').textContent=fmtFecha(document.getElementById('fecha').value);
+  document.getElementById('p-entrega').textContent=document.getElementById('entrega').value||'—';
+  document.getElementById('p-unidad-entrega').textContent=document.getElementById('unidad-entrega').value||'';
+  document.getElementById('p-recibe').textContent=document.getElementById('recibe').value||'—';
+  document.getElementById('p-unidad-recibe').textContent=document.getElementById('unidad-recibe').value||'';
+  document.getElementById('p-lugar').textContent=document.getElementById('lugar').value||'—';
+  document.getElementById('p-obs').textContent=document.getElementById('obs').value||'';
+  document.getElementById('p-firma-entrega').textContent=document.getElementById('entrega').value||'';
+  document.getElementById('p-firma-recibe').textContent=document.getElementById('recibe').value||'';
+
+  var sigE=document.getElementById('p-sig-entrega');
+  var sigR=document.getElementById('p-sig-recibe');
+  if(sigEntregaURL){sigE.src=sigEntregaURL;sigE.style.display='block';}else{sigE.style.display='none';}
+  if(sigRecibeURL){sigR.src=sigRecibeURL;sigR.style.display='block';}else{sigR.style.display='none';}
+
+  var tbody=document.getElementById('p-items'); tbody.innerHTML='';
+  items.filter(function(it){return it.descripcion;}).forEach(function(it){
+    var tr=document.createElement('tr');
+    [it.cant,it.descripcion,it.unidad].forEach(function(txt,ci){
+      var td=document.createElement('td');
+      td.style.cssText='border:1px solid #ccc;padding:4px 8px;font-size:12px'+(ci!==1?';text-align:center':'');
+      td.textContent=txt; tr.appendChild(td);
     });
     tbody.appendChild(tr);
   });
 
-  document.getElementById("p-entrega").textContent = entrega;
-  document.getElementById("p-recibe").textContent  = recibe;
-  if (sigEntregaURL) document.getElementById("p-sig-entrega").src = sigEntregaURL;
-  if (sigRecibeURL)  document.getElementById("p-sig-recibe").src  = sigRecibeURL;
-
-  setTimeout(function() { window.print(); }, 800);
+  setTimeout(function(){window.print();},800);
 }
 
-// ═══════════════════════════════════════════════════════
-// NUEVO VALE
-// ═══════════════════════════════════════════════════════
-function nuevoVale() {
-  ["entrega","recibe","lugar","obs","unidad-entrega","unidad-recibe"].forEach(function(id) {
-    document.getElementById(id).value = "";
-  });
-  items = [];
-  agregarItem();
-  sigEntregaURL = "";
-  sigRecibeURL  = "";
-  folio = "VE-" + new Date().getFullYear() + "-" + (Math.floor(Math.random()*9000)+1000);
-  document.getElementById("folio-show").textContent = folio;
-  document.querySelectorAll(".step-panel").forEach(function(p) { p.classList.remove("activo"); });
-  document.querySelectorAll(".step-item").forEach(function(s) { s.classList.remove("activo","completo"); });
-  pasoActual = 1;
-  document.getElementById("panel-1").classList.add("activo");
-  document.getElementById("si-1").classList.add("activo");
-  document.getElementById("btn-atras").disabled = true;
-  document.getElementById("btn-siguiente").textContent = "Siguiente →";
-  document.getElementById("btn-siguiente").className = "btn-nav btn-siguiente";
-  document.getElementById("nav-bar").classList.remove("oculta");
-}
-
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // TOAST
-// ═══════════════════════════════════════════════════════
-function mostrarToast(msg) {
-  var t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(function() { t.classList.remove("show"); }, 2500);
+// ═══════════════════════════════════════════════════════════════════
+function mostrarToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2500);
 }
 
-// ═══════════════════════════════════════════════════════
-// MIG-001 — MANIFEST INLINE
-// ═══════════════════════════════════════════════════════
-(function() {
-  var m = {
-    name: 'Vale de Entrega — AGA',
-    short_name: 'Vale AGA',
-    description: 'Vale de entrega de materiales — Academia de Guerra Aérea FACH',
-    start_url: '/scorpion-tail/vale.html',
-    display: 'standalone',
-    background_color: '#0d1f3c',
-    theme_color: '#0d1f3c',
-    orientation: 'portrait-primary',
-    icons: [{ src: LOGO, sizes: '128x128', type: 'image/png' }]
-  };
-  var b = new Blob([JSON.stringify(m)], { type: 'application/json' });
-  document.getElementById('vale-manifest').href = URL.createObjectURL(b);
-  document.getElementById('apple-icon-vale').href = LOGO;
+// ═══════════════════════════════════════════════════════════════════
+// PWA — Manifest + SW inline
+// ═══════════════════════════════════════════════════════════════════
+(function(){
+  var m={name:'Vale de Entrega — AGA',short_name:'Vale AGA',start_url:'/scorpion-tail/vale.html',display:'standalone',background_color:'#0d1f3c',theme_color:'#0d1f3c',orientation:'portrait-primary',icons:[]};
+  var b=new Blob([JSON.stringify(m)],{type:'application/json'});
+  document.getElementById('vale-manifest').href=URL.createObjectURL(b);
 })();
 
-// ═══════════════════════════════════════════════════════
-// MIG-002 — SERVICE WORKER INLINE
-// ═══════════════════════════════════════════════════════
-if ('serviceWorker' in navigator) {
-  var swCode = [
-    "const CACHE='aga-vale-v1';",
+if('serviceWorker'in navigator){
+  var swCode=[
+    "const CACHE='aga-vale-v2';",
     "self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add('.')).then(()=>self.skipWaiting()));});",
     "self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});",
     "self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{var rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));return res;}).catch(()=>caches.match(e.request))));});"
   ].join('\n');
-  var swBlob = new Blob([swCode], { type: 'application/javascript' });
-  navigator.serviceWorker.register(URL.createObjectURL(swBlob), { scope: './' })
-    .catch(function(e) { console.warn('[SW Vale]', e); });
+  var swBlob=new Blob([swCode],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob),{scope:'./'}).catch(function(e){console.warn('[SW Vale]',e);});
 }
 </script>
 </body>
