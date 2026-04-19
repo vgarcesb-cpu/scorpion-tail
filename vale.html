@@ -713,17 +713,18 @@ function verHistorial(){
   document.getElementById('panel-hist').classList.add('activo');
   renderHistorial();
   document.getElementById('nav-bar').classList.add('oculta');
-  var b=document.getElementById('btn-volver-hist');
-  if(!b){
+  var extraNav=document.getElementById('extra-nav-hist');
+  if(!extraNav){
     var nb=document.createElement('div');
-    nb.style.cssText='padding:10px 16px;background:linear-gradient(90deg,#071429,#0d2550);border-top:1px solid rgba(200,168,75,0.3)';
-    nb.innerHTML='<button id="btn-volver-hist" class="btn-nav btn-atras" style="width:100%" onclick="volverDeHistorial()">← Volver al formulario</button>';
+    nb.id='extra-nav-hist';
+    nb.style.cssText='padding:10px 16px;background:linear-gradient(90deg,#071429,#0d2550);border-top:1px solid rgba(200,168,75,0.3);padding-bottom:max(22px,calc(10px + env(safe-area-inset-bottom,0px)))';
+    nb.innerHTML='<button class="btn-nav btn-atras" style="width:100%" onclick="volverDeHistorial()">← Volver al formulario</button>';
     document.querySelector('.app').appendChild(nb);
   }
 }
 function volverDeHistorial(){
-  var extra=document.getElementById('btn-volver-hist');
-  if(extra&&extra.parentNode)extra.parentNode.remove();
+  var extra=document.getElementById('extra-nav-hist');
+  if(extra)extra.remove();
   document.getElementById('nav-bar').classList.remove('oculta');
   irPaso(pasoActual);
 }
@@ -737,10 +738,20 @@ function iniciarDevolucion(){
   document.getElementById('nav-bar').classList.add('oculta');
   document.getElementById('dev-id').value='';
   document.getElementById('dev-resultado').innerHTML='';
-  var nb=document.createElement('div');
-  nb.style.cssText='padding:10px 16px;background:linear-gradient(90deg,#071429,#0d2550);border-top:1px solid rgba(200,168,75,0.3)';
-  nb.innerHTML='<button class="btn-nav btn-atras" style="width:100%" onclick="volverDeHistorial()">← Volver</button>';
-  document.querySelector('.app').appendChild(nb);
+  var extraNav=document.getElementById('extra-nav-dev');
+  if(!extraNav){
+    var nb=document.createElement('div');
+    nb.id='extra-nav-dev';
+    nb.style.cssText='padding:10px 16px;background:linear-gradient(90deg,#071429,#0d2550);border-top:1px solid rgba(200,168,75,0.3);padding-bottom:max(22px,calc(10px + env(safe-area-inset-bottom,0px)))';
+    nb.innerHTML='<button class="btn-nav btn-atras" style="width:100%" onclick="volverDeDevolucion()">← Volver</button>';
+    document.querySelector('.app').appendChild(nb);
+  }
+}
+function volverDeDevolucion(){
+  var extra=document.getElementById('extra-nav-dev');
+  if(extra)extra.remove();
+  document.getElementById('nav-bar').classList.remove('oculta');
+  irPaso(4);
 }
 
 function buscarValeDevolucion(){
@@ -777,7 +788,6 @@ function confirmarDevolucion(id){
     if(typeof STDrive!=='undefined'&&STDrive.isConnected()){
       STDrive.guardar('vale',id,vale).catch(function(){});
     }
-    // Generar PDF de devolución
     setTimeout(function(){imprimirPDF('DEVUELTO',vale);},500);
   };
 }
@@ -790,7 +800,6 @@ function imprimirPDF(estado,valeData){
   var num=document.getElementById('folio-num').value;
   var folioId='VE-'+anio+'-'+num;
   if(valeData){
-    // PDF de devolución con datos del vale guardado
     document.getElementById('p-folio').textContent=valeData.id;
     document.getElementById('p-fecha').textContent=fmtFecha(valeData.fecha);
     document.getElementById('p-responsable').textContent=valeData.responsable||'—';
@@ -835,7 +844,6 @@ function imprimirPDF(estado,valeData){
       });tbody.appendChild(tr);
     });
   }
-  // QR en PDF
   var qrDiv=document.getElementById('p-qr-print');
   qrDiv.innerHTML='';
   try{
