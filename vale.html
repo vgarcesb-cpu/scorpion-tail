@@ -7,131 +7,131 @@
 <meta name="apple-mobile-web-app-title" content="Vale Entrega AGA">
 <meta name="theme-color" content="#0d1f3c">
 <link rel="manifest" id="vale-manifest">
-<link rel="apple-touch-icon" id="apple-icon-vale">
 <title>Vale de Entrega – AGA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="st-drive.js"></script>
 <style>
 :root {
-  --azul: #0d1f3c;
-  --azul2: #1a3a6e;
-  --dorado: #c8a84b;
-  --dorado2: #a07830;
-  --blanco: #ffffff;
-  --gris: #f4f6f9;
-  --borde: #dde3ed;
-  --verde: #2ecc71;
-  --rojo: #e74c3c;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: max(env(safe-area-inset-bottom, 0px), 20px);
+  --azul:#0d1f3c; --azul2:#1a3a6e; --azul3:#2456a4;
+  --dorado:#c8a84b; --dorado2:#a07830;
+  --blanco:#ffffff; --gris:#f4f6f9; --borde:#dde3ed;
+  --verde:#2ecc71; --rojo:#e74c3c; --naranja:#e67e22;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:max(env(safe-area-inset-bottom,0px),20px);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--azul);
-  color: #000;
-  position: fixed;
-  width: 100%;
-  height: 100dvh;
-  overflow: hidden;
-}
-.app { display: flex; flex-direction: column; height: 100dvh; padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--azul);position:fixed;width:100%;height:100dvh;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100dvh;padding-top:var(--safe-top)}
 
-/* ─── HEADER ─── */
-.app-header {
-  background: linear-gradient(135deg, #071429 0%, #0d2550 100%);
-  padding: 10px 16px 8px;
-  border-bottom: 1px solid rgba(200,168,75,0.3);
-  flex-shrink: 0;
-}
-.header-top { display: flex; align-items: center; justify-content: space-between; }
-.header-logo .inst { font-size: 8px; color: rgba(200,168,75,0.7); text-transform: uppercase; letter-spacing: 1px; }
-.header-logo .titulo { font-size: 13px; font-weight: 700; color: var(--dorado); text-transform: uppercase; letter-spacing: 0.5px; }
-.header-right { display: flex; align-items: center; gap: 8px; }
-.header-folio { font-size: 10px; color: rgba(255,255,255,0.5); text-align: right; }
-.folio-badge { font-size: 13px; font-weight: 700; color: var(--dorado); display: block; }
+/* HEADER */
+.app-header{background:linear-gradient(135deg,#071429 0%,#0d2550 100%);padding:10px 16px 8px;border-bottom:1px solid rgba(200,168,75,0.3);flex-shrink:0}
+.header-top{display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:10px}
+.escudo{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--dorado);background:linear-gradient(135deg,var(--azul2),#071429);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.header-logo .inst{font-size:8px;color:rgba(200,168,75,0.7);text-transform:uppercase;letter-spacing:1px}
+.header-logo .titulo{font-size:13px;font-weight:700;color:var(--dorado);text-transform:uppercase;letter-spacing:0.5px}
+.header-right{display:flex;align-items:center;gap:8px}
+.header-folio{font-size:10px;color:rgba(255,255,255,0.5);text-align:right}
+.folio-badge{font-size:13px;font-weight:700;color:var(--dorado);display:block}
 
-/* ─── STEPS BAR ─── */
-.steps-bar { display: flex; align-items: center; padding: 8px 16px; background: #071429; border-bottom: 1px solid rgba(200,168,75,0.2); flex-shrink: 0; gap: 0; }
-.step-item { display: flex; align-items: center; flex: 1; }
-.step-circle { width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(200,168,75,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); flex-shrink: 0; transition: all 0.2s; }
-.step-label { font-size: 9px; color: rgba(255,255,255,0.4); margin-left: 5px; text-transform: uppercase; letter-spacing: 0.3px; }
-.step-line { flex: 1; height: 1px; background: rgba(200,168,75,0.2); margin: 0 6px; }
-.step-item.activo .step-circle { border-color: var(--dorado); color: var(--dorado); background: rgba(200,168,75,0.1); }
-.step-item.activo .step-label { color: var(--dorado); }
-.step-item.completo .step-circle { border-color: var(--verde); color: var(--verde); background: rgba(46,204,113,0.1); }
-.step-item.completo .step-label { color: var(--verde); }
+/* STEPS */
+.steps-bar{display:flex;align-items:center;padding:8px 16px;background:#071429;border-bottom:1px solid rgba(200,168,75,0.2);flex-shrink:0;gap:0}
+.step-item{display:flex;align-items:center;flex:1}
+.step-circle{width:26px;height:26px;border-radius:50%;border:2px solid rgba(200,168,75,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);flex-shrink:0;transition:all 0.2s}
+.step-label{font-size:9px;color:rgba(255,255,255,0.4);margin-left:5px;text-transform:uppercase;letter-spacing:0.3px}
+.step-line{flex:1;height:1px;background:rgba(200,168,75,0.2);margin:0 6px}
+.step-item.activo .step-circle{border-color:var(--dorado);color:var(--dorado);background:rgba(200,168,75,0.1)}
+.step-item.activo .step-label{color:var(--dorado)}
+.step-item.completo .step-circle{border-color:var(--verde);color:var(--verde);background:rgba(46,204,113,0.1)}
+.step-item.completo .step-label{color:var(--verde)}
 
-/* ─── CONTENT ─── */
-.steps-content { flex: 1; min-height: 0; overflow: hidden; position: relative; background: var(--gris); }
-.step-panel { position: absolute; inset: 0; overflow-y: auto; padding: 12px; display: none; -webkit-overflow-scrolling: touch; }
-.step-panel.activo { display: block; }
+/* CONTENT */
+.steps-content{flex:1;min-height:0;overflow:hidden;position:relative;background:var(--gris)}
+.step-panel{position:absolute;inset:0;overflow-y:auto;padding:12px;display:none;-webkit-overflow-scrolling:touch}
+.step-panel.activo{display:block}
 
-/* ─── CARDS ─── */
-.card { background: var(--blanco); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--borde); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-.card-title { font-size: 11px; font-weight: 700; color: var(--azul2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--borde); display: flex; align-items: center; gap: 6px; }
+/* CARDS */
+.card{background:var(--blanco);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--borde);box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.card-title{font-size:11px;font-weight:700;color:var(--azul2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--borde);display:flex;align-items:center;gap:6px}
 
-/* ─── CAMPOS ─── */
-.campo-label { display: block; font-size: 10px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
-.campo-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--borde); border-radius: 8px; font-size: 13px; font-family: inherit; background: var(--gris); color: var(--azul); transition: border-color 0.15s; -webkit-appearance: none; }
-.campo-input:focus { outline: none; border-color: var(--azul2); background: #fff; }
-.campo-group { margin-bottom: 10px; }
-.campo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-textarea.campo-input { resize: none; min-height: 60px; }
+/* CAMPOS */
+.campo-label{display:block;font-size:10px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px}
+.campo-input{width:100%;padding:10px 12px;border:1.5px solid var(--borde);border-radius:8px;font-size:13px;font-family:inherit;background:var(--gris);color:var(--azul);transition:border-color 0.15s;-webkit-appearance:none}
+.campo-input:focus{outline:none;border-color:var(--azul2);background:#fff}
+.campo-group{margin-bottom:10px}
+.campo-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+textarea.campo-input{resize:none;min-height:70px}
 
-/* ─── ITEMS ─── */
-.item-card { background: var(--gris); border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1.5px solid var(--borde); position: relative; }
-.item-num { font-size: 10px; font-weight: 700; color: var(--azul2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-.btn-eliminar-item { position: absolute; top: 10px; right: 10px; background: #fee; border: 1px solid #fcc; color: var(--rojo); border-radius: 50%; width: 26px; height: 26px; font-size: 16px; cursor: pointer; line-height: 1; padding: 0; font-family: inherit; }
-.item-fila3 { display: grid; grid-template-columns: 70px 80px 1fr; gap: 8px; }
-.btn-agregar { width: 100%; padding: 10px; border: 2px dashed var(--borde); background: transparent; border-radius: 8px; color: var(--azul2); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+/* CONDICIONES */
+.condiciones-box{background:linear-gradient(135deg,#fff8e1,#fff3cd);border:2px solid var(--dorado);border-radius:12px;padding:14px;margin-bottom:12px}
+.condiciones-titulo{font-size:12px;font-weight:800;color:var(--azul);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.condicion-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid rgba(200,168,75,0.3);font-size:12px;color:#333;line-height:1.5}
+.condicion-item:last-of-type{border-bottom:none}
+.condicion-num{background:var(--azul);color:var(--dorado);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+.checkbox-wrap{display:flex;align-items:flex-start;gap:10px;background:var(--azul);border-radius:10px;padding:12px;margin-top:12px;cursor:pointer}
+.checkbox-wrap input[type=checkbox]{width:20px;height:20px;flex-shrink:0;accent-color:var(--dorado);cursor:pointer;margin-top:1px}
+.checkbox-label{font-size:12px;color:#fff;font-weight:600;line-height:1.4;cursor:pointer}
 
-/* ─── FIRMAS ─── */
-.firma-block { margin-bottom: 18px; }
-.firma-titulo { font-size: 12px; font-weight: 700; color: var(--azul2); text-align: center; margin-bottom: 3px; }
-.firma-nombre { font-size: 11px; color: #888; text-align: center; margin-bottom: 6px; font-style: italic; }
-#sig-entrega, #sig-recibe { border: 2px solid var(--azul2); border-radius: 10px; display: block; background: #fff; touch-action: none; width: 100%; height: 130px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.btn-borrar-firma { width: 100%; padding: 8px; margin-top: 6px; background: #eee; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; color: #555; }
+/* FIRMA */
+#wrap-firma{width:100%}
+#sig-canvas{border:2px solid var(--azul2);border-radius:10px;display:block;background:#fff;touch-action:none;width:100%;height:160px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
 
-/* ─── RESUMEN ─── */
-.resumen-fila { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--borde); font-size: 12px; }
-.r-key { color: #888; font-weight: 600; }
-.r-val { color: var(--azul); font-weight: 500; text-align: right; max-width: 60%; }
-.resumen-item-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 11px; color: #555; border-bottom: 1px dashed var(--borde); }
+/* QR */
+.qr-container{display:flex;flex-direction:column;align-items:center;padding:16px;gap:12px}
+#qr-code{border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.15);background:#fff;padding:12px}
+.qr-folio{font-size:18px;font-weight:800;color:var(--azul);font-family:monospace}
+.qr-instruccion{font-size:12px;color:#666;text-align:center;line-height:1.5}
 
-/* ─── HISTORIAL ─── */
-.hist-item-app { background: var(--blanco); border: 1px solid var(--borde); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: box-shadow 0.15s; }
-.hist-item-app:active { box-shadow: 0 0 0 2px var(--dorado); }
-.hist-folio { font-size: 13px; font-weight: 700; color: var(--azul2); }
-.hist-det { font-size: 11px; color: #888; margin-top: 3px; }
-.hist-obs { font-size: 11px; color: #aaa; margin-top: 2px; font-style: italic; }
-.btn-eliminar-hist { margin-top: 8px; padding: 5px 12px; background: #fee; border: 1px solid #fcc; color: var(--rojo); border-radius: 6px; font-size: 11px; cursor: pointer; font-family: inherit; }
+/* ESTADO BADGE */
+.estado-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.estado-entregado{background:rgba(46,204,113,0.15);color:#1a7a3a;border:1.5px solid var(--verde)}
+.estado-registrado{background:rgba(231,76,60,0.1);color:#c0392b;border:1.5px solid var(--rojo)}
+.estado-devuelto{background:rgba(52,152,219,0.1);color:#1a5276;border:1.5px solid #3498db}
 
-/* ─── NAV BAR ─── */
-.nav-bar { display: flex; gap: 8px; padding: 10px 16px; padding-bottom: max(22px, calc(10px + env(safe-area-inset-bottom, 0px))); background: linear-gradient(90deg,#071429,#0d2550); border-top: 1px solid rgba(200,168,75,0.3); flex-shrink: 0; }
-.nav-bar.oculta { display: none; }
-.btn-nav { flex: 1; padding: 11px 8px; border-radius: 10px; border: 1px solid rgba(200,168,75,0.25); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-.btn-nav:disabled { opacity: 0.35; }
-.btn-siguiente { background: var(--azul2); border-color: var(--azul2); color: #fff; }
-.btn-siguiente.dorado { background: linear-gradient(135deg,var(--dorado),var(--dorado2)); border-color: var(--dorado); color: #fff; }
-.btn-nav:active { transform: scale(0.97); }
+/* HISTORIAL */
+.hist-item{background:var(--blanco);border:1px solid var(--borde);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-left:4px solid var(--dorado)}
+.hist-item.entregado{border-left-color:var(--verde)}
+.hist-item.devuelto{border-left-color:#3498db}
+.hist-folio{font-size:13px;font-weight:700;color:var(--azul2)}
+.hist-det{font-size:11px;color:#888;margin-top:3px}
+.btn-eliminar-hist{margin-top:8px;padding:5px 12px;background:#fee;border:1px solid #fcc;color:var(--rojo);border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit}
 
-/* ─── BOTONES PASO 4 ─── */
-.btn-pdf { display: block; width: 100%; padding: 13px; background: var(--azul); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 8px; }
-.btn-nuevo { display: block; width: 100%; padding: 13px; background: linear-gradient(135deg,var(--dorado),var(--dorado2)); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 8px; }
+/* BOTONES */
+.btn-pdf{display:block;width:100%;padding:13px;background:var(--azul);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px}
+.btn-nuevo{display:block;width:100%;padding:13px;background:linear-gradient(135deg,var(--dorado),var(--dorado2));color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px}
+.btn-dev{display:block;width:100%;padding:13px;background:#3498db;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px}
+.btn-agregar{width:100%;padding:10px;border:2px dashed var(--borde);background:transparent;border-radius:8px;color:var(--azul2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.item-card{background:var(--gris);border-radius:10px;padding:12px;margin-bottom:10px;border:1.5px solid var(--borde);position:relative}
+.item-num{font-size:10px;font-weight:700;color:var(--azul2);text-transform:uppercase;margin-bottom:8px}
+.btn-del-item{position:absolute;top:10px;right:10px;background:#fee;border:1px solid #fcc;color:var(--rojo);border-radius:50%;width:26px;height:26px;font-size:16px;cursor:pointer;line-height:1;padding:0;font-family:inherit}
 
-/* ─── TOAST ─── */
-.toast { position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: #333; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* NAV */
+.nav-bar{display:flex;gap:8px;padding:10px 16px;padding-bottom:max(22px,calc(10px + env(safe-area-inset-bottom,0px)));background:linear-gradient(90deg,#071429,#0d2550);border-top:1px solid rgba(200,168,75,0.3);flex-shrink:0}
+.nav-bar.oculta{display:none}
+.btn-nav{flex:1;padding:11px 8px;border-radius:10px;border:1px solid rgba(200,168,75,0.25);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.8);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.btn-nav:disabled{opacity:0.35}
+.btn-siguiente{background:var(--azul2);border-color:var(--azul2);color:#fff}
+.btn-siguiente.dorado{background:linear-gradient(135deg,var(--dorado),var(--dorado2));border-color:var(--dorado);color:#fff}
+.btn-nav:active{transform:scale(0.97)}
 
-/* ─── PRINT ─── */
-#print-area { display: none; }
-@media print {
-  body { background: #ffffff !important; position: static !important; width: auto !important; overflow: visible !important; }
-  body > .app, .toast { display: none !important; }
-  #print-area { display: block !important; padding: 0; font-family: Arial, sans-serif; color: #000; background: #ffffff !important; }
-  @page { size: letter portrait; margin: 10mm 20mm 15mm 20mm; }
-  table { border-collapse: collapse !important; }
-  th, td { border: 1px solid #ccc !important; }
+/* TOAST */
+.toast{position:fixed;bottom:calc(80px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:all 0.3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* RESUMEN */
+.resumen-fila{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--borde);font-size:12px}
+.r-key{color:#888;font-weight:600}
+.r-val{color:var(--azul);font-weight:500;text-align:right;max-width:60%}
+
+/* PRINT */
+#print-area{display:none}
+@media print{
+  body{background:#fff!important;position:static!important;width:auto!important;overflow:visible!important}
+  body>.app,.toast{display:none!important}
+  #print-area{display:block!important;padding:0;font-family:Arial,sans-serif;color:#000;background:#fff!important}
+  @page{size:letter portrait;margin:10mm 20mm 15mm 20mm}
+  table{border-collapse:collapse!important}
+  th,td{border:1px solid #ccc!important}
 }
 </style>
 </head>
@@ -141,12 +141,15 @@ textarea.campo-input { resize: none; min-height: 60px; }
   <!-- HEADER -->
   <div class="app-header">
     <div class="header-top">
-      <div class="header-logo">
-        <span class="inst">Academia de Guerra Aérea · FACH</span>
-        <span class="titulo">Vale de Entrega</span>
+      <div class="header-left">
+        <div class="escudo">✈️</div>
+        <div class="header-logo">
+          <span class="inst">Academia de Guerra Aérea · FACH</span>
+          <span class="titulo">Vale de Entrega</span>
+        </div>
       </div>
       <div class="header-right">
-        <button id="btn-drive" onclick="toggleDrive()" style="background:none;border:1px solid rgba(200,168,75,.4);border-radius:14px;color:#C8A951;font-size:10px;font-weight:700;padding:3px 9px;cursor:pointer;font-family:Arial,sans-serif" title="Google Drive Sync"></button>
+        <button id="btn-drive" onclick="toggleDrive()" style="background:none;border:1px solid rgba(200,168,75,.4);border-radius:14px;color:#C8A951;font-size:10px;font-weight:700;padding:3px 9px;cursor:pointer;font-family:Arial,sans-serif"></button>
         <div class="header-folio">
           <span class="folio-badge" id="folio-show">VE-…</span>
           Folio
@@ -155,15 +158,15 @@ textarea.campo-input { resize: none; min-height: 60px; }
     </div>
   </div>
 
-  <!-- STEPS BAR -->
+  <!-- STEPS -->
   <div class="steps-bar">
     <div class="step-item activo" id="si-1"><div class="step-circle">1</div><span class="step-label">Datos</span></div>
     <div class="step-line"></div>
-    <div class="step-item" id="si-2"><div class="step-circle">2</div><span class="step-label">Materiales</span></div>
+    <div class="step-item" id="si-2"><div class="step-circle">2</div><span class="step-label">Condiciones</span></div>
     <div class="step-line"></div>
-    <div class="step-item" id="si-3"><div class="step-circle">3</div><span class="step-label">Firmas</span></div>
+    <div class="step-item" id="si-3"><div class="step-circle">3</div><span class="step-label">Firma</span></div>
     <div class="step-line"></div>
-    <div class="step-item" id="si-4"><div class="step-circle">4</div><span class="step-label">PDF</span></div>
+    <div class="step-item" id="si-4"><div class="step-circle">4</div><span class="step-label">QR · PDF</span></div>
   </div>
 
   <!-- CONTENIDO -->
@@ -178,52 +181,64 @@ textarea.campo-input { resize: none; min-height: 60px; }
           <div class="campo-group"><label class="campo-label">N° Folio</label><input class="campo-input" type="text" id="folio-num" readonly></div>
         </div>
         <div class="campo-group"><label class="campo-label">Fecha</label><input class="campo-input" type="date" id="fecha"></div>
-        <div class="campo-group"><label class="campo-label">Quien entrega *</label><input class="campo-input" type="text" id="entrega" placeholder="Nombre / Grado"></div>
-        <div class="campo-group"><label class="campo-label">Unidad origen (entrega)</label><input class="campo-input" type="text" id="unidad-entrega" placeholder="Ej: Escuadrilla de Material"></div>
-        <div class="campo-group"><label class="campo-label">Quien recibe *</label><input class="campo-input" type="text" id="recibe" placeholder="Nombre / Grado"></div>
-        <div class="campo-group"><label class="campo-label">Unidad origen (recibe)</label><input class="campo-input" type="text" id="unidad-recibe" placeholder="Ej: Dirección de Educación"></div>
+        <div class="campo-group"><label class="campo-label">Grado y Nombre Responsable *</label><input class="campo-input" type="text" id="responsable" placeholder="Ej: Cabo 1° Juan Pérez González"></div>
+        <div class="campo-group"><label class="campo-label">Unidad *</label><input class="campo-input" type="text" id="unidad" placeholder="Ej: Escuadrilla de Material"></div>
         <div class="campo-group"><label class="campo-label">Lugar de entrega</label><input class="campo-input" type="text" id="lugar" placeholder="Ej: Bodega central"></div>
-        <div class="campo-group"><label class="campo-label">Observaciones</label><textarea class="campo-input" id="obs" placeholder="Opcional..."></textarea></div>
+        <div class="campo-group"><label class="campo-label">Observaciones</label><textarea class="campo-input" id="observaciones" placeholder="Notas adicionales..."></textarea></div>
       </div>
-    </div>
-
-    <!-- PASO 2: MATERIALES -->
-    <div class="step-panel" id="panel-2">
       <div class="card">
-        <div class="card-title">📦 Materiales a Entregar</div>
+        <div class="card-title">📦 Detalle del Bien</div>
         <div id="items-container"></div>
-        <button class="btn-agregar" onclick="agregarItem()">+ Agregar material</button>
+        <button class="btn-agregar" onclick="agregarItem()">+ Agregar bien</button>
       </div>
     </div>
 
-    <!-- PASO 3: FIRMAS -->
+    <!-- PASO 2: CONDICIONES -->
+    <div class="step-panel" id="panel-2">
+      <div class="condiciones-box">
+        <div class="condiciones-titulo">⚠️ Condiciones de Uso — Bien Fiscal FACH</div>
+        <div class="condicion-item"><div class="condicion-num">1</div><div>Usted asume <strong>responsabilidad personal e intransferible</strong> sobre este bien desde el momento de la firma.</div></div>
+        <div class="condicion-item"><div class="condicion-num">2</div><div>El bien debe ser devuelto en el <strong>mismo estado en que fue entregado</strong>, limpio y en buen funcionamiento.</div></div>
+        <div class="condicion-item"><div class="condicion-num">3</div><div>La pérdida, daño o deterioro imputable al receptor será <strong>descontado de sus haberes</strong> conforme al Reglamento de Responsabilidad Administrativa FACH.</div></div>
+        <div class="condicion-item"><div class="condicion-num">4</div><div>Queda <strong>estrictamente prohibido</strong> ceder, prestar o usar el bien fuera del servicio institucional.</div></div>
+        <label class="checkbox-wrap">
+          <input type="checkbox" id="acepto-condiciones" onchange="verificarAceptacion()">
+          <span class="checkbox-label">He leído y acepto las condiciones. Entiendo que el incumplimiento puede derivar en descuento de mis haberes.</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- PASO 3: FIRMA -->
     <div class="step-panel" id="panel-3">
       <div class="card">
-        <div class="card-title">✍️ Firmas Digitales</div>
-        <div class="firma-block">
-          <div class="firma-titulo">Firma — Quien entrega</div>
-          <div class="firma-nombre" id="nombre-entrega-firma"></div>
-          <div id="wrap-entrega" style="width:100%"><canvas id="sig-entrega"></canvas></div>
-          <button class="btn-borrar-firma" onclick="limpiarFirma('sig-entrega','entrega')">🗑 Borrar firma</button>
+        <div class="card-title">✍️ Firma del Responsable</div>
+        <div style="background:var(--gris);border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:#555;text-align:center">
+          <strong id="nombre-firma-display"></strong><br>
+          <span style="font-size:11px;color:#888">Firma con el dedo en el área de abajo</span>
         </div>
-        <div class="firma-block">
-          <div class="firma-titulo">Firma — Quien recibe</div>
-          <div class="firma-nombre" id="nombre-recibe-firma"></div>
-          <div id="wrap-recibe" style="width:100%"><canvas id="sig-recibe"></canvas></div>
-          <button class="btn-borrar-firma" onclick="limpiarFirma('sig-recibe','recibe')">🗑 Borrar firma</button>
-        </div>
+        <div id="wrap-firma" style="width:100%"><canvas id="sig-canvas"></canvas></div>
+        <button onclick="limpiarFirma()" style="width:100%;padding:8px;margin-top:6px;background:#eee;border:1px solid #ddd;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;color:#555">🗑 Borrar firma</button>
       </div>
     </div>
 
-    <!-- PASO 4: PDF -->
+    <!-- PASO 4: QR + PDF -->
     <div class="step-panel" id="panel-4">
       <div class="card">
         <div class="card-title">📄 Resumen</div>
         <div id="resumen-datos"></div>
-        <div id="resumen-items" style="margin-top:10px"></div>
       </div>
-      <button class="btn-pdf" onclick="imprimirPDF()">🖨️ Guardar / Imprimir PDF</button>
-      <button class="btn-nuevo" onclick="guardarHistorial()">💾 Guardar en historial</button>
+      <div class="card">
+        <div class="card-title">📱 QR del Vale</div>
+        <div class="qr-container">
+          <div class="estado-badge estado-entregado">✅ ENTREGADO</div>
+          <div id="qr-code"></div>
+          <div class="qr-folio" id="qr-folio-txt"></div>
+          <div class="qr-instruccion">El responsable escanea este QR con su celular para recibir su comprobante PDF</div>
+        </div>
+      </div>
+      <button class="btn-pdf" onclick="imprimirPDF('ENTREGADO')">🖨️ PDF para mí — ENTREGADO</button>
+      <button class="btn-dev" onclick="iniciarDevolucion()">↩️ Registrar Devolución</button>
+      <button class="btn-nuevo" onclick="guardarYNuevo()">💾 Guardar en historial</button>
     </div>
 
     <!-- HISTORIAL -->
@@ -234,11 +249,21 @@ textarea.campo-input { resize: none; min-height: 60px; }
       </div>
     </div>
 
+    <!-- DEVOLUCIÓN -->
+    <div class="step-panel" id="panel-dev">
+      <div class="card">
+        <div class="card-title">↩️ Registrar Devolución</div>
+        <div class="campo-group"><label class="campo-label">ID / Folio del vale</label><input class="campo-input" type="text" id="dev-id" placeholder="VE-2026-0001" style="text-transform:uppercase"></div>
+        <button class="btn-nuevo" onclick="buscarValeDevolucion()" style="margin-top:8px">🔍 Buscar vale</button>
+        <div id="dev-resultado" style="margin-top:10px"></div>
+      </div>
+    </div>
+
   </div>
 
   <!-- NAV BAR -->
   <div class="nav-bar" id="nav-bar">
-    <button class="btn-nav btn-atras" id="btn-atras" onclick="irPaso(pasoActual-1)" disabled>← Atrás</button>
+    <button class="btn-nav" id="btn-atras" onclick="irPaso(pasoActual-1)" disabled>← Atrás</button>
     <button class="btn-nav btn-atras" onclick="verHistorial()" style="flex:0.6;font-size:12px">📁 Historial</button>
     <button class="btn-nav btn-atras" onclick="resetContador()" style="flex:0.5;font-size:11px;color:#c8a84b;border-color:rgba(200,168,75,0.3)">↺ Reset</button>
     <button class="btn-nav btn-siguiente" id="btn-siguiente" onclick="irPaso(pasoActual+1)">Siguiente →</button>
@@ -248,167 +273,139 @@ textarea.campo-input { resize: none; min-height: 60px; }
 
 <div class="toast" id="toast"></div>
 
-<!-- ÁREA DE IMPRESIÓN -->
+<!-- ÁREA IMPRESIÓN -->
 <div id="print-area">
   <div style="margin-bottom:12px;display:inline-block;padding-left:5px">
     <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center">FUERZA AÉREA DE CHILE</div>
     <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center">DIVISIÓN DE EDUCACIÓN</div>
     <div style="font-family:Arial,sans-serif;font-size:12px;line-height:16px;color:#000;text-align:center;text-decoration:underline">ACADEMIA DE GUERRA AÉREA</div>
   </div>
-  <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:400;line-height:16px;color:#000;text-align:center;text-decoration:underline;margin-bottom:14px">COMPROBANTE DE ENTREGA DE MATERIALES</div>
-  <div style="display:flex;justify-content:space-between;margin-top:16px;margin-bottom:10px;font-size:12px">
+  <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:400;line-height:16px;color:#000;text-align:center;text-decoration:underline;margin-bottom:14px">VALE DE ENTREGA DE BIEN FISCAL</div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:12px">
     <span>Folio: <strong id="p-folio"></strong></span>
     <span>Fecha: <span id="p-fecha"></span></span>
+    <span><strong id="p-estado" style="text-transform:uppercase"></strong></span>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;font-size:12px">
-    <div><div style="color:#666;font-size:10px">Quien entrega</div><div id="p-entrega" style="font-weight:600"></div><div id="p-unidad-entrega" style="font-size:10px;color:#555"></div></div>
-    <div><div style="color:#666;font-size:10px">Quien recibe</div><div id="p-recibe" style="font-weight:600"></div><div id="p-unidad-recibe" style="font-size:10px;color:#555"></div></div>
+    <div><div style="color:#666;font-size:10px">Responsable</div><div id="p-responsable" style="font-weight:600"></div></div>
+    <div><div style="color:#666;font-size:10px">Unidad</div><div id="p-unidad" style="font-weight:600"></div></div>
+    <div><div style="color:#666;font-size:10px">Lugar de entrega</div><div id="p-lugar" style="font-weight:600"></div></div>
   </div>
-  <div style="font-size:12px;margin-bottom:10px"><span style="color:#666">Lugar: </span><span id="p-lugar"></span></div>
   <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px">
     <thead><tr>
       <th style="border:1px solid #ccc;padding:5px 8px;text-align:center;font-weight:600;background:#f0f0f0;width:10%">Cant.</th>
-      <th style="border:1px solid #ccc;padding:5px 8px;text-align:left;font-weight:600;background:#f0f0f0">Descripción Material</th>
-      <th style="border:1px solid #ccc;padding:5px 8px;text-align:center;font-weight:600;background:#f0f0f0;width:15%">Unidad</th>
+      <th style="border:1px solid #ccc;padding:5px 8px;text-align:left;font-weight:600;background:#f0f0f0">Descripción del Bien</th>
+      <th style="border:1px solid #ccc;padding:5px 8px;text-align:center;font-weight:600;background:#f0f0f0;width:15%">N° Inventario</th>
     </tr></thead>
     <tbody id="p-items"></tbody>
   </table>
-  <div style="font-size:12px;margin-bottom:20px"><span style="color:#666">Observaciones: </span><span id="p-obs"></span></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:30px;text-align:center;font-size:11px">
-    <div>
-      <img id="p-sig-entrega" src="" style="display:none;max-width:180px;height:55px;object-fit:contain;margin-bottom:4px">
+  <div style="font-size:12px;margin-bottom:10px"><span style="color:#666">Observaciones: </span><span id="p-obs"></span></div>
+  <!-- CONDICIONES EN PDF -->
+  <div style="border:1px solid #ccc;border-radius:4px;padding:8px;margin-bottom:12px;font-size:10px;background:#fffbf0">
+    <div style="font-weight:700;font-size:11px;margin-bottom:4px;text-transform:uppercase">Condiciones de Uso — Bien Fiscal FACH</div>
+    <div>1. El receptor asume responsabilidad personal e intransferible desde la firma.</div>
+    <div>2. El bien debe devolverse en el mismo estado recibido.</div>
+    <div>3. Pérdida o daño será descontado de haberes conforme Reglamento FACH.</div>
+    <div>4. Prohibido ceder, prestar o usar fuera del servicio institucional.</div>
+    <div style="margin-top:4px;font-weight:700">✓ Condiciones leídas y aceptadas por el receptor.</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px">
+    <div style="text-align:center;font-size:11px">
+      <img id="p-sig" src="" style="display:none;max-width:180px;height:55px;object-fit:contain;margin-bottom:4px">
       <div style="width:100%;border-top:1px solid #000;margin-bottom:4px"></div>
-      <div id="p-firma-entrega" style="font-weight:700"></div>
-      <div style="color:#666">Quien entrega</div>
+      <div id="p-firma-nombre" style="font-weight:700"></div>
+      <div style="color:#666">Firma Responsable</div>
     </div>
-    <div>
-      <img id="p-sig-recibe" src="" style="display:none;max-width:180px;height:55px;object-fit:contain;margin-bottom:4px">
-      <div style="width:100%;border-top:1px solid #000;margin-bottom:4px"></div>
-      <div id="p-firma-recibe" style="font-weight:700"></div>
-      <div style="color:#666">Quien recibe</div>
+    <div style="text-align:center;font-size:11px">
+      <div id="p-qr-print" style="display:flex;justify-content:center;margin-bottom:4px"></div>
+      <div id="p-folio-qr" style="font-family:monospace;font-size:10px;color:#333"></div>
+      <div style="color:#666;font-size:10px">Escanear para comprobante</div>
     </div>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════
-// VARIABLES GLOBALES
-// ═══════════════════════════════════════════════════════════════════
-var db, pasoActual=1, items=[], vales=[], editIndex=null;
-var sigEntregaURL='', sigRecibeURL='';
-var IDB_NAME='AGA_DB_VALES', IDB_VERSION=1, STORE_VALES='vales', STORE_CFG='config';
+// ═══════════════════════════════════════════════
+// VARIABLES
+// ═══════════════════════════════════════════════
+var db, pasoActual=1, items=[], vales=[], sigDataURL='';
+var IDB_NAME='AGA_ValeQR_v1', STORE_VALES='vales', STORE_CFG='config';
+var BASE_URL='https://vgarcesb-cpu.github.io/scorpion-tail/receptor.html';
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // DRIVE
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 function actualizarBtnDrive(){
-  var btn=document.getElementById('btn-drive'); if(!btn) return;
+  var btn=document.getElementById('btn-drive');if(!btn)return;
   if(typeof STDrive!=='undefined'&&STDrive.isConnected()){
     btn.textContent='☁️ Drive';
     btn.style.borderColor='rgba(200,168,75,.8)';
-    btn.style.color='#C8A951';
-    setTimeout(sincronizarDesdeDrive, 800);
-  } else {
-    btn.textContent='☁️ Conectar';
-    btn.style.borderColor='rgba(255,255,255,.2)';
-    btn.style.color='rgba(255,255,255,.4)';
-  }
+    setTimeout(sincronizarDesdeDrive,800);
+  }else{btn.textContent='☁️ Conectar';btn.style.borderColor='rgba(255,255,255,.2)';btn.style.color='rgba(255,255,255,.4)';}
 }
 function toggleDrive(){
   if(typeof STDrive==='undefined'){mostrarToast('⚠️ Módulo Drive no cargado');return;}
-  if(STDrive.isConnected()){
-    if(confirm('Desconectar Google Drive?')){STDrive.logout();actualizarBtnDrive();mostrarToast('Drive desconectado');}
-  } else {
-    STDrive.login(window.location.href);
-  }
+  if(STDrive.isConnected()){if(confirm('Desconectar Google Drive?')){STDrive.logout();actualizarBtnDrive();mostrarToast('Drive desconectado');}}
+  else{STDrive.login(window.location.href);}
 }
-
-// ─── SYNC: Bajada desde Drive ─────────────────────────────────────
 function sincronizarDesdeDrive(){
-  if(typeof STDrive==='undefined'||!STDrive.isConnected()) return;
-  if(!db) return;
+  if(typeof STDrive==='undefined'||!STDrive.isConnected()||!db)return;
   STDrive.descargar('vale','VE-',function(registros,err){
-    if(err||!registros||!registros.length) return;
-    var importados=0;
-    var pendientes=registros.length;
-    function finalizarSiListo(){
-      pendientes--;
-      if(pendientes>0) return;
-      if(importados>0){
-        cargarTodosVales(function(){
-          renderHistorial();
-          mostrarToast('📥 Drive: '+importados+' registro(s) importado(s)');
-        });
-      }
-    }
+    if(err||!registros||!registros.length)return;
+    var imp=0;
     registros.forEach(function(item){
-      var data=item.data;
-      if(!data||typeof data!=='object'||!data.id){finalizarSiListo();return;}
+      var data=item.data;if(!data||!data.id)return;
       var tx=db.transaction([STORE_VALES],'readwrite');
-      var store=tx.objectStore(STORE_VALES);
-      var req=store.get(data.id);
-      req.onsuccess=function(e){
-        var existente=e.target.result;
-        if(!existente){store.put(data);importados++;}
-        else if((data.ts||0)>(existente.ts||0)){store.put(data);importados++;}
-      };
-      req.onerror=function(){};
-      tx.oncomplete=finalizarSiListo;
-      tx.onerror=function(){finalizarSiListo();};
+      var req=tx.objectStore(STORE_VALES).get(data.id);
+      req.onsuccess=function(e){var ex=e.target.result;if(!ex||(data.ts||0)>(ex.ts||0)){tx.objectStore(STORE_VALES).put(data);imp++;}};
+      tx.oncomplete=function(){if(imp>0){cargarTodosVales(function(){renderHistorial();mostrarToast('📥 Drive: '+imp+' importado(s)');});}};
     });
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// FIX-001 — IndexedDB con onerror
-// ═══════════════════════════════════════════════════════════════════
-var idbReq=indexedDB.open(IDB_NAME,IDB_VERSION);
-idbReq.onerror=function(e){ alert('Error al abrir la base de datos: '+e.target.errorCode); };
+// ═══════════════════════════════════════════════
+// IDB — FIX-001
+// ═══════════════════════════════════════════════
+var idbReq=indexedDB.open(IDB_NAME,1);
+idbReq.onerror=function(e){alert('Error al abrir la base de datos: '+e.target.errorCode);};
 idbReq.onupgradeneeded=function(e){
   var d=e.target.result;
-  if(!d.objectStoreNames.contains(STORE_VALES)) d.createObjectStore(STORE_VALES,{keyPath:'id'});
-  if(!d.objectStoreNames.contains(STORE_CFG))   d.createObjectStore(STORE_CFG,{keyPath:'key'});
+  if(!d.objectStoreNames.contains(STORE_VALES))d.createObjectStore(STORE_VALES,{keyPath:'id'});
+  if(!d.objectStoreNames.contains(STORE_CFG))d.createObjectStore(STORE_CFG,{keyPath:'key'});
 };
 idbReq.onsuccess=function(e){
   db=e.target.result;
-  cargarTodosVales(function(){
-    init();
-    setTimeout(sincronizarDesdeDrive, 1200);
-  });
+  cargarTodosVales(function(){init();setTimeout(sincronizarDesdeDrive,1200);});
 };
 
 function cargarTodosVales(cb){
-  // FIX-002 — guard !db
   if(!db){cb();return;}
   var tx=db.transaction(STORE_VALES,'readonly');
-  tx.onerror=function(e){alert('Error IDB: '+e.target.error);};
   tx.objectStore(STORE_VALES).getAll().onsuccess=function(e){
     vales=e.target.result||[];
     vales.sort(function(a,b){return(b.ts||0)-(a.ts||0);});
     cb();
   };
 }
-
 function getFolio(cb){
   if(!db){cb(0);return;}
   var tx=db.transaction(STORE_CFG,'readonly');
   tx.onerror=function(){cb(0);};
   tx.objectStore(STORE_CFG).get('folio').onsuccess=function(e){
-    var r=e.target.result; cb(r?(parseInt(r.value)||0):0);
+    var r=e.target.result;cb(r?(parseInt(r.value)||0):0);
   };
 }
 function setFolio(n,cb){
   if(!db){if(cb)cb();return;}
   var tx=db.transaction(STORE_CFG,'readwrite');
-  tx.onerror=function(e){alert('Error IDB config: '+e.target.error);};
   tx.objectStore(STORE_CFG).put({key:'folio',value:String(n)});
   tx.oncomplete=function(){if(cb)cb();};
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // UTILIDADES
-// ═══════════════════════════════════════════════════════════════════
-function escHTML(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+// ═══════════════════════════════════════════════
+function escHTML(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function folioStr(n){return String(n).padStart(4,'0');}
 function fmtFecha(f){if(!f)return '';var p=f.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:f;}
 function actualizarFolioHeader(){
@@ -416,10 +413,11 @@ function actualizarFolioHeader(){
   var num=document.getElementById('folio-num').value||'????';
   document.getElementById('folio-show').textContent='VE-'+anio+'-'+num;
 }
+function getNextFolioNum(){var max=0;vales.forEach(function(s){var n=parseInt(s.folioNum)||0;if(n>max)max=n;});return max;}
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 function init(){
   getFolio(function(actual){
     document.getElementById('folio-num').value=folioStr(actual+1);
@@ -430,97 +428,104 @@ function init(){
     actualizarBtnDrive();
   });
 }
-
 function resetContador(){
-  if(!confirm('¿Resetear el contador de folios a 0001?')) return;
-  setFolio(0,function(){document.getElementById('folio-num').value='0001';actualizarFolioHeader();mostrarToast('✓ Contador reseteado a 0001');});
+  if(!confirm('¿Resetear el contador de folios a 0001?'))return;
+  setFolio(0,function(){document.getElementById('folio-num').value='0001';actualizarFolioHeader();mostrarToast('✓ Contador reseteado');});
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // ITEMS
-// ═══════════════════════════════════════════════════════════════════
-function agregarItem(){ items.push({cant:1,unidad:'UN',descripcion:''}); renderItems(); }
-function eliminarItem(i){ if(items.length>1){items.splice(i,1);renderItems();} }
-function updItem(i,k,v){ items[i][k]=v; renderItems(); }
+// ═══════════════════════════════════════════════
+function agregarItem(){items.push({cant:1,descripcion:'',ninv:''});renderItems();}
+function eliminarItem(i){if(items.length>1){items.splice(i,1);renderItems();}}
+function updItem(i,k,v){items[i][k]=v;}
 
 function renderItems(){
   document.getElementById('items-container').innerHTML=items.map(function(it,i){
     return '<div class="item-card"><div class="item-num">Ítem '+(i+1)+'</div>'+
-      (items.length>1?'<button class="btn-eliminar-item" onclick="eliminarItem('+i+')">×</button>':'')+
-      '<div class="item-fila3">'+
-        '<div><label class="campo-label" style="font-size:10px">Cant.</label><input class="campo-input" style="padding:8px" type="number" min="1" value="'+escHTML(String(it.cant))+'" onchange="updItem('+i+',\'cant\',parseFloat(this.value)||1)"></div>'+
-        '<div><label class="campo-label" style="font-size:10px">Unidad</label><select class="campo-input" style="padding:8px" onchange="updItem('+i+',\'unidad\',this.value)">'+
-          ['UN','KG','MT','LT','CJ','PAQ','GL'].map(function(u){return'<option'+(it.unidad===u?' selected':'')+'>'+u+'</option>';}).join('')+
-        '</select></div>'+
-        '<div><label class="campo-label" style="font-size:10px">Descripción</label><input class="campo-input" style="padding:8px" type="text" placeholder="Descripción material" value="'+escHTML(it.descripcion)+'" onchange="updItem('+i+',\'descripcion\',this.value)"></div>'+
+      (items.length>1?'<button class="btn-del-item" onclick="eliminarItem('+i+')">×</button>':'')+
+      '<div class="campo-group"><label class="campo-label" style="font-size:10px">Descripción del bien</label>'+
+      '<input class="campo-input" style="padding:8px" type="text" placeholder="Ej: Silla ejecutiva negra" value="'+escHTML(it.descripcion)+'" onchange="updItem('+i+',\'descripcion\',this.value)"></div>'+
+      '<div class="campo-row">'+
+        '<div><label class="campo-label" style="font-size:10px">Cantidad</label>'+
+        '<input class="campo-input" style="padding:8px" type="number" min="1" value="'+it.cant+'" onchange="updItem('+i+',\'cant\',parseInt(this.value)||1)"></div>'+
+        '<div><label class="campo-label" style="font-size:10px">N° Inventario</label>'+
+        '<input class="campo-input" style="padding:8px" type="text" placeholder="Opcional" value="'+escHTML(it.ninv||'')+'" onchange="updItem('+i+',\'ninv\',this.value)"></div>'+
       '</div></div>';
   }).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// NAVEGACIÓN — FIX-009
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// VALIDACIÓN — FIX-009
+// ═══════════════════════════════════════════════
 function validarPaso(n){
   if(n===1){
     if(!document.getElementById('folio-anio').value.trim()||document.getElementById('folio-anio').value.trim().length!==4){mostrarToast('⚠️ Ingresa el año (4 dígitos)');return false;}
     if(!document.getElementById('fecha').value.trim()){mostrarToast('⚠️ Selecciona una fecha');return false;}
-    if(!document.getElementById('entrega').value.trim()){mostrarToast('⚠️ Ingresa quien entrega');return false;}
-    if(!document.getElementById('recibe').value.trim()){mostrarToast('⚠️ Ingresa quien recibe');return false;}
+    if(!document.getElementById('responsable').value.trim()){mostrarToast('⚠️ Ingresa grado y nombre del responsable');return false;}
+    if(!document.getElementById('unidad').value.trim()){mostrarToast('⚠️ Ingresa la unidad');return false;}
+    var tieneDesc=items.some(function(it){return it.descripcion.trim()!=='';});
+    if(!tieneDesc){mostrarToast('⚠️ Agrega al menos un bien con descripción');return false;}
   }
   if(n===2){
-    var tieneDesc=items.some(function(it){return it.descripcion.trim()!=='';});
-    if(!tieneDesc){mostrarToast('⚠️ Agrega al menos un ítem con descripción');return false;}
+    if(!document.getElementById('acepto-condiciones').checked){mostrarToast('⚠️ El responsable debe aceptar las condiciones');return false;}
+  }
+  if(n===3){
+    if(!sigDataURL){
+      var sc=document.getElementById('sig-canvas');
+      if(sc){
+        var datos=sc.getContext('2d').getImageData(0,0,sc.width,sc.height).data;
+        var firmado=false;
+        for(var i=3;i<datos.length;i+=4){if(datos[i]>10){firmado=true;break;}}
+        if(!firmado){mostrarToast('⚠️ El responsable debe firmar');return false;}
+      }
+    }
   }
   return true;
 }
 
-function irPaso(n){
-  if(n<1||n>4) return;
-  if(n>pasoActual&&!validarPaso(pasoActual)) return;
-
-  // Capturar firmas al salir del paso 3
-  if(pasoActual===3&&n!==3){
-    sigEntregaURL=capturarFirma('sig-entrega');
-    sigRecibeURL=capturarFirma('sig-recibe');
+function verificarAceptacion(){
+  var acepto=document.getElementById('acepto-condiciones').checked;
+  var btn=document.getElementById('btn-siguiente');
+  if(pasoActual===2){
+    btn.style.opacity=acepto?'1':'0.4';
   }
+}
 
-  // Al entrar al paso 4: actualizar resumen
-  if(n===4) actualizarResumen();
-
+// ═══════════════════════════════════════════════
+// NAVEGACIÓN
+// ═══════════════════════════════════════════════
+function irPaso(n){
+  if(n<1||n>4)return;
+  if(n>pasoActual&&!validarPaso(pasoActual))return;
+  if(pasoActual===3&&n!==3){sigDataURL=capturarFirma();}
+  if(n===4){actualizarResumen();generarQR();}
   document.querySelectorAll('.step-panel').forEach(function(p){p.classList.remove('activo');});
   ['si-1','si-2','si-3','si-4'].forEach(function(id,idx){
     var el=document.getElementById(id);
     el.classList.remove('activo','completo');
-    if(idx+1<n) el.classList.add('completo');
-    if(idx+1===n) el.classList.add('activo');
+    if(idx+1<n)el.classList.add('completo');
+    if(idx+1===n)el.classList.add('activo');
   });
-
   document.getElementById('panel-'+n).classList.add('activo');
   pasoActual=n;
   document.getElementById('btn-atras').disabled=(n===1);
-
   var btnSig=document.getElementById('btn-siguiente');
   var navBar=document.getElementById('nav-bar');
-
   if(n===4){
     navBar.classList.add('oculta');
-  } else {
+  }else{
     navBar.classList.remove('oculta');
     if(n===3){
-      btnSig.textContent='Ver Resumen →';
+      btnSig.textContent='Ver QR →';
       btnSig.className='btn-nav btn-siguiente dorado';
-      // FIX-005 — setTimeout 150ms antes de initCanvas
       setTimeout(function(){
-        ajustarCanvas('sig-entrega','wrap-entrega');
-        ajustarCanvas('sig-recibe','wrap-recibe');
-        initCanvas('sig-entrega');
-        initCanvas('sig-recibe');
-        if(sigEntregaURL) restaurarFirma('sig-entrega',sigEntregaURL);
-        if(sigRecibeURL)  restaurarFirma('sig-recibe',sigRecibeURL);
+        ajustarCanvas();initCanvas();
+        if(sigDataURL)restaurarFirma();
       },150);
-      document.getElementById('nombre-entrega-firma').textContent=document.getElementById('entrega').value||'';
-      document.getElementById('nombre-recibe-firma').textContent=document.getElementById('recibe').value||'';
-    } else {
+      document.getElementById('nombre-firma-display').textContent=
+        document.getElementById('responsable').value||'';
+    }else{
       btnSig.textContent='Siguiente →';
       btnSig.className='btn-nav btn-siguiente';
     }
@@ -528,29 +533,24 @@ function irPaso(n){
   actualizarFolioHeader();
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// CANVAS — FIX-004, FIX-005, FIX-006, FIX-010
-// ═══════════════════════════════════════════════════════════════════
-function ajustarCanvas(canvasId, wrapId){
-  var sc=document.getElementById(canvasId);
-  var wrap=document.getElementById(wrapId);
-  if(!sc||!wrap) return;
+// ═══════════════════════════════════════════════
+// CANVAS — FIX-004,005,006,010
+// ═══════════════════════════════════════════════
+function ajustarCanvas(){
+  var sc=document.getElementById('sig-canvas');
+  var wrap=document.getElementById('wrap-firma');
+  if(!sc||!wrap)return;
   var w=wrap.getBoundingClientRect().width;
-  if(w===0) return;
-  sc.width=w; sc.height=130;
+  if(w===0)return;
+  sc.width=w;sc.height=160;
   var ctx=sc.getContext('2d');
-  ctx.strokeStyle='#1a3a6e'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.strokeStyle='#1a3a6e';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
 }
-
-function initCanvas(canvasId){
-  var sc=document.getElementById(canvasId); if(!sc) return;
-  if(sc._siginit) return; sc._siginit=true;
-  var ctx=sc.getContext('2d');
-  var drawing=false;
-  function getPos(e){
-    var r=sc.getBoundingClientRect(),t=e.touches?e.touches[0]:e;
-    return{x:(t.clientX-r.left)*(sc.width/r.width),y:(t.clientY-r.top)*(sc.height/r.height)};
-  }
+function initCanvas(){
+  var sc=document.getElementById('sig-canvas');if(!sc)return;
+  if(sc._siginit)return;sc._siginit=true;
+  var ctx=sc.getContext('2d');var drawing=false;
+  function getPos(e){var r=sc.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*(sc.width/r.width),y:(t.clientY-r.top)*(sc.height/r.height)};}
   sc.addEventListener('mousedown',function(e){drawing=true;ctx.beginPath();var p=getPos(e);ctx.moveTo(p.x,p.y);});
   sc.addEventListener('mousemove',function(e){if(!drawing)return;var p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
   sc.addEventListener('mouseup',function(){drawing=false;});
@@ -559,137 +559,121 @@ function initCanvas(canvasId){
   sc.addEventListener('touchmove',function(e){e.preventDefault();if(!drawing)return;var p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();},{passive:false});
   sc.addEventListener('touchend',function(){drawing=false;});
 }
-
-// FIX-010 — Resize listener rotación S25
-window.addEventListener('resize',function(){setTimeout(function(){
-  if(pasoActual===3){
-    ajustarCanvas('sig-entrega','wrap-entrega');
-    ajustarCanvas('sig-recibe','wrap-recibe');
-  }
-},200);});
-screen.orientation&&screen.orientation.addEventListener('change',function(){setTimeout(function(){
-  if(pasoActual===3){
-    ajustarCanvas('sig-entrega','wrap-entrega');
-    ajustarCanvas('sig-recibe','wrap-recibe');
-  }
-},350);});
-
-// FIX-006 — drawImage con dimensiones explícitas
-function restaurarFirma(canvasId,dataURL){
-  var sc=document.getElementById(canvasId); if(!sc||!dataURL) return;
-  var img=new Image();
+window.addEventListener('resize',function(){setTimeout(ajustarCanvas,200);});
+screen.orientation&&screen.orientation.addEventListener('change',function(){setTimeout(ajustarCanvas,350);});
+function restaurarFirma(){
+  var sc=document.getElementById('sig-canvas');if(!sc||!sigDataURL)return;
+  ajustarCanvas();var img=new Image();
   img.onload=function(){sc.getContext('2d').drawImage(img,0,0,sc.width,sc.height);};
-  img.src=dataURL;
+  img.src=sigDataURL;
 }
-
-function limpiarFirma(canvasId,tipo){
-  var sc=document.getElementById(canvasId);
-  if(sc) sc.getContext('2d').clearRect(0,0,sc.width,sc.height);
-  if(tipo==='entrega') sigEntregaURL='';
-  if(tipo==='recibe')  sigRecibeURL='';
+function limpiarFirma(){
+  var sc=document.getElementById('sig-canvas');
+  if(sc)sc.getContext('2d').clearRect(0,0,sc.width,sc.height);
+  sigDataURL='';
 }
-
-function capturarFirma(canvasId){
-  var sc=document.getElementById(canvasId); if(!sc) return '';
-  var tmp=document.createElement('canvas'); tmp.width=sc.width; tmp.height=sc.height;
-  var ctx=tmp.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,tmp.width,tmp.height); ctx.drawImage(sc,0,0);
+function capturarFirma(){
+  var sc=document.getElementById('sig-canvas');if(!sc)return'';
+  var tmp=document.createElement('canvas');tmp.width=sc.width;tmp.height=sc.height;
+  var ctx=tmp.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,tmp.width,tmp.height);ctx.drawImage(sc,0,0);
   return tmp.toDataURL('image/jpeg',0.7);
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // RESUMEN
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 function actualizarResumen(){
   var anio=document.getElementById('folio-anio').value;
   var num=document.getElementById('folio-num').value;
   document.getElementById('resumen-datos').innerHTML=[
     ['Folio','VE-'+anio+'-'+num],
     ['Fecha',fmtFecha(document.getElementById('fecha').value)],
-    ['Entrega',document.getElementById('entrega').value||'—'],
-    ['Unidad entrega',document.getElementById('unidad-entrega').value||'—'],
-    ['Recibe',document.getElementById('recibe').value||'—'],
-    ['Unidad recibe',document.getElementById('unidad-recibe').value||'—'],
+    ['Responsable',document.getElementById('responsable').value||'—'],
+    ['Unidad',document.getElementById('unidad').value||'—'],
     ['Lugar',document.getElementById('lugar').value||'—'],
-    ['Observaciones',document.getElementById('obs').value||'—']
+    ['Bienes',items.filter(function(it){return it.descripcion;}).length+' ítem(s)'],
+    ['Condiciones','✓ Aceptadas'],
+    ['Estado','✅ ENTREGADO']
   ].map(function(r){return'<div class="resumen-fila"><span class="r-key">'+r[0]+'</span><span class="r-val">'+r[1]+'</span></div>';}).join('');
-
-  document.getElementById('resumen-items').innerHTML=
-    '<div style="font-size:11px;font-weight:700;color:var(--azul2);margin:8px 0 4px">Materiales</div>'+
-    items.filter(function(it){return it.descripcion;}).map(function(it,i){
-      return'<div class="resumen-item-row"><span>'+(i+1)+'. '+it.cant+' '+it.unidad+' — '+it.descripcion+'</span></div>';
-    }).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// QR
+// ═══════════════════════════════════════════════
+function generarQR(){
+  var anio=document.getElementById('folio-anio').value;
+  var num=document.getElementById('folio-num').value;
+  var folioId='VE-'+anio+'-'+num;
+  document.getElementById('qr-folio-txt').textContent=folioId;
+  var url=BASE_URL+'?id='+encodeURIComponent(folioId);
+  var div=document.getElementById('qr-code');
+  div.innerHTML='';
+  try{
+    new QRCode(div,{text:url,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
+  }catch(e){div.innerHTML='<div style="padding:20px;font-size:11px;color:#666;text-align:center">QR: '+folioId+'</div>';}
+}
+
+// ═══════════════════════════════════════════════
 // HISTORIAL
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 function renderHistorial(){
   var lista=document.getElementById('hist-lista');
-  if(vales.length===0){lista.innerHTML='<div style="text-align:center;color:#aaa;padding:20px;font-size:13px">No hay vales guardados aún.</div>';return;}
+  if(vales.length===0){lista.innerHTML='<div style="text-align:center;color:#aaa;padding:20px;font-size:13px">No hay vales guardados.</div>';return;}
   lista.innerHTML=vales.map(function(h){
-    return'<div class="hist-item-app" onclick="cargarHistorial(\''+h.id+'\')">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center"><span class="hist-folio">'+h.id+'</span><span style="color:#888;font-size:11px">'+fmtFecha(h.fecha)+'</span></div>'+
-      '<div class="hist-det">'+h.entrega+' → '+h.recibe+' · '+h.items.length+' ítem(s)</div>'+
-      (h.obs?'<div class="hist-obs">'+h.obs+'</div>':'')+
+    var estadoClass=h.estado==='DEVUELTO'?'devuelto':'entregado';
+    return'<div class="hist-item '+estadoClass+'" onclick="cargarHistorial(\''+h.id+'\')">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center">'+
+        '<span class="hist-folio">'+h.id+'</span>'+
+        '<span class="estado-badge estado-'+h.estado.toLowerCase()+'" style="font-size:9px;padding:3px 8px">'+h.estado+'</span>'+
+      '</div>'+
+      '<div class="hist-det">'+h.responsable+' · '+h.items.length+' bien(es) · '+fmtFecha(h.fecha)+'</div>'+
       '<button class="btn-eliminar-hist" onclick="event.stopPropagation();eliminarHistorial(\''+h.id+'\')">Eliminar</button>'+
     '</div>';
   }).join('');
 }
 
-function guardarHistorial(){
-  // FIX-002 — guard !db
-  if(!db) return alert('Base de datos no lista.');
+function guardarYNuevo(){
+  if(!db)return alert('Base de datos no lista.');
   var anio=document.getElementById('folio-anio').value||new Date().getFullYear().toString();
   var num=document.getElementById('folio-num').value||'0001';
   var folioId='VE-'+anio+'-'+num;
-
-  // Capturar firmas antes de guardar
-  sigEntregaURL=capturarFirma('sig-entrega')||sigEntregaURL;
-  sigRecibeURL=capturarFirma('sig-recibe')||sigRecibeURL;
-
+  var sigUrl=capturarFirma()||sigDataURL;
   var rec={
-    id:folioId, folioAnio:anio, folioNum:num,
+    id:folioId,folioAnio:anio,folioNum:num,
     fecha:document.getElementById('fecha').value||new Date().toISOString().slice(0,10),
-    entrega:document.getElementById('entrega').value||'',
-    unidadEntrega:document.getElementById('unidad-entrega').value||'',
-    recibe:document.getElementById('recibe').value||'',
-    unidadRecibe:document.getElementById('unidad-recibe').value||'',
+    responsable:document.getElementById('responsable').value||'',
+    unidad:document.getElementById('unidad').value||'',
     lugar:document.getElementById('lugar').value||'',
-    obs:document.getElementById('obs').value||'',
-    sigEntrega:sigEntregaURL,
-    sigRecibe:sigRecibeURL,
+    observaciones:document.getElementById('observaciones').value||'',
     items:items.map(function(it){return Object.assign({},it);}),
+    sigDataURL:sigUrl,
+    estado:'ENTREGADO',
     ts:Date.now()
   };
-
   var tx=db.transaction(STORE_VALES,'readwrite');
   tx.onerror=function(e){alert('Error al guardar: '+e.target.error);};
   tx.objectStore(STORE_VALES).put(rec);
   tx.oncomplete=function(){
     var idx=vales.findIndex(function(s){return s.id===folioId;});
     if(idx>=0){vales[idx]=rec;}else{vales.unshift(rec);}
-    editIndex=null;
     mostrarToast('✓ Guardado: '+folioId);
-    // Subir a Drive
     if(typeof STDrive!=='undefined'&&STDrive.isConnected()){
       STDrive.guardar('vale',folioId,rec).catch(function(){});
     }
     setFolio(parseInt(num)||1,function(){
       setTimeout(function(){
-        sigEntregaURL=''; sigRecibeURL='';
+        sigDataURL='';
         getFolio(function(actual){
-          // FIX-008 — Limpiar TODOS los campos
           document.getElementById('folio-num').value=folioStr(actual+1);
           document.getElementById('folio-anio').value=new Date().getFullYear();
           document.getElementById('fecha').value=new Date().toISOString().slice(0,10);
-          document.getElementById('entrega').value='';
-          document.getElementById('unidad-entrega').value='';
-          document.getElementById('recibe').value='';
-          document.getElementById('unidad-recibe').value='';
+          document.getElementById('responsable').value='';
+          document.getElementById('unidad').value='';
           document.getElementById('lugar').value='';
-          document.getElementById('obs').value='';
-          items=[]; agregarItem();
-          actualizarFolioHeader(); irPaso(1);
+          document.getElementById('observaciones').value='';
+          document.getElementById('acepto-condiciones').checked=false;
+          items=[];agregarItem();
+          actualizarFolioHeader();irPaso(1);
         });
       },1000);
     });
@@ -697,36 +681,30 @@ function guardarHistorial(){
 }
 
 function cargarHistorial(id){
-  // FIX-003 — null-check
   var h=vales.find(function(s){return s.id===id;});
-  if(!h) return alert('Registro no encontrado.');
-  editIndex=id;
+  if(!h)return alert('Registro no encontrado.');
   document.getElementById('folio-anio').value=h.folioAnio;
   document.getElementById('folio-num').value=h.folioNum;
   document.getElementById('fecha').value=h.fecha;
-  document.getElementById('entrega').value=h.entrega||'';
-  document.getElementById('unidad-entrega').value=h.unidadEntrega||'';
-  document.getElementById('recibe').value=h.recibe||'';
-  document.getElementById('unidad-recibe').value=h.unidadRecibe||'';
+  document.getElementById('responsable').value=h.responsable||'';
+  document.getElementById('unidad').value=h.unidad||'';
   document.getElementById('lugar').value=h.lugar||'';
-  document.getElementById('obs').value=h.obs||'';
-  sigEntregaURL=h.sigEntrega||'';
-  sigRecibeURL=h.sigRecibe||'';
+  document.getElementById('observaciones').value=h.observaciones||'';
+  document.getElementById('acepto-condiciones').checked=true;
+  sigDataURL=h.sigDataURL||'';
   items=h.items.map(function(it){return Object.assign({},it);});
-  renderItems(); volverDeHistorial(); actualizarFolioHeader(); irPaso(1);
+  renderItems();volverDeHistorial();actualizarFolioHeader();irPaso(1);
   mostrarToast('Vale '+h.id+' cargado');
 }
 
 function eliminarHistorial(id){
-  if(!db) return alert('Base de datos no lista.');
-  if(!confirm('¿Eliminar el vale '+id+'?')) return;
+  if(!db)return alert('Base de datos no lista.');
+  if(!confirm('¿Eliminar el vale '+id+'?'))return;
   var tx=db.transaction(STORE_VALES,'readwrite');
-  tx.onerror=function(e){alert('Error al eliminar: '+e.target.error);};
   tx.objectStore(STORE_VALES).delete(id);
   tx.oncomplete=function(){
     vales=vales.filter(function(s){return s.id!==id;});
-    renderHistorial();
-    mostrarToast('✓ Vale eliminado');
+    renderHistorial();mostrarToast('✓ Vale eliminado');
   };
 }
 
@@ -743,97 +721,150 @@ function verHistorial(){
     document.querySelector('.app').appendChild(nb);
   }
 }
-
 function volverDeHistorial(){
   var extra=document.getElementById('btn-volver-hist');
-  if(extra&&extra.parentNode) extra.parentNode.remove();
+  if(extra&&extra.parentNode)extra.parentNode.remove();
   document.getElementById('nav-bar').classList.remove('oculta');
   irPaso(pasoActual);
 }
 
-function getNextFolioNum(){
-  var max=0;
-  vales.forEach(function(s){var n=parseInt(s.folioNum)||0;if(n>max)max=n;});
-  return max;
+// ═══════════════════════════════════════════════
+// DEVOLUCIÓN
+// ═══════════════════════════════════════════════
+function iniciarDevolucion(){
+  document.querySelectorAll('.step-panel').forEach(function(p){p.classList.remove('activo');});
+  document.getElementById('panel-dev').classList.add('activo');
+  document.getElementById('nav-bar').classList.add('oculta');
+  document.getElementById('dev-id').value='';
+  document.getElementById('dev-resultado').innerHTML='';
+  var nb=document.createElement('div');
+  nb.style.cssText='padding:10px 16px;background:linear-gradient(90deg,#071429,#0d2550);border-top:1px solid rgba(200,168,75,0.3)';
+  nb.innerHTML='<button class="btn-nav btn-atras" style="width:100%" onclick="volverDeHistorial()">← Volver</button>';
+  document.querySelector('.app').appendChild(nb);
 }
 
-function nuevoFormulario(){
-  editIndex=null; sigEntregaURL=''; sigRecibeURL='';
-  var sc1=document.getElementById('sig-entrega'); if(sc1) sc1.getContext('2d').clearRect(0,0,sc1.width,sc1.height);
-  var sc2=document.getElementById('sig-recibe');  if(sc2) sc2.getContext('2d').clearRect(0,0,sc2.width,sc2.height);
-  var next=getNextFolioNum()+1;
-  document.getElementById('folio-num').value=folioStr(next);
-  document.getElementById('folio-anio').value=new Date().getFullYear();
-  document.getElementById('fecha').value=new Date().toISOString().slice(0,10);
-  document.getElementById('entrega').value='';
-  document.getElementById('unidad-entrega').value='';
-  document.getElementById('recibe').value='';
-  document.getElementById('unidad-recibe').value='';
-  document.getElementById('lugar').value='';
-  document.getElementById('obs').value='';
-  items=[]; agregarItem(); actualizarFolioHeader(); irPaso(1);
+function buscarValeDevolucion(){
+  var id=document.getElementById('dev-id').value.trim().toUpperCase();
+  if(!id){mostrarToast('⚠️ Ingresa el folio del vale');return;}
+  var vale=vales.find(function(v){return v.id===id;});
+  var div=document.getElementById('dev-resultado');
+  if(!vale){div.innerHTML='<div class="card" style="text-align:center;color:#888;padding:20px">Vale '+id+' no encontrado</div>';return;}
+  if(vale.estado==='DEVUELTO'){div.innerHTML='<div class="card" style="text-align:center;color:'+
+    'var(--verde);padding:20px;font-weight:700">✅ Este vale ya fue devuelto</div>';return;}
+  div.innerHTML='<div class="card">'+
+    '<div class="card-title">Vale encontrado</div>'+
+    '<div class="resumen-fila"><span class="r-key">Folio</span><span class="r-val">'+vale.id+'</span></div>'+
+    '<div class="resumen-fila"><span class="r-key">Responsable</span><span class="r-val">'+vale.responsable+'</span></div>'+
+    '<div class="resumen-fila"><span class="r-key">Unidad</span><span class="r-val">'+vale.unidad+'</span></div>'+
+    '<div class="resumen-fila"><span class="r-key">Bienes</span><span class="r-val">'+vale.items.length+' ítem(s)</span></div>'+
+    '<div class="resumen-fila"><span class="r-key">Estado</span><span class="r-val">'+vale.estado+'</span></div>'+
+    '<button class="btn-nuevo" style="margin-top:12px" onclick="confirmarDevolucion(\''+vale.id+'\')">✅ Confirmar devolución</button>'+
+  '</div>';
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// PDF — setTimeout 800ms para S25
-// ═══════════════════════════════════════════════════════════════════
-function imprimirPDF(){
+function confirmarDevolucion(id){
+  if(!db)return;
+  if(!confirm('¿Confirmar devolución del vale '+id+'?'))return;
+  var vale=vales.find(function(v){return v.id===id;});
+  if(!vale)return;
+  vale.estado='DEVUELTO';
+  vale.fechaDevolucion=new Date().toISOString().slice(0,10);
+  vale.ts=Date.now();
+  var tx=db.transaction(STORE_VALES,'readwrite');
+  tx.objectStore(STORE_VALES).put(vale);
+  tx.oncomplete=function(){
+    mostrarToast('✓ Devolución registrada: '+id);
+    if(typeof STDrive!=='undefined'&&STDrive.isConnected()){
+      STDrive.guardar('vale',id,vale).catch(function(){});
+    }
+    // Generar PDF de devolución
+    setTimeout(function(){imprimirPDF('DEVUELTO',vale);},500);
+  };
+}
+
+// ═══════════════════════════════════════════════
+// PDF — 800ms para S25
+// ═══════════════════════════════════════════════
+function imprimirPDF(estado,valeData){
   var anio=document.getElementById('folio-anio').value;
   var num=document.getElementById('folio-num').value;
-  sigEntregaURL=capturarFirma('sig-entrega')||sigEntregaURL;
-  sigRecibeURL=capturarFirma('sig-recibe')||sigRecibeURL;
-
-  document.getElementById('p-folio').textContent='VE-'+anio+'-'+num;
-  document.getElementById('p-fecha').textContent=fmtFecha(document.getElementById('fecha').value);
-  document.getElementById('p-entrega').textContent=document.getElementById('entrega').value||'—';
-  document.getElementById('p-unidad-entrega').textContent=document.getElementById('unidad-entrega').value||'';
-  document.getElementById('p-recibe').textContent=document.getElementById('recibe').value||'—';
-  document.getElementById('p-unidad-recibe').textContent=document.getElementById('unidad-recibe').value||'';
-  document.getElementById('p-lugar').textContent=document.getElementById('lugar').value||'—';
-  document.getElementById('p-obs').textContent=document.getElementById('obs').value||'';
-  document.getElementById('p-firma-entrega').textContent=document.getElementById('entrega').value||'';
-  document.getElementById('p-firma-recibe').textContent=document.getElementById('recibe').value||'';
-
-  var sigE=document.getElementById('p-sig-entrega');
-  var sigR=document.getElementById('p-sig-recibe');
-  if(sigEntregaURL){sigE.src=sigEntregaURL;sigE.style.display='block';}else{sigE.style.display='none';}
-  if(sigRecibeURL){sigR.src=sigRecibeURL;sigR.style.display='block';}else{sigR.style.display='none';}
-
-  var tbody=document.getElementById('p-items'); tbody.innerHTML='';
-  items.filter(function(it){return it.descripcion;}).forEach(function(it){
-    var tr=document.createElement('tr');
-    [it.cant,it.descripcion,it.unidad].forEach(function(txt,ci){
-      var td=document.createElement('td');
-      td.style.cssText='border:1px solid #ccc;padding:4px 8px;font-size:12px'+(ci!==1?';text-align:center':'');
-      td.textContent=txt; tr.appendChild(td);
+  var folioId='VE-'+anio+'-'+num;
+  if(valeData){
+    // PDF de devolución con datos del vale guardado
+    document.getElementById('p-folio').textContent=valeData.id;
+    document.getElementById('p-fecha').textContent=fmtFecha(valeData.fecha);
+    document.getElementById('p-responsable').textContent=valeData.responsable||'—';
+    document.getElementById('p-unidad').textContent=valeData.unidad||'—';
+    document.getElementById('p-lugar').textContent=valeData.lugar||'—';
+    document.getElementById('p-obs').textContent=valeData.observaciones||'';
+    document.getElementById('p-firma-nombre').textContent=valeData.responsable||'';
+    var sigImg=document.getElementById('p-sig');
+    if(valeData.sigDataURL){sigImg.src=valeData.sigDataURL;sigImg.style.display='block';}
+    else{sigImg.style.display='none';}
+    var tbody=document.getElementById('p-items');tbody.innerHTML='';
+    (valeData.items||[]).filter(function(it){return it.descripcion;}).forEach(function(it){
+      var tr=document.createElement('tr');
+      [it.cant,it.descripcion,it.ninv||'—'].forEach(function(txt,ci){
+        var td=document.createElement('td');
+        td.style.cssText='border:1px solid #ccc;padding:4px 8px;font-size:12px'+(ci===0?';text-align:center':'');
+        td.textContent=txt;tr.appendChild(td);
+      });tbody.appendChild(tr);
     });
-    tbody.appendChild(tr);
-  });
-
+    document.getElementById('p-folio-qr').textContent=valeData.id;
+    document.getElementById('p-estado').textContent='DEVUELTO';
+  }else{
+    document.getElementById('p-folio').textContent=folioId;
+    document.getElementById('p-fecha').textContent=fmtFecha(document.getElementById('fecha').value);
+    document.getElementById('p-responsable').textContent=document.getElementById('responsable').value||'—';
+    document.getElementById('p-unidad').textContent=document.getElementById('unidad').value||'—';
+    document.getElementById('p-lugar').textContent=document.getElementById('lugar').value||'—';
+    document.getElementById('p-obs').textContent=document.getElementById('observaciones').value||'';
+    document.getElementById('p-firma-nombre').textContent=document.getElementById('responsable').value||'';
+    document.getElementById('p-estado').textContent=estado||'ENTREGADO';
+    document.getElementById('p-folio-qr').textContent=folioId;
+    var sigUrl=capturarFirma()||sigDataURL;
+    var sigImg=document.getElementById('p-sig');
+    if(sigUrl){sigImg.src=sigUrl;sigImg.style.display='block';}else{sigImg.style.display='none';}
+    var tbody=document.getElementById('p-items');tbody.innerHTML='';
+    items.filter(function(it){return it.descripcion;}).forEach(function(it){
+      var tr=document.createElement('tr');
+      [it.cant,it.descripcion,it.ninv||'—'].forEach(function(txt,ci){
+        var td=document.createElement('td');
+        td.style.cssText='border:1px solid #ccc;padding:4px 8px;font-size:12px'+(ci===0?';text-align:center':'');
+        td.textContent=txt;tr.appendChild(td);
+      });tbody.appendChild(tr);
+    });
+  }
+  // QR en PDF
+  var qrDiv=document.getElementById('p-qr-print');
+  qrDiv.innerHTML='';
+  try{
+    var url=BASE_URL+'?id='+encodeURIComponent(valeData?valeData.id:folioId);
+    new QRCode(qrDiv,{text:url,width:70,height:70,correctLevel:QRCode.CorrectLevel.M});
+  }catch(e){}
   setTimeout(function(){window.print();},800);
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // TOAST
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 function mostrarToast(msg){
   var t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
+  t.textContent=msg;t.classList.add('show');
   setTimeout(function(){t.classList.remove('show');},2500);
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// PWA — Manifest + SW inline
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// PWA
+// ═══════════════════════════════════════════════
 (function(){
-  var m={name:'Vale de Entrega — AGA',short_name:'Vale AGA',start_url:'/scorpion-tail/vale.html',display:'standalone',background_color:'#0d1f3c',theme_color:'#0d1f3c',orientation:'portrait-primary',icons:[]};
+  var m={name:'Vale Entrega AGA',short_name:'Vale AGA',start_url:'/scorpion-tail/vale.html',display:'standalone',background_color:'#0d1f3c',theme_color:'#0d1f3c',orientation:'portrait-primary',icons:[]};
   var b=new Blob([JSON.stringify(m)],{type:'application/json'});
   document.getElementById('vale-manifest').href=URL.createObjectURL(b);
 })();
-
 if('serviceWorker'in navigator){
   var swCode=[
-    "const CACHE='aga-vale-v2';",
+    "const CACHE='aga-vale-qr-v1';",
     "self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add('.')).then(()=>self.skipWaiting()));});",
     "self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});",
     "self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{var rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));return res;}).catch(()=>caches.match(e.request))));});"

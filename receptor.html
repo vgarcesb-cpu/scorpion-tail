@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0d1f3c">
+<title>Comprobante Vale — AGA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --azul:#0d1f3c;--azul2:#1a3a6e;
+  --dorado:#c8a84b;--dorado2:#a07830;
+  --blanco:#ffffff;--gris:#f4f6f9;--borde:#dde3ed;
+  --verde:#2ecc71;--rojo:#e74c3c;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--gris);min-height:100vh;padding-bottom:40px}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#071429 0%,#0d2550 100%);padding:14px 16px;border-bottom:2px solid var(--dorado)}
+.header-top{display:flex;align-items:center;gap:10px}
+.escudo{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--dorado);background:linear-gradient(135deg,var(--azul2),#071429);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.header-txt .inst{font-size:9px;color:rgba(200,168,75,0.7);text-transform:uppercase;letter-spacing:1px}
+.header-txt .titulo{font-size:14px;font-weight:700;color:var(--dorado);text-transform:uppercase}
+
+/* ESTADO HERO */
+.estado-hero{padding:20px 16px;text-align:center;background:linear-gradient(135deg,var(--azul),var(--azul2))}
+.estado-icono{font-size:48px;margin-bottom:8px}
+.estado-txt{font-size:20px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:1px}
+.estado-folio{font-size:14px;color:var(--dorado);font-family:monospace;margin-top:4px}
+.estado-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;text-transform:uppercase;margin-top:10px}
+.badge-entregado{background:rgba(46,204,113,0.2);color:#2ecc71;border:1.5px solid var(--verde)}
+.badge-registrado{background:rgba(231,76,60,0.2);color:#e74c3c;border:1.5px solid var(--rojo)}
+.badge-devuelto{background:rgba(52,152,219,0.2);color:#3498db;border:1.5px solid #3498db}
+
+/* CONTENT */
+.content{padding:16px;max-width:480px;margin:0 auto}
+
+/* CARD */
+.card{background:var(--blanco);border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid var(--borde);box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.card-title{font-size:11px;font-weight:700;color:var(--azul2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--borde);display:flex;align-items:center;gap:6px}
+.dato-fila{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--gris);font-size:13px}
+.dato-fila:last-child{border-bottom:none}
+.dato-key{color:#888;font-weight:600;font-size:11px;text-transform:uppercase}
+.dato-val{font-weight:600;color:var(--azul);text-align:right;max-width:60%}
+
+/* BIENES */
+.bien-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--gris);font-size:13px}
+.bien-row:last-child{border-bottom:none}
+.bien-cant{background:var(--azul2);color:#fff;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;flex-shrink:0}
+.bien-desc{flex:1;color:var(--azul)}
+.bien-ninv{font-size:11px;color:#888}
+
+/* CONDICIONES */
+.condiciones-card{background:linear-gradient(135deg,#fff8e1,#fff3cd);border:1.5px solid var(--dorado);border-radius:12px;padding:14px;margin-bottom:12px}
+.condiciones-titulo{font-size:11px;font-weight:800;color:var(--azul);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.condicion-row{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:12px;color:#444;line-height:1.4}
+.condicion-num{background:var(--azul);color:var(--dorado);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px}
+.acepto-banner{background:var(--azul);border-radius:8px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;gap:8px;font-size:12px;color:#fff;font-weight:600}
+
+/* FIRMA */
+.firma-img{max-width:200px;height:60px;object-fit:contain;display:block;margin:8px auto}
+.firma-linea{width:100%;border-top:1px solid var(--azul);margin:8px 0}
+.firma-nombre{font-size:13px;font-weight:700;color:var(--azul);text-align:center}
+.firma-label{font-size:11px;color:#888;text-align:center}
+
+/* QR */
+.qr-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0}
+#qr-receptor{border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);background:#fff;padding:8px}
+
+/* BOTONES */
+.btn-pdf{display:block;width:100%;padding:16px;background:var(--azul);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px;text-align:center}
+.btn-wa{display:block;width:100%;padding:14px;background:#25d366;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px;text-align:center;text-decoration:none}
+
+/* ERROR */
+.error-wrap{display:flex;flex-direction:column;align-items:center;padding:60px 20px;text-align:center;color:#888}
+.error-icono{font-size:48px;margin-bottom:16px}
+.error-txt{font-size:16px;font-weight:700;color:var(--azul);margin-bottom:8px}
+.error-sub{font-size:13px;line-height:1.5}
+
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;gap:12px;color:#888;font-size:14px}
+.spinner{width:28px;height:28px;border:3px solid var(--borde);border-top-color:var(--azul);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PRINT */
+@media print{
+  .btn-pdf,.btn-wa,.header{display:none!important}
+  body{background:#fff!important}
+  .content{padding:0;max-width:100%}
+  @page{size:letter portrait;margin:10mm 20mm 15mm 20mm}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="escudo">✈️</div>
+    <div class="header-txt">
+      <div class="inst">Academia de Guerra Aérea · FACH</div>
+      <div class="titulo">Comprobante de Entrega</div>
+    </div>
+  </div>
+</div>
+
+<div id="app-content">
+  <div class="loading"><div class="spinner"></div> Cargando comprobante...</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIGURACIÓN
+// ═══════════════════════════════════════════════
+var BASE_URL='https://vgarcesb-cpu.github.io/scorpion-tail/receptor.html';
+var IDB_NAME='AGA_ValeQR_v1';
+var STORE_VALES='vales';
+
+// ═══════════════════════════════════════════════
+// LEER PARÁMETRO ID DE LA URL
+// ═══════════════════════════════════════════════
+var params=new URLSearchParams(window.location.search);
+var folioId=params.get('id')||'';
+
+if(!folioId){
+  mostrarError('Sin folio','No se encontró el ID del vale en el QR. Solicita uno nuevo al custodio.');
+}else{
+  cargarVale(folioId);
+}
+
+// ═══════════════════════════════════════════════
+// CARGAR VALE DESDE IDB
+// ═══════════════════════════════════════════════
+function cargarVale(id){
+  var req=indexedDB.open(IDB_NAME,1);
+  req.onerror=function(){
+    // Si no hay IDB local, mostrar comprobante básico con el ID
+    mostrarComprobanteBasico(id);
+  };
+  req.onsuccess=function(e){
+    var db=e.target.result;
+    if(!db.objectStoreNames.contains(STORE_VALES)){
+      mostrarComprobanteBasico(id);return;
+    }
+    var tx=db.transaction(STORE_VALES,'readonly');
+    var reqGet=tx.objectStore(STORE_VALES).get(id);
+    reqGet.onsuccess=function(ev){
+      var vale=ev.target.result;
+      if(!vale){
+        mostrarComprobanteBasico(id);
+      }else{
+        mostrarComprobante(vale);
+      }
+    };
+    reqGet.onerror=function(){mostrarComprobanteBasico(id);};
+  };
+  req.onupgradeneeded=function(e){
+    // Primera vez — sin datos
+    mostrarComprobanteBasico(id);
+  };
+}
+
+// ═══════════════════════════════════════════════
+// MOSTRAR COMPROBANTE COMPLETO
+// ═══════════════════════════════════════════════
+function mostrarComprobante(vale){
+  var estado=vale.estado||'REGISTRADO';
+  var iconoMap={ENTREGADO:'📦',REGISTRADO:'✅',DEVUELTO:'↩️'};
+  var badgeClass={ENTREGADO:'badge-entregado',REGISTRADO:'badge-registrado',DEVUELTO:'badge-devuelto'};
+  var icono=iconoMap[estado]||'📋';
+
+  var bienes=(vale.items||[]).filter(function(it){return it.descripcion;});
+  var bienesHTML=bienes.map(function(it){
+    return'<div class="bien-row">'+
+      '<span class="bien-cant">x'+it.cant+'</span>'+
+      '<span class="bien-desc">'+escHTML(it.descripcion)+'</span>'+
+      (it.ninv?'<span class="bien-ninv">'+escHTML(it.ninv)+'</span>':'')+
+    '</div>';
+  }).join('');
+
+  var fmtFecha=function(f){if(!f)return '';var p=f.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:f;};
+
+  var html=
+    '<div class="estado-hero">'+
+      '<div class="estado-icono">'+icono+'</div>'+
+      '<div class="estado-txt">Comprobante '+estado+'</div>'+
+      '<div class="estado-folio">'+escHTML(vale.id)+'</div>'+
+      '<span class="estado-badge '+badgeClass[estado]+'">● '+estado+'</span>'+
+    '</div>'+
+    '<div class="content">'+
+
+      '<div class="card">'+
+        '<div class="card-title">📋 Datos del Vale</div>'+
+        '<div class="dato-fila"><span class="dato-key">Folio</span><span class="dato-val">'+escHTML(vale.id)+'</span></div>'+
+        '<div class="dato-fila"><span class="dato-key">Fecha</span><span class="dato-val">'+fmtFecha(vale.fecha)+'</span></div>'+
+        '<div class="dato-fila"><span class="dato-key">Responsable</span><span class="dato-val">'+escHTML(vale.responsable||'—')+'</span></div>'+
+        '<div class="dato-fila"><span class="dato-key">Unidad</span><span class="dato-val">'+escHTML(vale.unidad||'—')+'</span></div>'+
+        '<div class="dato-fila"><span class="dato-key">Lugar</span><span class="dato-val">'+escHTML(vale.lugar||'—')+'</span></div>'+
+        (vale.fechaDevolucion?'<div class="dato-fila"><span class="dato-key">Fecha devolución</span><span class="dato-val">'+fmtFecha(vale.fechaDevolucion)+'</span></div>':'')+
+      '</div>'+
+
+      '<div class="card">'+
+        '<div class="card-title">📦 Bienes Entregados</div>'+
+        (bienesHTML||'<div style="color:#888;font-size:13px">Sin detalle disponible</div>')+
+      '</div>'+
+
+      '<div class="condiciones-card">'+
+        '<div class="condiciones-titulo">⚠️ Condiciones de Uso — Bien Fiscal FACH</div>'+
+        '<div class="condicion-row"><div class="condicion-num">1</div><div>Responsabilidad personal e intransferible desde la firma.</div></div>'+
+        '<div class="condicion-row"><div class="condicion-num">2</div><div>Devolver en el mismo estado recibido.</div></div>'+
+        '<div class="condicion-row"><div class="condicion-num">3</div><div>Pérdida o daño será descontado de haberes conforme Reglamento FACH.</div></div>'+
+        '<div class="condicion-row"><div class="condicion-num">4</div><div>Prohibido ceder, prestar o usar fuera del servicio institucional.</div></div>'+
+        '<div class="acepto-banner">✅ Condiciones leídas y aceptadas por el receptor.</div>'+
+      '</div>'+
+
+      (vale.sigDataURL?
+        '<div class="card">'+
+          '<div class="card-title">✍️ Firma del Responsable</div>'+
+          '<img class="firma-img" src="'+vale.sigDataURL+'">'+
+          '<div class="firma-linea"></div>'+
+          '<div class="firma-nombre">'+escHTML(vale.responsable||'')+'</div>'+
+          '<div class="firma-label">Firma Responsable</div>'+
+        '</div>':''+
+      '')+
+
+      '<div class="card">'+
+        '<div class="card-title">📱 QR de Trazabilidad</div>'+
+        '<div class="qr-wrap">'+
+          '<div id="qr-receptor"></div>'+
+          '<div style="font-family:monospace;font-size:12px;color:var(--azul)">'+escHTML(vale.id)+'</div>'+
+          '<div style="font-size:11px;color:#888;text-align:center">Guarda este QR para la devolución</div>'+
+        '</div>'+
+      '</div>'+
+
+      (vale.observaciones?
+        '<div class="card">'+
+          '<div class="card-title">📝 Observaciones</div>'+
+          '<div style="font-size:13px;color:#555;line-height:1.5">'+escHTML(vale.observaciones)+'</div>'+
+        '</div>':'')+
+
+      '<button class="btn-pdf" onclick="window.print()">🖨️ Guardar / Imprimir PDF</button>'+
+
+    '</div>';
+
+  document.getElementById('app-content').innerHTML=html;
+
+  // Generar QR
+  setTimeout(function(){
+    var qrDiv=document.getElementById('qr-receptor');
+    if(qrDiv&&typeof QRCode!=='undefined'){
+      try{
+        new QRCode(qrDiv,{
+          text:BASE_URL+'?id='+encodeURIComponent(vale.id),
+          width:150,height:150,
+          correctLevel:QRCode.CorrectLevel.M
+        });
+      }catch(e){}
+    }
+  },300);
+}
+
+// ═══════════════════════════════════════════════
+// COMPROBANTE BÁSICO (sin IDB — primera vez)
+// ═══════════════════════════════════════════════
+function mostrarComprobanteBasico(id){
+  var html=
+    '<div class="estado-hero">'+
+      '<div class="estado-icono">✅</div>'+
+      '<div class="estado-txt">Comprobante Registrado</div>'+
+      '<div class="estado-folio">'+escHTML(id)+'</div>'+
+      '<span class="estado-badge badge-registrado">● REGISTRADO</span>'+
+    '</div>'+
+    '<div class="content">'+
+
+      '<div class="card">'+
+        '<div class="card-title">📋 Vale de Entrega</div>'+
+        '<div class="dato-fila"><span class="dato-key">Folio</span><span class="dato-val">'+escHTML(id)+'</span></div>'+
+        '<div class="dato-fila"><span class="dato-key">Estado</span><span class="dato-val">REGISTRADO</span></div>'+
+        '<div style="font-size:12px;color:#888;margin-top:8px;line-height:1.5">'+
+          'Este comprobante certifica que has recibido un bien fiscal de la Academia de Guerra Aérea. '+
+          'Guarda este QR para acreditar la devolución.'+
+        '</div>'+
+      '</div>'+
+
+      '<div class="condiciones-card">'+
+        '<div class="condiciones-titulo">⚠️ Condiciones de Uso — Bien Fiscal FACH</div>'+
+        '<div class="condicion-row"><div class="condicion-num">1</div><div>Responsabilidad personal e intransferible desde la firma.</div></div>'+
+        '<div class="condicion-row"><div class="condicion-num">2</div><div>Devolver en el mismo estado recibido.</div></div>'+
+        '<div class="condicion-row"><div class="condicion-num">3</div><div>Pérdida o daño será descontado de haberes conforme Reglamento FACH.</div></div>'+
+        '<div class="condicion-row"><div class="condicion-num">4</div><div>Prohibido ceder, prestar o usar fuera del servicio institucional.</div></div>'+
+        '<div class="acepto-banner">✅ Condiciones leídas y aceptadas por el receptor.</div>'+
+      '</div>'+
+
+      '<div class="card">'+
+        '<div class="card-title">📱 Tu QR de Trazabilidad</div>'+
+        '<div class="qr-wrap">'+
+          '<div id="qr-receptor"></div>'+
+          '<div style="font-family:monospace;font-size:12px;color:var(--azul)">'+escHTML(id)+'</div>'+
+          '<div style="font-size:11px;color:#888;text-align:center">Guarda este QR para la devolución</div>'+
+        '</div>'+
+      '</div>'+
+
+      '<button class="btn-pdf" onclick="window.print()">🖨️ Guardar / Imprimir PDF</button>'+
+
+    '</div>';
+
+  document.getElementById('app-content').innerHTML=html;
+
+  setTimeout(function(){
+    var qrDiv=document.getElementById('qr-receptor');
+    if(qrDiv&&typeof QRCode!=='undefined'){
+      try{
+        new QRCode(qrDiv,{
+          text:BASE_URL+'?id='+encodeURIComponent(id),
+          width:150,height:150,
+          correctLevel:QRCode.CorrectLevel.M
+        });
+      }catch(e){}
+    }
+  },300);
+}
+
+// ═══════════════════════════════════════════════
+// ERROR
+// ═══════════════════════════════════════════════
+function mostrarError(titulo,sub){
+  document.getElementById('app-content').innerHTML=
+    '<div class="content">'+
+      '<div class="error-wrap">'+
+        '<div class="error-icono">⚠️</div>'+
+        '<div class="error-txt">'+escHTML(titulo)+'</div>'+
+        '<div class="error-sub">'+escHTML(sub)+'</div>'+
+      '</div>'+
+    '</div>';
+}
+
+function escHTML(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>
